@@ -1,0 +1,143 @@
+version: 2.1
+
+commands:
+  deploy:
+    description: Deployment of budget-planner
+    parameters:
+      hostname:
+        type: string
+        default: "staging.budget-planner.samanvayfoundation.org"
+    steps:
+      - attach_workspace:
+          at: ~/artifacts
+
+      - run: sudo apt-get install make openssl
+
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get -y -qq update
+            sudo apt-get -y -qq install python3-pip
+            sudo pip3 install awscli --upgrade
+      - run:
+          name: Copy etl jar to server
+          command: |
+            scp -o StrictHostKeyChecking=no ~/artifacts/avni-etl.jar ec2-user@<< parameters.hostname >>:/tmp/avni-etl.jar
+      - run:
+          name: Copy etl jar to server
+          command: |
+            ssh -o StrictHostKeyChecking=no ec2-user@<< parameters.hostname >> \<< EOF
+            sudo cp /tmp/avni-etl.jar /opt/avni-etl/avni-etl.jar
+            sudo chown openchs:openchs /opt/avni-etl/avni-etl.jar
+            sudo rm /tmp/avni-etl.jar
+            EOF
+jobs:
+#  test:
+#    docker:
+#      - image: circleci/openjdk:11-jdk
+#
+#      - image: circleci/postgres:12.7
+#        environment:
+#          - POSTGRES_USER: openchs
+#          - POSTGRES_DB: openchs_test
+#          - POSTGRES_PASSWORD: password
+
+#    working_directory: ~/avni-etl
+#
+#    environment:
+#      MAVEN_OPTS: -Xmx3200m
+#
+#    steps:
+#      - checkout
+#
+#      - run: sudo apt-get update
+#
+#      - run: sudo apt-get install make postgresql-client
+#
+#      - run: make create-extensions
+#
+#      - run: wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/8.5.9/flyway-commandline-8.5.9-linux-x64.tar.gz | tar xvz && sudo ln -s `pwd`/flyway-8.5.9/flyway /usr/local/bin
+#
+#      - run: curl -L https://github.com/avniproject/avni-server/archive/master.zip >> ~/server.zip
+#
+#      - run: |
+#          cd ~/
+#          unzip server.zip
+#          mv avni-server-master avni-server
+#          rm -rf server.zip
+#      - run: |
+#          pwd
+#          cd ~/avni-server
+#          make deploy_test_schema
+#      - run: |
+#          cd ~/avni-etl
+#          make test
+#      - store_artifacts:
+#          path: ~/avni-etl/build/reports/tests/test
+#          destination: testReports
+
+  build:
+    docker:
+      - image: circleci/openjdk:11-jdk
+
+    working_directory: ~/budget-planner
+
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+
+      - run: sudo apt-get install make openssl
+
+      - run: make build_jar
+
+      - run: mkdir -p ~/artifacts;
+
+      - run: cp ~/avni-etl/build/libs/etl-0.0.1-SNAPSHOT.jar ~/artifacts/avni-etl.jar;
+
+      - persist_to_workspace:
+          root: ~/artifacts
+          paths:
+            - avni-etl.jar
+
+      - store_artifacts:
+          path: ~/artifacts
+
+  STAGING_deploy:
+    docker:
+      - image: circleci/openjdk:11-jdk
+    working_directory: ~/
+    steps:
+      - deploy:
+          hostname: "staging.budget-planner.samanvayfoundation.org"
+
+#  PRODUCTION_deploy:
+#    docker:
+#      - image: circleci/openjdk:11-jdk
+#    working_directory: ~/
+#    steps:
+#      - deploy:
+#          hostname: "staging.budget-planner.samanvayfoundation.org"
+
+workflows:
+  version: 2
+  test_and_build_and_deploy:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+      - STAGING_deploy:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build
+      - PRODUCTION_approve:
+          type: approval
+          requires:
+            - build
+      - PRODUCTION_deploy:
+          requires:
+            - PRODUCTION_approve
