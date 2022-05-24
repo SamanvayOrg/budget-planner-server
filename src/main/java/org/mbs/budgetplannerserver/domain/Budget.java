@@ -6,8 +6,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "budgets")
-public class Budgets extends BaseModel {
+@Table(name = "budget")
+public class Budget extends BaseModel {
 
 
 	private String year;
@@ -23,8 +23,6 @@ public class Budgets extends BaseModel {
 	public Municipality getMunicipality() {
 		return municipality;
 	}
-
-
 
 	public void setYear(String year) {
 		this.year = year;

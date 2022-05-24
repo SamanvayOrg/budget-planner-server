@@ -1,9 +1,8 @@
 package org.mbs.budgetplannerserver.controller;
 
 import org.junit.jupiter.api.Test;
-import org.mbs.budgetplannerserver.domain.Budgets;
+import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.repository.BudgetsRepository;
-import org.mbs.budgetplannerserver.service.BudgetService;
 
 import java.util.Arrays;
 
@@ -17,9 +16,9 @@ class BudgetControllerTest {
 	@Test
 	public void shouldCallBudgetRepositoryToRetrieveBudgets() {
 		BudgetsRepository budgetsRepository = mock(BudgetsRepository.class);
-		Budgets returnedBudgets = new Budgets();
+		Budget returnedBudgets = new Budget();
 		when(budgetsRepository.findAll()).thenReturn(Arrays.asList(returnedBudgets));
-		Iterable<Budgets> budgets = new BudgetController(budgetsRepository).getBudgets();
+		Iterable<Budget> budgets = new BudgetController(budgetsRepository).getBudgets();
 		assertThat(budgets, hasItem(returnedBudgets));
 	}
 

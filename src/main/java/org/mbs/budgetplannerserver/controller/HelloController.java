@@ -1,8 +1,6 @@
 package org.mbs.budgetplannerserver.controller;
 
-import org.mbs.budgetplannerserver.domain.Budgets;
 import org.mbs.budgetplannerserver.domain.Municipality;
-import org.mbs.budgetplannerserver.repository.BudgetsRepository;
 import org.mbs.budgetplannerserver.repository.MunicipalityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

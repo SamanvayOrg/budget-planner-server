@@ -1,15 +1,15 @@
 package org.mbs.budgetplannerserver.repository;
 
-import org.mbs.budgetplannerserver.domain.Budgets;
+import org.mbs.budgetplannerserver.domain.Budget;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface BudgetsRepository extends CrudRepository<Budgets, Long> {
+public interface BudgetsRepository extends CrudRepository<Budget, Long> {
 
-		Budgets findById(Optional<String> year);
+		Budget findById(Optional<String> year);
 
-	Budgets findByYear(Optional<String> year);
+	Budget findByYear(Optional<String> year);
 }
