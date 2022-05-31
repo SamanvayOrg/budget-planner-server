@@ -22,6 +22,8 @@ public class BudgetContract {
 		budgetContract.setAdvTax(Arrays.asList("7", " जाहीरात कर ", "920-1120", "4,31,031", "88,520", "64,470", "58,270", "4,41,730", "5,00,000", "5,00,000"));
 		budgetContract.setWasteTax(Arrays.asList("8", " विशेष घनकचरा व्यवस्थापन कर  ", "944-1190", "15,27,454", "15,99,305", "13,68,978", "9,75,916", "15,24,084", "25,00,000", "30,00,000"));
 		budgetContract.setMailaTax(Arrays.asList("9", "  मैला व्यवस्थापन कर  ", "944-1190", "24,99,314", "33,49,667", "32,08,799", "17,82,148", "27,17,852", "45,00,000", "45,00,000"));
+		budgetContract.setTreeTax(Arrays.asList("10", " वृक्ष कर ", "948-1140", "4,14,910", "3,91,243", "2,36,996", "1,48,200", "3,51,800", "5,00,000", "7,50,000"));
+		budgetContract.setTotalA(Arrays.asList(" ", "  एकूण (A) ", "", "5,24,91,694", "5,39,85,939", "3,43,72,819", "2,28,67,059", "4,41,42,941", "6,70,10,000", "9,17,65,000"));
 		return budgetContract;
 
 	}
@@ -40,6 +42,16 @@ public class BudgetContract {
 	private List<String> advTax = new ArrayList<>();
 	private List<String> wasteTax = new ArrayList<>();
 	private List<String> mailaTax = new ArrayList<>();
+	private List<String> treeTax = new ArrayList<>();
+	private List<String> totalA = new ArrayList<>();
+
+	public List<String> getTotalA() {
+		return totalA;
+	}
+
+	public void setTotalA(List<String> totalA) {
+		this.totalA = totalA;
+	}
 
 	public List<String> getPropTax() {
 		return propTax;
@@ -121,7 +133,6 @@ public class BudgetContract {
 		this.treeTax = treeTax;
 	}
 
-	private List<String> treeTax = new ArrayList<>();
 
 	public List<String> getNpTax() {
 		return npTax;
