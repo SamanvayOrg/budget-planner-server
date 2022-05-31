@@ -1,0 +1,45 @@
+insert into state(name) values ('Maharashtra');
+
+insert into municipality (name, population, state_id) VALUES ('Sinnar', '30000', 1);
+insert into municipality (name, population, state_id) VALUES ('Wai', '50000', 1);
+
+
+insert into budget(id, financial_year, municipality_id) VALUES (1, 2020, 1);
+insert into budget(id, financial_year, municipality_id) VALUES (2, 2021, 1);
+insert into budget(id, financial_year, municipality_id) VALUES (3, 2022, 1);
+insert into budget(id, financial_year, municipality_id) VALUES (4, 2023, 1);
+insert into budget(id, financial_year, municipality_id) VALUES (5, 2020, 2);
+insert into budget(id, financial_year, municipality_id) VALUES (6, 2021, 2);
+insert into budget(id, financial_year, municipality_id) VALUES (7, 2022, 2);
+insert into budget(id, financial_year, municipality_id) VALUES (8, 2023, 2);
+
+
+select * from detailed_head;
+
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (1, 1, 1, 1021, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (2, 1, 1, 1022, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (3, 1, 2, 1023, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (4, 1, 2, 1024, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (5, 1, 3, 1025, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (6, 1, 1, 1026, 1001.00, 1000.00, 900);
+
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (7, 2, 1,  1021, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (8, 2, 1,  1022, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (9, 2, 2,  1023, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (10, 2, 2, 1024, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (11, 2, 3, 1025, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (12, 2, 1, 1026, 1001.00, 1000.00, 900);
+
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (13, 3, 1, 1021, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (14, 3, 1, 1022, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (15, 3, 2, 1023, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (16, 3, 2, 1024, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (17, 3, 3, 1025, 1001.00, 1000.00, 900);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (18, 3, 1, 1026, 1001.00, 1000.00, 900);
+
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (19, 4, 1, 1021, 1001.00, 0, 0);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (20, 4, 1, 1022, 1001.00, 0, 0);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (21, 4, 2, 1023, 1001.00, 0, 0);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (22, 4, 2, 1024, 1001.00, 0, 0);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (23, 4, 3, 1025, 1001.00, 0, 0);
+insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (24, 4, 1, 1026, 1001.00, 0, 0);

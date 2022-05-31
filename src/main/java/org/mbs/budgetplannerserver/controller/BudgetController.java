@@ -1,38 +1,31 @@
 package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.domain.Budget;
-import org.mbs.budgetplannerserver.repository.BudgetsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mbs.budgetplannerserver.domain.Year;
+import org.mbs.budgetplannerserver.service.BudgetService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.Arrays;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 public class BudgetController {
-	private BudgetsRepository budgetsRepository;
+	private BudgetService budgetService;
 
-	@Autowired
-	public BudgetController(BudgetsRepository budgetsRepository) {
-		this.budgetsRepository = budgetsRepository;
+	public BudgetController(BudgetService budgetService) {
+		this.budgetService = budgetService;
 	}
 
 	@GetMapping("/budgets")
 	public Iterable<Budget> getBudgets() {
-		return budgetsRepository.findAll();
+		return Arrays.asList();
 	}
 
 
 	@RequestMapping(value = "/budget", method = GET)
 	@ResponseBody
-	public Budget getBudgetByYear(@RequestParam("year") Optional<String> year) {
-		return budgetsRepository.findByYear(year);
-	}
-
-
-	@GetMapping("/budgetd")
-	public Iterable<Budget> getBudgetByYear() {
-		return null;
+	public Budget getBudgetByYear(@RequestParam("year") Integer year) {
+		return budgetService.getBudgetForFinancialYear(new Year(year).getYear());
 	}
 }
