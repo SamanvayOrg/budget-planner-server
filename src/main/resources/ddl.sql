@@ -84,5 +84,8 @@ create table budget_line (
     detailed_head_id int not null references detailed_head(id),
     planned_amount numeric(15,2),
     revised_amount numeric(15,2),
-    actual_amount numeric(15,2)
+    actual_amount numeric(15,2),
+    display_order numeric(7, 2)
 );
+
+alter table budget_line add column display_order numeric(3, 2);

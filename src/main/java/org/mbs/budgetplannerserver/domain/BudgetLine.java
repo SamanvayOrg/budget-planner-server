@@ -27,6 +27,7 @@ public class BudgetLine extends BaseModel{
     private BigDecimal plannedAmount;
     private BigDecimal revisedAmount;
     private BigDecimal actualAmount;
+    private BigDecimal displayOrder;
 
     public Budget getBudget() {
         return budget;
@@ -74,5 +75,21 @@ public class BudgetLine extends BaseModel{
 
     public void setActualAmount(BigDecimal actualAmount) {
         this.actualAmount = actualAmount;
+    }
+
+    public BigDecimal getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(BigDecimal order) {
+        this.displayOrder = order;
+    }
+
+    public String getFullCode() {
+        return getFunction().getFullCode() + "-" + getDetailedHead().getFullCode();
+    }
+
+    public boolean matches(BudgetLine other) {
+        return this.function.equals(other.function) && this.detailedHead.equals(other.detailedHead);
     }
 }
