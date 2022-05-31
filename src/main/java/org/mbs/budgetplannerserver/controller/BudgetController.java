@@ -1,11 +1,11 @@
 package org.mbs.budgetplannerserver.controller;
 
+import org.mbs.budgetplannerserver.contract.BudgetContract;
 import org.mbs.budgetplannerserver.domain.Budgets;
 import org.mbs.budgetplannerserver.repository.BudgetsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -19,7 +19,7 @@ public class BudgetController {
 		this.budgetsRepository = budgetsRepository;
 	}
 
-	@GetMapping("/budgets")
+	@GetMapping("/allbudgets")
 	public Iterable<Budgets> getBudgets() {
 		return budgetsRepository.findAll();
 	}
@@ -30,16 +30,25 @@ public class BudgetController {
 //		return budgetsRepository.findById(Long.valueOf(data));
 //	}
 
-
-	@RequestMapping(value = "/budget", method = GET)
+	@CrossOrigin
+	@RequestMapping(value = "/budgets", method = GET)
 	@ResponseBody
 	public Budgets getBudgetByYear(@RequestParam("year") Optional<String> year) {
 		return budgetsRepository.findByYear(year);
 	}
 
 
-	@GetMapping("/budgetd")
-	public Iterable<Budgets> getBudgetByYear() {
-		return null;
+//	@GetMapping("/budgetd")
+//	public Iterable<Budgets> getBudgetByYear() {
+//		return null;
+//	}
+
+	@CrossOrigin
+	@RequestMapping(value = "/budget", method = GET)
+	@ResponseBody
+	public BudgetContract getBudget(@RequestParam("id") Optional<String> budgetId) {
+		return BudgetContract.dummy();
 	}
+
+
 }

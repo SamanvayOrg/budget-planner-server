@@ -2,12 +2,19 @@ package org.mbs.budgetplannerserver.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mbs.budgetplannerserver.domain.Budgets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +24,9 @@ public class BudgetControllerIntegrationTest {
 
 	@Autowired
 	private WebApplicationContext webApplicationContext;
+
+	@Autowired
+	private BudgetController budgetController;
 
 	private MockMvc mockMvc;
 
@@ -40,4 +50,11 @@ public class BudgetControllerIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 	}
+
+//	@Test
+//	public void shouldRetrieveBudgetByYearInController() {
+//		Budgets budgetByYear = budgetController.getBudgetByYear(Optional.of("2021-2022"));
+//		assertThat(budgetByYear, not(nullValue()));
+//		assertThat(budgetByYear.getYear(), equals(2022));
+//	}
 }
