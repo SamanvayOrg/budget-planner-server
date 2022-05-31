@@ -12,5 +12,5 @@ public interface BudgetRepository extends CrudRepository<Budget, Long> {
 
     Budget findById(Optional<String> year);
 
-    Budget findByMunicipalityAndFinancialYear(Municipality municipality, int year);
+    Budget findByMunicipalityAndFinancialYear(Municipality municipality, int financialYear);
 }

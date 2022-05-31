@@ -18,6 +18,9 @@ public class BudgetControllerIntegrationTest {
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 
+	@Autowired
+	private BudgetController budgetController;
+
 	private MockMvc mockMvc;
 
 	@BeforeEach
@@ -40,4 +43,11 @@ public class BudgetControllerIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 	}
+
+//	@Test
+//	public void shouldRetrieveBudgetByYearInController() {
+//		Budgets budgetByYear = budgetController.getBudgetByYear(Optional.of("2021-2022"));
+//		assertThat(budgetByYear, not(nullValue()));
+//		assertThat(budgetByYear.getYear(), equals(2022));
+//	}
 }

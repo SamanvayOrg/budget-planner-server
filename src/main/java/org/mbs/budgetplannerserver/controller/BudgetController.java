@@ -3,9 +3,10 @@ package org.mbs.budgetplannerserver.controller;
 import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.Year;
 import org.mbs.budgetplannerserver.service.BudgetService;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -16,12 +17,6 @@ public class BudgetController {
 	public BudgetController(BudgetService budgetService) {
 		this.budgetService = budgetService;
 	}
-
-	@GetMapping("/budgets")
-	public Iterable<Budget> getBudgets() {
-		return Arrays.asList();
-	}
-
 
 	@RequestMapping(value = "/budget", method = GET)
 	@ResponseBody
