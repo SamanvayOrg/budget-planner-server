@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 public class BudgetController {
@@ -25,5 +26,10 @@ public class BudgetController {
 	public BudgetContract getBudgetByYear(@RequestParam("year") Integer year) {
 		Budget budget = budgetService.getBudgetForFinancialYear(new Year(year).getYear());
 		return new BudgetContractMapper().map(budget);
+	}
+
+	@RequestMapping(value = "/budget", method = POST)
+	public void create(@RequestParam("year") Integer year) {
+		budgetService.createBudget(year);
 	}
 }

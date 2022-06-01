@@ -15,7 +15,7 @@ create table municipality
 create table budget
 (
     id              serial primary key,
-    financial_year            int,
+    financial_year  int,
     municipality_id bigint references municipality (id)
 );
 
@@ -77,15 +77,26 @@ create table login_user
     municipality_id int references municipality (id)
 );
 
-create table budget_line (
-    id serial primary key,
-    budget_id int not null references budget(id),
-    function_id int not null references function(id),
-    detailed_head_id int not null references detailed_head(id),
-    planned_amount numeric(15,2),
-    revised_amount numeric(15,2),
-    actual_amount numeric(15,2),
-    display_order numeric(7, 2)
+create table budget_line
+(
+    id               serial primary key,
+    budget_id        int not null references budget (id),
+    function_id      int not null references function (id),
+    detailed_head_id int not null references detailed_head (id),
+    planned_amount   numeric(15, 2),
+    revised_amount   numeric(15, 2),
+    actual_amount    numeric(15, 2),
+    display_order    numeric(7, 2)
 );
 
-alter table budget_line add column display_order numeric(3, 2);
+alter table budget_line
+    add column display_order numeric(3, 2);
+
+create table sample_budget_line
+(
+    id               serial primary key,
+    state_id         integer not null references state (id),
+    function_id      int     not null references function (id),
+    detailed_head_id int     not null references detailed_head (id),
+    display_order    numeric(7, 2)
+);

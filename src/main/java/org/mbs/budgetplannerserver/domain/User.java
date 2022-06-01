@@ -38,4 +38,8 @@ public class User extends BaseModel{
     public void setMunicipality(Municipality municipality) {
         this.municipality = municipality;
     }
+
+    public State getState() {
+        return getMunicipality().getState();
+    }
 }

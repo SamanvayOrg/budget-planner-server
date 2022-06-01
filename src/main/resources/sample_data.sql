@@ -43,3 +43,9 @@ insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_a
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (22, 4, 2, 1024, 1001.00, 0, 0);
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (23, 4, 3, 1025, 1001.00, 0, 0);
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (24, 4, 1, 1026, 1001.00, 0, 0);
+
+insert into sample_budget_line
+(state_id, function_id, detailed_head_id, display_order)
+    (select 1, function_id, detailed_head_id, display_order
+     from budget_line
+     where budget_id = 1);

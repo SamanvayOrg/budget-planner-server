@@ -2,23 +2,28 @@ package org.mbs.budgetplannerserver.service;
 
 import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.PreviousYearBudgets;
+import org.mbs.budgetplannerserver.domain.SampleBudgetLine;
 import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.repository.BudgetRepository;
+import org.mbs.budgetplannerserver.repository.SampleBudgetLineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BudgetService {
 
     private UserService userService;
     private BudgetRepository budgetRepository;
+    private SampleBudgetLineRepository sampleBudgetLineRepository;
 
     @Autowired
-    public BudgetService(UserService userService, BudgetRepository budgetRepository) {
+    public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository) {
         this.userService = userService;
         this.budgetRepository = budgetRepository;
+        this.sampleBudgetLineRepository = sampleBudgetLineRepository;
     }
 
     public Budget getBudgetForFinancialYear(int year) {
@@ -34,5 +39,27 @@ public class BudgetService {
 
     private Budget findForYear(List<Budget> budgets, int year) {
         return budgets.stream().filter(budget -> budget.getFinancialYear() == year).findFirst().orElse(null);
+    }
+
+    public Budget createBudget(int year) {
+        User user = userService.getUser();
+        Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
+        return budget == null ? createBudgetInternal(year, user) : budget;
+    }
+
+    private Budget createBudgetInternal(int year, User user) {
+        Budget newBudget = new Budget();
+        newBudget.setFinancialYear(year);
+        newBudget.setMunicipality(user.getMunicipality());
+
+        newBudget.setBudgetLines(sampleBudgetLineRepository
+                .findAllByState(user.getState())
+                .stream()
+                .map(sampleBudgetLine -> sampleBudgetLine.toBudgetLine(newBudget))
+                .collect(Collectors.toSet()));
+
+        budgetRepository.save(newBudget);
+
+        return newBudget;
     }
 }

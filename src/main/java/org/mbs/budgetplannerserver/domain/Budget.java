@@ -18,7 +18,7 @@ public class Budget extends BaseModel {
 	@JoinColumn(name = "municipality_id")
 	private Municipality municipality;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "budget")
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "budget")
 	private Set<BudgetLine> budgetLines;
 
 	@Transient
