@@ -49,3 +49,4 @@ insert into sample_budget_line
     (select 1, function_id, detailed_head_id, display_order
      from budget_line
      where budget_id = 1);
+update budget_line set display_order=id;

@@ -2,7 +2,7 @@ insert into function_group(code, name) values ('1', 'Municipal Body');
 insert into function_group(code, name) values ('2', 'Commissioner/ Chief Officer');
 insert into function_group(code, name) values ('3', 'General Administration ');
 insert into function_group(code, name) values ('4', 'Finance / Accounts /Audit');
-insert into function_group(code, name) values ('6', 'Ward Administration');
+insert into function_group(code, name) values ('5', 'Ward Administration');
 insert into function_group(code, name) values ('6', 'Election & Census');
 insert into function_group(code, name) values ('7', 'Common Services');
 insert into function_group(code, name) values ('8', 'Common Activities of Municipal Body');
