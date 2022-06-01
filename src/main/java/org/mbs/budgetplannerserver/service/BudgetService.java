@@ -2,8 +2,8 @@ package org.mbs.budgetplannerserver.service;
 
 import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.PreviousYearBudgets;
-import org.mbs.budgetplannerserver.domain.SampleBudgetLine;
 import org.mbs.budgetplannerserver.domain.User;
+import org.mbs.budgetplannerserver.domain.Year;
 import org.mbs.budgetplannerserver.repository.BudgetRepository;
 import org.mbs.budgetplannerserver.repository.SampleBudgetLineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,5 +61,9 @@ public class BudgetService {
         budgetRepository.save(newBudget);
 
         return newBudget;
+    }
+
+    public Budget getCurrentBudget() {
+        return getBudgetForFinancialYear(Year.currentYear());
     }
 }

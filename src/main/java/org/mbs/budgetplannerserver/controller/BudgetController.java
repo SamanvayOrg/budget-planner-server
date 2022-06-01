@@ -32,4 +32,10 @@ public class BudgetController {
 	public void create(@RequestParam("year") Integer year) {
 		budgetService.createBudget(year);
 	}
+
+	@RequestMapping(value = "/budget/current", method = GET)
+	public BudgetContract currentBudget() {
+		Budget budget = budgetService.getCurrentBudget();
+		return new BudgetContractMapper().map(budget);
+	}
 }
