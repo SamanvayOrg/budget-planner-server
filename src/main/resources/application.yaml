@@ -2,7 +2,7 @@
 spring:
   jpa:
     database: POSTGRESQL
-    show-sql: true
+    show-sql: false
     generate-ddl: false
     properties.hibernate.jdbc.lob.non_contextual_creation: true
   datasource:
