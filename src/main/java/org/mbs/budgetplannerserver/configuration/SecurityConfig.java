@@ -22,18 +22,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authz) -> authz
-                        .anyRequest().authenticated()
-                )
+                .authorizeRequests()
+                .antMatchers("/**").permitAll()
+                .antMatchers("/api/**").authenticated()
+                .and()
                 .oauth2ResourceServer()
                 .jwt()
                 .decoder(jwtDecoder());
         return http.build();
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().antMatchers("/ignore1", "/ignore2");
     }
 
     JwtDecoder jwtDecoder() {

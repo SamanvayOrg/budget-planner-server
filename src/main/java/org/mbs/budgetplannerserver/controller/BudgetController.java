@@ -21,19 +21,19 @@ public class BudgetController {
 		this.budgetService = budgetService;
 	}
 
-	@RequestMapping(value = "/budget", method = GET)
+	@RequestMapping(value = "/api/budget", method = GET)
 	@ResponseBody
 	public BudgetContract getBudgetByYear(@RequestParam("year") Integer year) {
 		Budget budget = budgetService.getBudgetForFinancialYear(new Year(year).getYear());
 		return new BudgetContractMapper().map(budget);
 	}
 
-	@RequestMapping(value = "/budget", method = POST)
+	@RequestMapping(value = "/api/budget", method = POST)
 	public void create(@RequestParam("year") Integer year) {
 		budgetService.createBudget(year);
 	}
 
-	@RequestMapping(value = "/budget/current", method = GET)
+	@RequestMapping(value = "/api/budget/current", method = GET)
 	public BudgetContract currentBudget() {
 		Budget budget = budgetService.getCurrentBudget();
 		return new BudgetContractMapper().map(budget);

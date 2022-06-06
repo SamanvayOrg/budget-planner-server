@@ -22,6 +22,7 @@ dependencies {
 	implementation 'com.auth0:auth0:1.42.0'
 	implementation 'org.springframework.security:spring-security-oauth2-resource-server'
 	implementation 'org.springframework.security:spring-security-oauth2-jose'
+	implementation 'commons-io:commons-io:2.11.0'
 
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.hamcrest:hamcrest:2.2'

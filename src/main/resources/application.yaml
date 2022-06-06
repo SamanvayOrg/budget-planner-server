@@ -1,4 +1,3 @@
-
 spring:
   jpa:
     database: POSTGRESQL
@@ -33,3 +32,6 @@ debug: false
 logging:
   level:
     root: INFO
+budget-planner:
+  static:
+    path: ${BPS_STATIC_PATH:/var/www/budget-planner}
