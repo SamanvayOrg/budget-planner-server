@@ -3,9 +3,7 @@ package org.mbs.budgetplannerserver.domain;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -22,7 +20,7 @@ public class Budget extends BaseModel {
 	private Set<BudgetLine> budgetLines;
 
 	@Transient
-	private PreviousYearBudgets previousYearBudgets;
+	private PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(null, null, null);
 
 	public void setMunicipality(Municipality municipality) {
 		this.municipality = municipality;
@@ -64,7 +62,8 @@ public class Budget extends BaseModel {
 	}
 
 	public BudgetLine getBudgetLineMatching(BudgetLine budgetLine) {
-		return getBudgetLines().stream().filter(existing -> budgetLine.matches(budgetLine)).findFirst().get();
+		Optional<BudgetLine> matchingLine = getBudgetLines().stream().filter(line -> line.matches(budgetLine)).findFirst();
+		return matchingLine.orElse(null);
 	}
 
 	public List<String> possibleCodes() {

@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -37,5 +40,11 @@ public class BudgetController {
 	public BudgetContract currentBudget() {
 		Budget budget = budgetService.getCurrentBudget();
 		return new BudgetContractMapper().map(budget);
+	}
+
+	@RequestMapping(value = "/api/budgets", method = GET)
+	public List<BudgetContract> allBudgets() {
+		List<Budget> budgets = budgetService.getAllBudgets();
+		return budgets.stream().map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
 	}
 }

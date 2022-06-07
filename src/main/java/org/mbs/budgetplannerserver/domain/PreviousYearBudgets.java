@@ -20,9 +20,9 @@ public class PreviousYearBudgets {
                 };
     }
 
-    private BudgetLine nullSafeGetBudgetLine(Budget yearMinus3, BudgetLine budgetLine) {
-        if (yearMinus3 != null) {
-            return yearMinus3.getBudgetLineMatching(budgetLine);
+    private BudgetLine nullSafeGetBudgetLine(Budget budget, BudgetLine budgetLine) {
+        if (budget != null) {
+            return budget.getBudgetLineMatching(budgetLine);
         }
 
         return null;

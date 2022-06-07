@@ -34,7 +34,6 @@ public class BudgetService {
         budget.setPreviousYearBudgets(previousYearBudgets);
 
         return budget;
-
     }
 
     private Budget findForYear(List<Budget> budgets, int year) {
@@ -65,5 +64,10 @@ public class BudgetService {
 
     public Budget getCurrentBudget() {
         return getBudgetForFinancialYear(Year.currentYear());
+    }
+
+    public List<Budget> getAllBudgets() {
+        User user = userService.getUser();
+        return budgetRepository.findByMunicipality(user.getMunicipality());
     }
 }

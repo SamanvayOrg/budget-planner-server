@@ -41,7 +41,7 @@ public class BudgetLineContractMapper {
 
     private BigDecimal actualAmount(BudgetLine[] budgetLinesMatching, int index) {
         BudgetLine matching = budgetLinesMatching[index];
-        return matching == null? BigDecimal.valueOf(0.0) : matching.getActualAmount();
+        return matching == null? null : matching.getActualAmount();
     }
 
 }

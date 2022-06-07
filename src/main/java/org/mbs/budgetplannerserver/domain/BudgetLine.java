@@ -90,6 +90,6 @@ public class BudgetLine extends BaseModel{
     }
 
     public boolean matches(BudgetLine other) {
-        return this.function.equals(other.function) && this.detailedHead.equals(other.detailedHead);
+        return this.getFunction().getFullCode().equals(other.getFunction().getFullCode()) && this.getDetailedHead().getFullCode().equals(other.getDetailedHead().getFullCode());
     }
 }
