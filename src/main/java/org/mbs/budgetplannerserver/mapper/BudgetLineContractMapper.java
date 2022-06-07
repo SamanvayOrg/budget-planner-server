@@ -28,6 +28,7 @@ public class BudgetLineContractMapper {
         budgetLineContract.setMajorHead(majorHead.getName());
         MajorHeadGroup majorHeadGroup = majorHead.getMajorHeadGroup();
         budgetLineContract.setMajorHeadGroup(majorHeadGroup.getName());
+        budgetLineContract.setMajorHeadGroupDisplayOrder(majorHeadGroup.getDisplayOrder());
 
         PreviousYearBudgets previousYearBudgets = budget.getPreviousYearBudgets();
         BudgetLine[] budgetLinesMatching = previousYearBudgets.getBudgetLinesMatching(budgetLine);

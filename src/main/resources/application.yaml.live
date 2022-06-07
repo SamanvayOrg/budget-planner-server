@@ -1,0 +1,4 @@
+logging:
+  file:
+    path: /var/log/budget-planner
+    file: budget-planner_appserver.log

@@ -37,9 +37,10 @@ create table function
 
 create table major_head_group
 (
-    id   serial primary key,
-    code text not null,
-    name text not null
+    id            serial primary key,
+    code          text not null,
+    name          text not null,
+    display_order numeric(7, 2)
 );
 
 create table major_head

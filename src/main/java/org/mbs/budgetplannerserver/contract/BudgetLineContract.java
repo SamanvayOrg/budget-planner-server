@@ -13,6 +13,7 @@ public class BudgetLineContract {
     private BigDecimal yearMinus3ActualAmount;
     private BigDecimal displayOrder;
     private String majorHeadGroup;
+    private BigDecimal majorHeadGroupDisplayOrder;
     private String majorHead;
     private String minorHead;
 
@@ -94,6 +95,14 @@ public class BudgetLineContract {
 
     public void setMajorHeadGroup(String majorHeadGroup) {
         this.majorHeadGroup = majorHeadGroup;
+    }
+
+    public BigDecimal getMajorHeadGroupDisplayOrder() {
+        return majorHeadGroupDisplayOrder;
+    }
+
+    public void setMajorHeadGroupDisplayOrder(BigDecimal majorHeadGroupDisplayOrder) {
+        this.majorHeadGroupDisplayOrder = majorHeadGroupDisplayOrder;
     }
 
     public String getMajorHead() {

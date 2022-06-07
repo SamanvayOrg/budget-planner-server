@@ -359,10 +359,10 @@ insert into function (function_group_id, code, name, full_code) values ((select 
 insert into function (function_group_id, code, name, full_code) values ((select id from function_group where code = '98'), '9', 'Other Cess', '989');
 insert into function (function_group_id, code, name, full_code) values ((select id from function_group where code = '99'), '0', 'All', '990');
 
-insert into major_head_group (code, name) values ('1', 'Revenue Receipt');
-insert into major_head_group (code, name) values ('2', 'Expenses');
-insert into major_head_group (code, name) values ('3', 'Liability');
-insert into major_head_group (code, name) values ('4', 'Assets');
+insert into major_head_group (code, name, display_order) values ('1', 'Revenue Receipt', 1);
+insert into major_head_group (code, name, display_order) values ('2', 'Expenses', 2);
+insert into major_head_group (code, name, display_order) values ('3', 'Liability', 3);
+insert into major_head_group (code, name, display_order) values ('4', 'Assets', 4);
 
 
 insert into major_head (code, name, major_head_group_id) values ('1', 'Property Tax', (select id from major_head_group where code ='1'));
