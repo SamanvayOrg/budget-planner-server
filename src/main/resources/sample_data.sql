@@ -1,8 +1,7 @@
-insert into state(name) values ('Maharashtra');
+insert into state(id, name) values (1, 'Maharashtra');
 
-insert into municipality (name, population, state_id) VALUES ('Sinnar', '30000', 1);
-insert into municipality (name, population, state_id) VALUES ('Wai', '50000', 1);
-
+insert into municipality (id, name, population, state_id) VALUES (1, 'Sinnar', '30000', 1);
+insert into municipality (id, name, population, state_id) VALUES (2, 'Wai', '50000', 1);
 
 insert into budget(id, financial_year, municipality_id) VALUES (1, 2020, 1);
 insert into budget(id, financial_year, municipality_id) VALUES (2, 2021, 1);
@@ -22,6 +21,9 @@ insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_a
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (4, 1, 2, 1024, 1001.00, 1000.00, 900);
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (5, 1, 3, 1025, 1001.00, 1000.00, 900);
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (6, 1, 1, 1026, 1001.00, 1000.00, 900);
+
+
+
 
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (7, 2, 1,  1021, 1001.00, 1000.00, 900);
 insert into budget_line (id, budget_id, function_id, detailed_head_id, planned_amount, revised_amount, actual_amount) VALUES    (8, 2, 1,  1022, 1001.00, 1000.00, 900);
@@ -50,3 +52,15 @@ insert into sample_budget_line
      from budget_line
      where budget_id = 1);
 update budget_line set display_order=id;
+select * from budget;
+delete from budget_line where budget_id = 4;
+
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (1, 1, (select id from function where full_code = '910'), (select id from detailed_head where full_code = '1110'), 1);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (2, 1, (select id from function where full_code = '910'), (select id from detailed_head where full_code = '1111'), 2);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (3, 1, (select id from function where full_code = '920'), (select id from detailed_head where full_code = '1120'), 3);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (4, 1, (select id from function where full_code = '920'), (select id from detailed_head where full_code = '1121'), 4);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (5, 1, (select id from function where full_code = '310'), (select id from detailed_head where full_code = '2510'), 5);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (6, 1, (select id from function where full_code = '314'), (select id from detailed_head where full_code = '2520'), 6);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (7, 1, (select id from function where full_code = '210'), (select id from detailed_head where full_code = '3221'), 7);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (8, 1, (select id from function where full_code = '315'), (select id from detailed_head where full_code = '4234'), 8);
+insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (9, 1, (select id from function where full_code = '740'), (select id from detailed_head where full_code = '3230'), 9);

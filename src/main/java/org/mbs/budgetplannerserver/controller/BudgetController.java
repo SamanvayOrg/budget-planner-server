@@ -5,10 +5,12 @@ import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.Year;
 import org.mbs.budgetplannerserver.mapper.BudgetContractMapper;
 import org.mbs.budgetplannerserver.service.BudgetService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +30,16 @@ public class BudgetController {
 	@ResponseBody
 	public BudgetContract getBudgetByYear(@RequestParam("year") Integer year) {
 		Budget budget = budgetService.getBudgetForFinancialYear(new Year(year).getYear());
+		assertBudgetPresent(budget);
 		return new BudgetContractMapper().map(budget);
+	}
+
+	private void assertBudgetPresent(Budget budget) {
+		if (budget == null) {
+			throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND, "entity not found"
+			);
+		}
 	}
 
 	@RequestMapping(value = "/api/budget", method = POST)
@@ -39,6 +50,7 @@ public class BudgetController {
 	@RequestMapping(value = "/api/budget/current", method = GET)
 	public BudgetContract currentBudget() {
 		Budget budget = budgetService.getCurrentBudget();
+		assertBudgetPresent(budget);
 		return new BudgetContractMapper().map(budget);
 	}
 

@@ -29,6 +29,9 @@ public class BudgetService {
     public Budget getBudgetForFinancialYear(int year) {
         User user = userService.getUser();
         Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
+        if (budget == null) {
+            return null;
+        }
         List<Budget> previousBudgets = budgetRepository.findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(user.getMunicipality(), year - 4, year - 1);
         PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(findForYear(previousBudgets, year - 1), findForYear(previousBudgets, year - 2), findForYear(previousBudgets, year - 3));
         budget.setPreviousYearBudgets(previousYearBudgets);
