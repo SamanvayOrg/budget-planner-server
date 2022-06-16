@@ -13,67 +13,70 @@ import java.util.stream.Collectors;
 @Service
 public class BudgetService {
 
-    private UserService userService;
-    private BudgetRepository budgetRepository;
-    private SampleBudgetLineRepository sampleBudgetLineRepository;
+	private UserService userService;
+	private BudgetRepository budgetRepository;
+	private SampleBudgetLineRepository sampleBudgetLineRepository;
 	private MunicipalityRepository municipalityRepository;
 
-    @Autowired
-    public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository,MunicipalityRepository municipalityRepository) {
-        this.userService = userService;
-        this.budgetRepository = budgetRepository;
-        this.sampleBudgetLineRepository = sampleBudgetLineRepository;
+	@Autowired
+	public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository, MunicipalityRepository municipalityRepository) {
+		this.userService = userService;
+		this.budgetRepository = budgetRepository;
+		this.sampleBudgetLineRepository = sampleBudgetLineRepository;
 		this.municipalityRepository = municipalityRepository;
-    }
+	}
 
-    public Budget getBudgetForFinancialYear(int year) {
-        User user = userService.getUser();
-        Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
-        if (budget == null) {
-            return null;
-        }
-        List<Budget> previousBudgets = budgetRepository.findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(user.getMunicipality(), year - 4, year - 1);
-        PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(findForYear(previousBudgets, year - 1), findForYear(previousBudgets, year - 2), findForYear(previousBudgets, year - 3));
-        budget.setPreviousYearBudgets(previousYearBudgets);
+	public Budget getBudgetForFinancialYear(int year) {
+		User user = userService.getUser();
+		Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
+		if (budget == null) {
+			return null;
+		}
+		List<Budget> previousBudgets = budgetRepository.findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(user.getMunicipality(), year - 4, year - 1);
+		PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(findForYear(previousBudgets, year - 1), findForYear(previousBudgets, year - 2), findForYear(previousBudgets, year - 3));
+		budget.setPreviousYearBudgets(previousYearBudgets);
 
-        return budget;
-    }
+		return budget;
+	}
 
-    private Budget findForYear(List<Budget> budgets, int year) {
-        return budgets.stream().filter(budget -> budget.getFinancialYear() == year).findFirst().orElse(null);
-    }
+	private Budget findForYear(List<Budget> budgets, int year) {
+		return budgets.stream().filter(budget -> budget.getFinancialYear() == year).findFirst().orElse(null);
+	}
 
-    public Budget createBudget(int year) {
-        User user = userService.getUser();
-        Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
-        return budget == null ? createBudgetInternal(year, user) : budget;
-    }
+	public Budget createBudget(int year) {
+		User user = userService.getUser();
+		Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
+		return budget == null ? createBudgetInternal(year, user) : budget;
+	}
 
-    private Budget createBudgetInternal(int year, User user) {
-        Budget newBudget = new Budget();
-        newBudget.setFinancialYear(year);
-        newBudget.setMunicipality(user.getMunicipality());
+	private Budget createBudgetInternal(int year, User user) {
+		Budget newBudget = new Budget();
+		newBudget.setFinancialYear(year);
+		newBudget.setMunicipality(user.getMunicipality());
 
-        newBudget.setBudgetLines(sampleBudgetLineRepository
-                .findAllByState(user.getState())
-                .stream()
-                .map(sampleBudgetLine -> sampleBudgetLine.toBudgetLine(newBudget))
-                .collect(Collectors.toSet()));
+		newBudget.setBudgetLines(sampleBudgetLineRepository
+				.findAllByState(user.getState())
+				.stream()
+				.map(sampleBudgetLine -> sampleBudgetLine.toBudgetLine(newBudget))
+				.collect(Collectors.toSet()));
 
-        budgetRepository.save(newBudget);
+		budgetRepository.save(newBudget);
 
-        return newBudget;
-    }
+		return newBudget;
+	}
 
-    public Budget getCurrentBudget() {
-        return getBudgetForFinancialYear(Year.currentYear());
-    }
+	public Budget getCurrentBudget() {
+		return getBudgetForFinancialYear(Year.currentYear());
+	}
 
-    public List<Budget> getAllBudgets() {
-        User user = userService.getUser();
-        return budgetRepository.findByMunicipality(user.getMunicipality());
-    }
-	public Iterable<Municipality> getMunicipalities() {
-		return municipalityRepository.findAll();
+	public List<Budget> getAllBudgets() {
+		User user = userService.getUser();
+		return budgetRepository.findByMunicipality(user.getMunicipality());
+	}
+
+
+	public Municipality getMunicipality() {
+		User user = userService.getUser();
+		return user.getMunicipality();
 	}
 }

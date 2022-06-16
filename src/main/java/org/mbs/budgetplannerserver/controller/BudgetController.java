@@ -62,7 +62,7 @@ public class BudgetController {
 	}
 
 	@RequestMapping(value = "api/municipality", method = GET)
-	public Iterable<Municipality> getMunicipalities() {
-		return budgetService.getMunicipalities();
+	public Municipality getMunicipality() {
+		return budgetService.getMunicipality();
 	}
 }
