@@ -15,6 +15,10 @@ public class Municipality extends BaseModel{
 	@JoinColumn(name = "state_id")
 	private State state;
 
+	@ManyToOne(targetEntity = CityClass.class)
+	@JoinColumn(name = "class_id")
+	private CityClass cityClass;
+
 	private Long population;
 
 	public String getName() {
@@ -39,5 +43,13 @@ public class Municipality extends BaseModel{
 
 	public void setState(State state) {
 		this.state = state;
+	}
+
+	public String getCityClass() {
+		return cityClass.getName();
+	}
+
+	public void setCityClass(CityClass cityClass) {
+		this.cityClass = cityClass;
 	}
 }

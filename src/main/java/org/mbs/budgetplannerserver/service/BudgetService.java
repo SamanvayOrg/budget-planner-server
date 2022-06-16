@@ -1,10 +1,8 @@
 package org.mbs.budgetplannerserver.service;
 
-import org.mbs.budgetplannerserver.domain.Budget;
-import org.mbs.budgetplannerserver.domain.PreviousYearBudgets;
-import org.mbs.budgetplannerserver.domain.User;
-import org.mbs.budgetplannerserver.domain.Year;
+import org.mbs.budgetplannerserver.domain.*;
 import org.mbs.budgetplannerserver.repository.BudgetRepository;
+import org.mbs.budgetplannerserver.repository.MunicipalityRepository;
 import org.mbs.budgetplannerserver.repository.SampleBudgetLineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,12 +16,14 @@ public class BudgetService {
     private UserService userService;
     private BudgetRepository budgetRepository;
     private SampleBudgetLineRepository sampleBudgetLineRepository;
+	private MunicipalityRepository municipalityRepository;
 
     @Autowired
-    public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository) {
+    public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository,MunicipalityRepository municipalityRepository) {
         this.userService = userService;
         this.budgetRepository = budgetRepository;
         this.sampleBudgetLineRepository = sampleBudgetLineRepository;
+		this.municipalityRepository = municipalityRepository;
     }
 
     public Budget getBudgetForFinancialYear(int year) {
@@ -73,4 +73,7 @@ public class BudgetService {
         User user = userService.getUser();
         return budgetRepository.findByMunicipality(user.getMunicipality());
     }
+	public Iterable<Municipality> getMunicipalities() {
+		return municipalityRepository.findAll();
+	}
 }

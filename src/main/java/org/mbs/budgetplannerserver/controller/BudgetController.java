@@ -2,6 +2,7 @@ package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.contract.BudgetContract;
 import org.mbs.budgetplannerserver.domain.Budget;
+import org.mbs.budgetplannerserver.domain.Municipality;
 import org.mbs.budgetplannerserver.domain.Year;
 import org.mbs.budgetplannerserver.mapper.BudgetContractMapper;
 import org.mbs.budgetplannerserver.service.BudgetService;
@@ -58,5 +59,10 @@ public class BudgetController {
 	public List<BudgetContract> allBudgets() {
 		List<Budget> budgets = budgetService.getAllBudgets();
 		return budgets.stream().map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
+	}
+
+	@RequestMapping(value = "api/municipality", method = GET)
+	public Iterable<Municipality> getMunicipalities() {
+		return budgetService.getMunicipalities();
 	}
 }
