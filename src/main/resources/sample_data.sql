@@ -64,3 +64,10 @@ insert into sample_budget_line(id, state_id, function_id, detailed_head_id, disp
 insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (7, 1, (select id from function where full_code = '210'), (select id from detailed_head where full_code = '3221'), 7);
 insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (8, 1, (select id from function where full_code = '315'), (select id from detailed_head where full_code = '4234'), 8);
 insert into sample_budget_line(id, state_id, function_id, detailed_head_id, display_order)values (9, 1, (select id from function where full_code = '740'), (select id from detailed_head where full_code = '3230'), 9);
+
+
+
+
+insert into  city_class(name) values ('Municipal council');
+insert into  city_class(name) values ('Municipal corporation');
+insert into  city_class(name) values ('Nagar panchayat');
