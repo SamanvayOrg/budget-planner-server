@@ -1,4 +1,6 @@
 spring:
+#  flyway:
+#    locations=classpath:db/migration
   jpa:
     database: POSTGRESQL
     show-sql: false
@@ -29,12 +31,19 @@ auth0:
   audience: https://api.budget-planner
   domain: https://budget-planner.us.auth0.com
 debug: false
-logging:
-  file:
-    path: /var/log/budget-planner
-    file: budget-planner_appserver.log
-  level:
-    root: INFO
 budget-planner:
   static:
     path: ${BPS_STATIC_PATH:/var/www/budget-planner}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: production
+logging:
+  level:
+    root: INFO
+  file:
+    path: /var/log/budget-planner
+    name: budget-planner_appserver.log

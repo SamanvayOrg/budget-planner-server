@@ -1301,3 +1301,10 @@ insert into detailed_head (code, name, minor_head_id, full_code) values ('0', 'A
 insert into detailed_head (code, name, minor_head_id, full_code) values ('0', 'All', (select mih.id from minor_head mih inner join major_head mh on mih.major_head_id = mh.id inner join major_head_group mhg on mh.major_head_group_id = mhg.id where mih.code = '6' and mh.code = '9' and mhg.code = '4'), '4960');
 insert into detailed_head (code, name, minor_head_id, full_code) values ('0', 'All', (select mih.id from minor_head mih inner join major_head mh on mih.major_head_id = mh.id inner join major_head_group mhg on mh.major_head_group_id = mhg.id where mih.code = '7' and mh.code = '9' and mhg.code = '4'), '4970');
 insert into detailed_head (code, name, minor_head_id, full_code) values ('0', 'All', (select mih.id from minor_head mih inner join major_head mh on mih.major_head_id = mh.id inner join major_head_group mhg on mh.major_head_group_id = mhg.id where mih.code = '9' and mh.code = '9' and mhg.code = '4'), '4990');
+
+SELECT setval('function_group_id_seq', COALESCE((SELECT MAX(id)+1 FROM function_group), 1), false);
+SELECT setval('function_id_seq', COALESCE((SELECT MAX(id)+1 FROM function), 1), false);
+SELECT setval('major_head_group_id_seq', COALESCE((SELECT MAX(id)+1 FROM major_head_group), 1), false);
+SELECT setval('major_head_id_seq', COALESCE((SELECT MAX(id)+1 FROM major_head), 1), false);
+SELECT setval('minor_head_id_seq', COALESCE((SELECT MAX(id)+1 FROM minor_head), 1), false);
+SELECT setval('detailed_head_id_seq', COALESCE((SELECT MAX(id)+1 FROM detailed_head), 1), false);

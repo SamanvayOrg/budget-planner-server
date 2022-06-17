@@ -3,19 +3,28 @@ package org.mbs.budgetplannerserver.contract;
 import java.math.BigDecimal;
 
 public class BudgetLineContract {
+    private Long id;
     private String code;
     private String name;
-    private BigDecimal plannedAmount;
-    private BigDecimal revisedAmount;
-    private BigDecimal actualAmount;
-    private BigDecimal yearMinus1ActualAmount;
-    private BigDecimal yearMinus2ActualAmount;
-    private BigDecimal yearMinus3ActualAmount;
+    private BigDecimal budgetedAmount;
+    private BigDecimal currentYear8MonthsActuals;
+    private BigDecimal currentYear4MonthsProbables;
+    private BigDecimal previousYearActuals;
+    private BigDecimal yearMinus1Actuals;
+    private BigDecimal yearMinus2Actuals;
     private BigDecimal displayOrder;
     private String majorHeadGroup;
     private BigDecimal majorHeadGroupDisplayOrder;
     private String majorHead;
     private String minorHead;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getCode() {
         return code;
@@ -33,52 +42,52 @@ public class BudgetLineContract {
         this.name = name;
     }
 
-    public BigDecimal getPlannedAmount() {
-        return plannedAmount;
+    public BigDecimal getBudgetedAmount() {
+        return budgetedAmount;
     }
 
-    public void setPlannedAmount(BigDecimal plannedAmount) {
-        this.plannedAmount = plannedAmount;
+    public void setBudgetedAmount(BigDecimal budgetedAmount) {
+        this.budgetedAmount = budgetedAmount;
     }
 
-    public BigDecimal getRevisedAmount() {
-        return revisedAmount;
+    public BigDecimal getCurrentYear8MonthsActuals() {
+        return currentYear8MonthsActuals;
     }
 
-    public void setRevisedAmount(BigDecimal revisedAmount) {
-        this.revisedAmount = revisedAmount;
+    public void setCurrentYear8MonthsActuals(BigDecimal currentYear8MonthsActuals) {
+        this.currentYear8MonthsActuals = currentYear8MonthsActuals;
     }
 
-    public BigDecimal getActualAmount() {
-        return actualAmount;
+    public BigDecimal getCurrentYear4MonthsProbables() {
+        return currentYear4MonthsProbables;
     }
 
-    public void setActualAmount(BigDecimal actualAmount) {
-        this.actualAmount = actualAmount;
+    public void setCurrentYear4MonthsProbables(BigDecimal currentYear4MonthsProbables) {
+        this.currentYear4MonthsProbables = currentYear4MonthsProbables;
     }
 
-    public BigDecimal getYearMinus1ActualAmount() {
-        return yearMinus1ActualAmount;
+    public BigDecimal getPreviousYearActuals() {
+        return previousYearActuals;
     }
 
-    public void setYearMinus1ActualAmount(BigDecimal yearMinus1ActualAmount) {
-        this.yearMinus1ActualAmount = yearMinus1ActualAmount;
+    public void setPreviousYearActuals(BigDecimal previousYearActuals) {
+        this.previousYearActuals = previousYearActuals;
     }
 
-    public BigDecimal getYearMinus2ActualAmount() {
-        return yearMinus2ActualAmount;
+    public BigDecimal getYearMinus1Actuals() {
+        return yearMinus1Actuals;
     }
 
-    public void setYearMinus2ActualAmount(BigDecimal yearMinus2ActualAmount) {
-        this.yearMinus2ActualAmount = yearMinus2ActualAmount;
+    public void setYearMinus1Actuals(BigDecimal yearMinus1Actuals) {
+        this.yearMinus1Actuals = yearMinus1Actuals;
     }
 
-    public BigDecimal getYearMinus3ActualAmount() {
-        return yearMinus3ActualAmount;
+    public BigDecimal getYearMinus2Actuals() {
+        return yearMinus2Actuals;
     }
 
-    public void setYearMinus3ActualAmount(BigDecimal yearMinus3ActualAmount) {
-        this.yearMinus3ActualAmount = yearMinus3ActualAmount;
+    public void setYearMinus2Actuals(BigDecimal yearMinus2Actuals) {
+        this.yearMinus2Actuals = yearMinus2Actuals;
     }
 
     public BigDecimal getDisplayOrder() {

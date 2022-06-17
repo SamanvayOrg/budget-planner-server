@@ -1,8 +1,9 @@
 create table state
 (
     id   serial primary key,
-    name text
+    name text not null
 );
+
 create table city_class
 (
     id   serial primary key,
@@ -12,33 +13,33 @@ create table city_class
 create table municipality
 (
     id         serial primary key,
-    name       varchar(255),
+    name       text not null,
     population bigint,
     state_id   int references state (id),
-    class_id int references city_class
+    class_id   int references city_class
 );
 
 create table budget
 (
     id              serial primary key,
-    financial_year  int,
+    financial_year  int not null,
     municipality_id bigint references municipality (id)
 );
 
 create table function_group
 (
     id   serial primary key,
-    code text,
-    name text
+    code text not null,
+    name text not null
 );
 
 create table function
 (
     id                serial primary key,
     function_group_id integer references function_group (id),
-    code              text,
-    full_code         text,
-    name              text
+    code              text not null,
+    full_code         text not null,
+    name              text not null
 );
 
 create table major_head_group
@@ -79,28 +80,25 @@ create table detailed_head
 create table login_user
 (
     id              serial primary key,
-    name            varchar(255),
-    user_name       varchar(255),
+    name            varchar(255) not null,
+    user_name       varchar(255) not null,
     municipality_id int references municipality (id)
 );
 
 create table budget_line
 (
-    id                          serial primary key,
-    name                        text,
-    budget_id                   int not null references budget (id),
-    function_id                 int not null references function (id),
-    detailed_head_id            int not null references detailed_head (id),
-    budgeted_amount             numeric(15, 2),
-    revised_amount              numeric(15, 2),
-    actual_amount               numeric(15, 2),
-    display_order               numeric(7, 2),
-    currentYear8MonthsActuals   numeric(15, 2),
-    currentYear4MonthsProbables numeric(15, 2)
+    id                   serial primary key,
+    name                 text,
+    budget_id            int not null references budget (id),
+    function_id          int not null references function (id),
+    detailed_head_id     int not null references detailed_head (id),
+    budgeted_amount      numeric(15, 2),
+    eight_month_actual_amount  numeric(15, 2),
+    four_month_probable_amount numeric(15, 2),
+    revised_amount       numeric(15, 2),
+    actual_amount        numeric(15, 2),
+    display_order        numeric(7, 2)
 );
-
-alter table budget_line
-    add column display_order numeric(3, 2);
 
 create table sample_budget_line
 (

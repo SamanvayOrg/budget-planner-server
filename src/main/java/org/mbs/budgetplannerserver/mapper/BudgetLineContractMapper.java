@@ -15,11 +15,10 @@ public class BudgetLineContractMapper {
 
     public BudgetLineContract map(BudgetLine budgetLine, Budget budget) {
         BudgetLineContract budgetLineContract = new BudgetLineContract();
-        budgetLineContract.setName(budgetLine.getDetailedHead().getName());
+        budgetLineContract.setId(budgetLine.getId());
+        budgetLineContract.setName(budgetLine.getName());
         budgetLineContract.setCode(budgetLine.getFullCode());
-        budgetLineContract.setPlannedAmount(budgetLine.getPlannedAmount());
-        budgetLineContract.setRevisedAmount(budgetLine.getRevisedAmount());
-        budgetLineContract.setActualAmount(budgetLine.getActualAmount());
+        budgetLineContract.setBudgetedAmount(budgetLine.getBudgetedAmount());
         budgetLineContract.setDisplayOrder(budgetLine.getDisplayOrder());
         DetailedHead detailedHead = budgetLine.getDetailedHead();
         MinorHead minorHead = detailedHead.getMinorHead();
@@ -32,9 +31,15 @@ public class BudgetLineContractMapper {
 
         PreviousYearBudgets previousYearBudgets = budget.getPreviousYearBudgets();
         BudgetLine[] budgetLinesMatching = previousYearBudgets.getBudgetLinesMatching(budgetLine);
-        budgetLineContract.setYearMinus1ActualAmount(actualAmount(budgetLinesMatching, 0));
-        budgetLineContract.setYearMinus2ActualAmount(actualAmount(budgetLinesMatching, 1));
-        budgetLineContract.setYearMinus3ActualAmount(actualAmount(budgetLinesMatching, 2));
+
+        BudgetLine currentYearBudgetLine = budgetLinesMatching[0];
+        if (currentYearBudgetLine != null) {
+            budgetLineContract.setCurrentYear8MonthsActuals(currentYearBudgetLine.getEightMonthActualAmount());
+            budgetLineContract.setCurrentYear4MonthsProbables(currentYearBudgetLine.getFourMonthProbableAmount());
+        }
+        budgetLineContract.setPreviousYearActuals(actualAmount(budgetLinesMatching, 1));
+        budgetLineContract.setYearMinus1Actuals(actualAmount(budgetLinesMatching, 2));
+        budgetLineContract.setYearMinus2Actuals(actualAmount(budgetLinesMatching, 3));
 
         return budgetLineContract;
     }

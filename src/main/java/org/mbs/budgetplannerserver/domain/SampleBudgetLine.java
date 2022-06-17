@@ -25,6 +25,8 @@ public class SampleBudgetLine  extends BaseModel{
     @JoinColumn(name = "detailed_head_id")
     private DetailedHead detailedHead;
 
+    private String name;
+
     private BigDecimal displayOrder;
 
     public State getState() {
@@ -51,6 +53,14 @@ public class SampleBudgetLine  extends BaseModel{
         this.detailedHead = detailedHead;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public BigDecimal getDisplayOrder() {
         return displayOrder;
     }
@@ -63,6 +73,7 @@ public class SampleBudgetLine  extends BaseModel{
         BudgetLine budgetLine = new BudgetLine();
 
         budgetLine.setBudget(budget);
+        budgetLine.setName(getName());
         budgetLine.setFunction(getFunction());
         budgetLine.setDetailedHead(getDetailedHead());
         budgetLine.setDisplayOrder(getDisplayOrder());

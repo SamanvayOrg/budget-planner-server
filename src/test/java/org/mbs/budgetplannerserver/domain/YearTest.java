@@ -83,4 +83,37 @@ public class YearTest {
             throw new Exception(message);
         }
     }
+
+    @Test
+    public void asdf() {
+        String basicQuery = "select * from\n" +
+                "(select bje.job_execution_id execution_id,\n" +
+                "       bje.status status,\n" +
+                "       bje.exit_code exit_code,\n" +
+                "       bje.create_time create_time,\n" +
+                "       bje.start_time start_time,\n" +
+                "       bje.end_time end_time,\n" +
+                "       string_agg(case when bjep.key_name = 'uuid' then bjep.string_val else '' end::text, '') uuid,\n" +
+                "       string_agg(case when bjep.key_name = 'fileName' then bjep.string_val else '' end::text, '') fileName,\n" +
+                "       sum(case when bjep.key_name = 'noOfLines' then bjep.long_val else 0 end) noOfLines,\n" +
+                "       string_agg(case when bjep.key_name = 's3Key' then bjep.string_val else '' end::text, '') s3Key,\n" +
+                "       sum(case when bjep.key_name = 'userId' then bjep.long_val else 0 end) userId,\n" +
+                "       string_agg(case when bjep.key_name = 'type' then bjep.string_val::text else '' end::text, '') job_type,\n" +
+                "       max(case when bjep.key_name = 'startDate' then bjep.date_val::timestamp else null::timestamp end::timestamp) startDate,\n" +
+                "       max(case when bjep.key_name = 'endDate' then bjep.date_val::timestamp else null::timestamp end::timestamp) endDate,\n" +
+                "       string_agg(case when bjep.key_name = 'subjectTypeUUID' then bjep.string_val::text else '' end::text, '') subjectTypeUUID,\n" +
+                "       string_agg(case when bjep.key_name = 'programUUID' then bjep.string_val::text else '' end::text, '') programUUID,\n" +
+                "       string_agg(case when bjep.key_name = 'encounterTypeUUID' then bjep.string_val::text else '' end::text, '') encounterTypeUUID,\n" +
+                "       string_agg(case when bjep.key_name = 'reportType' then bjep.string_val::text else '' end::text, '') reportType,\n" +
+                "       max(bse.read_count) read_count,\n" +
+                "       max(bse.write_count) write_count,\n" +
+                "       max(bse.write_skip_count) write_skip_count\n" +
+                "from batch_job_execution bje\n" +
+                "left outer join  batch_job_execution_params bjep on bje.job_execution_id = bjep.job_execution_id\n" +
+                "left outer join batch_step_execution bse on bje.job_execution_id = bse.job_execution_id\n" +
+                "group by bje.job_execution_id, bje.status, bje.exit_code, bje.create_time, bje.start_time, bje.end_time\n" +
+                "order by bje.create_time desc) jobs\n" +
+                "where jobs.userId = :userId\n";
+        System.out.println(basicQuery);
+    }
 }

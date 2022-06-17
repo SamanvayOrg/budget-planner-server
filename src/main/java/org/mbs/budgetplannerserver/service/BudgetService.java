@@ -2,7 +2,6 @@ package org.mbs.budgetplannerserver.service;
 
 import org.mbs.budgetplannerserver.domain.*;
 import org.mbs.budgetplannerserver.repository.BudgetRepository;
-import org.mbs.budgetplannerserver.repository.MunicipalityRepository;
 import org.mbs.budgetplannerserver.repository.SampleBudgetLineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +15,12 @@ public class BudgetService {
 	private UserService userService;
 	private BudgetRepository budgetRepository;
 	private SampleBudgetLineRepository sampleBudgetLineRepository;
-	private MunicipalityRepository municipalityRepository;
 
 	@Autowired
-	public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository, MunicipalityRepository municipalityRepository) {
+	public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository) {
 		this.userService = userService;
 		this.budgetRepository = budgetRepository;
 		this.sampleBudgetLineRepository = sampleBudgetLineRepository;
-		this.municipalityRepository = municipalityRepository;
 	}
 
 	public Budget getBudgetForFinancialYear(int year) {
@@ -32,8 +29,12 @@ public class BudgetService {
 		if (budget == null) {
 			return null;
 		}
-		List<Budget> previousBudgets = budgetRepository.findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(user.getMunicipality(), year - 4, year - 1);
-		PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(findForYear(previousBudgets, year - 1), findForYear(previousBudgets, year - 2), findForYear(previousBudgets, year - 3));
+		List<Budget> previousBudgets = budgetRepository.findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(user.getMunicipality(), year - 5, year - 1);
+		PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(
+				findForYear(previousBudgets, year - 1),
+				findForYear(previousBudgets, year - 2),
+				findForYear(previousBudgets, year - 3),
+				findForYear(previousBudgets, year - 4));
 		budget.setPreviousYearBudgets(previousYearBudgets);
 
 		return budget;
@@ -73,7 +74,6 @@ public class BudgetService {
 		User user = userService.getUser();
 		return budgetRepository.findByMunicipality(user.getMunicipality());
 	}
-
 
 	public Municipality getMunicipality() {
 		User user = userService.getUser();

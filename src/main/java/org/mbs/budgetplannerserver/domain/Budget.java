@@ -20,7 +20,7 @@ public class Budget extends BaseModel {
 	private Set<BudgetLine> budgetLines;
 
 	@Transient
-	private PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(null, null, null);
+	private PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(null, null, null, null);
 
 	public void setMunicipality(Municipality municipality) {
 		this.municipality = municipality;

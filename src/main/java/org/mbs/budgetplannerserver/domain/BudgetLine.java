@@ -3,10 +3,7 @@ package org.mbs.budgetplannerserver.domain;
 import org.mbs.budgetplannerserver.domain.code.DetailedHead;
 import org.mbs.budgetplannerserver.domain.code.Function;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
@@ -24,9 +21,14 @@ public class BudgetLine extends BaseModel{
     @JoinColumn(name = "detailed_head_id")
     private DetailedHead detailedHead;
 
-    private BigDecimal plannedAmount;
+    private String name;
+
+    private BigDecimal budgetedAmount;
     private BigDecimal revisedAmount;
     private BigDecimal actualAmount;
+    private BigDecimal eightMonthActualAmount;
+    private BigDecimal fourMonthProbableAmount;
+
     private BigDecimal displayOrder;
 
     public Budget getBudget() {
@@ -53,12 +55,20 @@ public class BudgetLine extends BaseModel{
         this.detailedHead = detailedHead;
     }
 
-    public BigDecimal getPlannedAmount() {
-        return plannedAmount;
+    public String getName() {
+        return name;
     }
 
-    public void setPlannedAmount(BigDecimal plannedAmount) {
-        this.plannedAmount = plannedAmount;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public BigDecimal getBudgetedAmount() {
+        return budgetedAmount;
+    }
+
+    public void setBudgetedAmount(BigDecimal plannedAmount) {
+        this.budgetedAmount = plannedAmount;
     }
 
     public BigDecimal getRevisedAmount() {
@@ -75,6 +85,22 @@ public class BudgetLine extends BaseModel{
 
     public void setActualAmount(BigDecimal actualAmount) {
         this.actualAmount = actualAmount;
+    }
+
+    public BigDecimal getEightMonthActualAmount() {
+        return eightMonthActualAmount;
+    }
+
+    public void setEightMonthActualAmount(BigDecimal eightMonthActualAmount) {
+        this.eightMonthActualAmount = eightMonthActualAmount;
+    }
+
+    public BigDecimal getFourMonthProbableAmount() {
+        return fourMonthProbableAmount;
+    }
+
+    public void setFourMonthProbableAmount(BigDecimal fourMonthProbableAmount) {
+        this.fourMonthProbableAmount = fourMonthProbableAmount;
     }
 
     public BigDecimal getDisplayOrder() {
