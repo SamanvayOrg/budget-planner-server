@@ -60,9 +60,4 @@ public class BudgetController {
 		List<Budget> budgets = budgetService.getAllBudgets();
 		return budgets.stream().map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
 	}
-
-	@RequestMapping(value = "api/municipality", method = GET)
-	public Municipality getMunicipality() {
-		return budgetService.getMunicipality();
-	}
 }

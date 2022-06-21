@@ -74,9 +74,4 @@ public class BudgetService {
 		User user = userService.getUser();
 		return budgetRepository.findByMunicipality(user.getMunicipality());
 	}
-
-	public Municipality getMunicipality() {
-		User user = userService.getUser();
-		return user.getMunicipality();
-	}
 }
