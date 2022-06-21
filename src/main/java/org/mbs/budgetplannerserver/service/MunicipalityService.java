@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MunicipalityService {
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     public MunicipalityService(UserService userService) {

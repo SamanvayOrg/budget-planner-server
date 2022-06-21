@@ -3,7 +3,10 @@ package org.mbs.budgetplannerserver.domain;
 import org.mbs.budgetplannerserver.domain.code.DetailedHead;
 import org.mbs.budgetplannerserver.domain.code.Function;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 
 @Entity

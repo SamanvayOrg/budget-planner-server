@@ -9,7 +9,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 public class MunicipalityController {
-    private MunicipalityService municipalityService;
+    private final MunicipalityService municipalityService;
 
     public MunicipalityController(MunicipalityService municipalityService) {
         this.municipalityService = municipalityService;

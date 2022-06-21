@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PreviousYearBudgets {
-    private Budget yearMinus1;
-    private Budget yearMinus2;
-    private Budget yearMinus3;
-    private Budget yearMinus4;
+    private final Budget yearMinus1;
+    private final Budget yearMinus2;
+    private final Budget yearMinus3;
+    private final Budget yearMinus4;
 
     public PreviousYearBudgets(Budget yearMinus1, Budget yearMinus2, Budget yearMinus3, Budget yearMinus4) {
         this.yearMinus1 = yearMinus1;

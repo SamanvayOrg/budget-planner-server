@@ -2,7 +2,6 @@ package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.contract.BudgetContract;
 import org.mbs.budgetplannerserver.domain.Budget;
-import org.mbs.budgetplannerserver.domain.Municipality;
 import org.mbs.budgetplannerserver.domain.Year;
 import org.mbs.budgetplannerserver.mapper.BudgetContractMapper;
 import org.mbs.budgetplannerserver.service.BudgetService;
@@ -21,7 +20,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 public class BudgetController {
-	private BudgetService budgetService;
+	private final BudgetService budgetService;
 
 	public BudgetController(BudgetService budgetService) {
 		this.budgetService = budgetService;

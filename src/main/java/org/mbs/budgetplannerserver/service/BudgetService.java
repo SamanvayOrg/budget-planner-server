@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 @Service
 public class BudgetService {
 
-	private UserService userService;
-	private BudgetRepository budgetRepository;
-	private SampleBudgetLineRepository sampleBudgetLineRepository;
+	private final UserService userService;
+	private final BudgetRepository budgetRepository;
+	private final SampleBudgetLineRepository sampleBudgetLineRepository;
 
 	@Autowired
 	public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository) {

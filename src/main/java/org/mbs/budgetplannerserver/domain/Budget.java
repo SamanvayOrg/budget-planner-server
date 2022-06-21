@@ -3,9 +3,10 @@ package org.mbs.budgetplannerserver.domain;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Entity
 @Table(name = "budget")
@@ -36,7 +37,7 @@ public class Budget extends BaseModel {
 	}
 
 	public String getFinancialYearString() {
-		return String.valueOf(financialYear) + "-" + String.valueOf(financialYear + 1).substring(2);
+		return financialYear + "-" + String.valueOf(financialYear + 1).substring(2);
 	}
 
 	public void setFinancialYear(int year) {

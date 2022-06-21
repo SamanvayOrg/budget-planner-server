@@ -12,7 +12,7 @@ public class BudgetPlannerServerApplicationTest {
 
 	@Test
 	public void shouldStart() {
-		budgetPlannerServerApplication.main(new String[]{});
+		BudgetPlannerServerApplication.main(new String[]{});
 	}
 
 }
