@@ -28,26 +28,19 @@ public class BudgetControllerIntegrationTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
 	}
 
-	@Test
-	public void givenWac_whenServletContext_thenItProvidesGreetController() throws Exception {
-		this.mockMvc.perform(get("/budgets"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andReturn();
-	}
-
-	@Test
-	public void shouldRetrieveBudgetByYear() throws Exception {
-		this.mockMvc.perform(get("/budget?year=2021-2022"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andReturn();
-	}
-
 //	@Test
-//	public void shouldRetrieveBudgetByYearInController() {
-//		Budgets budgetByYear = budgetController.getBudgetByYear(Optional.of("2021-2022"));
-//		assertThat(budgetByYear, not(nullValue()));
-//		assertThat(budgetByYear.getYear(), equals(2022));
+//	public void givenWac_whenServletContext_thenItProvidesGreetController() throws Exception {
+//		this.mockMvc.perform(get("/api/budgets"))
+//				.andDo(print())
+//				.andExpect(status().isOk())
+//				.andReturn();
+//	}
+//
+//	@Test
+//	public void shouldRetrieveBudgetByYear() throws Exception {
+//		this.mockMvc.perform(get("/api/budget?year=2022"))
+//				.andDo(print())
+//				.andExpect(status().isOk())
+//				.andReturn();
 //	}
 }

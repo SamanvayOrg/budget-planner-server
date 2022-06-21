@@ -5,6 +5,7 @@ import org.hibernate.annotations.BatchSize;
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = "budget")
@@ -20,7 +21,7 @@ public class Budget extends BaseModel {
 	private Set<BudgetLine> budgetLines;
 
 	@Transient
-	private PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(null, null, null, null);
+	private PreviousYearBudgets previousYearBudgets;
 
 	public void setMunicipality(Municipality municipality) {
 		this.municipality = municipality;
@@ -46,8 +47,15 @@ public class Budget extends BaseModel {
 		return budgetLines;
 	}
 
-	public List<BudgetLine> getBudgetLinesOrdered() {
-		return getBudgetLines().stream().sorted(Comparator.comparing(BudgetLine::getDisplayOrder)).collect(Collectors.toList());
+	public Set<BudgetLineDetail> getSelfBudgetLineDetails() {
+		return getBudgetLines().stream().map(BudgetLineDetail::new).collect(Collectors.toSet());
+	}
+
+	public Set<BudgetLineDetail> getUniqueBudgetLineDetails() {
+		HashSet<BudgetLineDetail> budgetLineDetails = new HashSet<>();
+		budgetLineDetails.addAll(getSelfBudgetLineDetails());
+		budgetLineDetails.addAll(getPreviousYearBudgets().getUniqueBudgetLineDetails());
+		return budgetLineDetails;
 	}
 
 	public void setBudgetLines(Set<BudgetLine> budgetLineItems) {
@@ -55,18 +63,17 @@ public class Budget extends BaseModel {
 	}
 
 	public PreviousYearBudgets getPreviousYearBudgets() {
-		return previousYearBudgets;
+		if (previousYearBudgets != null) {
+			return previousYearBudgets;
+		}
+		return new PreviousYearBudgets(new NullBudget(), new NullBudget(), new NullBudget(), new NullBudget());
 	}
 	public void setPreviousYearBudgets(PreviousYearBudgets previousYearBudgets) {
 		this.previousYearBudgets = previousYearBudgets;
 	}
 
-	public BudgetLine getBudgetLineMatching(BudgetLine budgetLine) {
-		Optional<BudgetLine> matchingLine = getBudgetLines().stream().filter(line -> line.matches(budgetLine)).findFirst();
+	public BudgetLine getBudgetLineMatching(BudgetLineDetail budgetLineDetail) {
+		Optional<BudgetLine> matchingLine = getBudgetLines().stream().filter(line -> budgetLineDetail.matches(line)).findFirst();
 		return matchingLine.orElse(null);
-	}
-
-	public List<String> possibleCodes() {
-		return this.getBudgetLines().stream().map(budgetLine -> budgetLine.getFullCode()).collect(Collectors.toList());
 	}
 }

@@ -1,5 +1,8 @@
 package org.mbs.budgetplannerserver.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PreviousYearBudgets {
     private Budget yearMinus1;
     private Budget yearMinus2;
@@ -13,21 +16,23 @@ public class PreviousYearBudgets {
         this.yearMinus4 = yearMinus4;
     }
 
-    public BudgetLine[] getBudgetLinesMatching(BudgetLine budgetLine) {
+    public BudgetLine[] getBudgetLinesMatching(BudgetLineDetail budgetLineDetail) {
         return new BudgetLine[]
                 {
-                        nullSafeGetBudgetLine(yearMinus1, budgetLine),
-                        nullSafeGetBudgetLine(yearMinus2, budgetLine),
-                        nullSafeGetBudgetLine(yearMinus3, budgetLine),
-                        nullSafeGetBudgetLine(yearMinus4, budgetLine)
+                        yearMinus1.getBudgetLineMatching(budgetLineDetail),
+                        yearMinus2.getBudgetLineMatching(budgetLineDetail),
+                        yearMinus3.getBudgetLineMatching(budgetLineDetail),
+                        yearMinus4.getBudgetLineMatching(budgetLineDetail)
                 };
     }
 
-    private BudgetLine nullSafeGetBudgetLine(Budget budget, BudgetLine budgetLine) {
-        if (budget != null) {
-            return budget.getBudgetLineMatching(budgetLine);
-        }
+    public Set<BudgetLineDetail> getUniqueBudgetLineDetails() {
+        HashSet<BudgetLineDetail> budgetLineDetails = new HashSet<>();
+        budgetLineDetails.addAll(yearMinus1.getSelfBudgetLineDetails());
+        budgetLineDetails.addAll(yearMinus2.getSelfBudgetLineDetails());
+        budgetLineDetails.addAll(yearMinus3.getSelfBudgetLineDetails());
+        budgetLineDetails.addAll(yearMinus4.getSelfBudgetLineDetails());
 
-        return null;
+        return budgetLineDetails;
     }
 }

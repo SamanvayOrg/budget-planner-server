@@ -41,7 +41,7 @@ public class BudgetService {
 	}
 
 	private Budget findForYear(List<Budget> budgets, int year) {
-		return budgets.stream().filter(budget -> budget.getFinancialYear() == year).findFirst().orElse(null);
+		return budgets.stream().filter(budget -> budget.getFinancialYear() == year).findFirst().orElse(new NullBudget());
 	}
 
 	public Budget createBudget(int year) {

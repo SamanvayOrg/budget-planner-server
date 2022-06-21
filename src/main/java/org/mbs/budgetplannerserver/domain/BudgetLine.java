@@ -114,8 +114,4 @@ public class BudgetLine extends BaseModel{
     public String getFullCode() {
         return getFunction().getFullCode() + "-" + getDetailedHead().getFullCode();
     }
-
-    public boolean matches(BudgetLine other) {
-        return this.getFunction().getFullCode().equals(other.getFunction().getFullCode()) && this.getDetailedHead().getFullCode().equals(other.getDetailedHead().getFullCode());
-    }
 }

@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class BudgetPlannerServerApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void shouldLoadContext() {
 	}
 
 }

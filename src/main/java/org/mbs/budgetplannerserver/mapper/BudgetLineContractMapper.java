@@ -3,6 +3,7 @@ package org.mbs.budgetplannerserver.mapper;
 import org.mbs.budgetplannerserver.contract.BudgetLineContract;
 import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.BudgetLine;
+import org.mbs.budgetplannerserver.domain.BudgetLineDetail;
 import org.mbs.budgetplannerserver.domain.PreviousYearBudgets;
 import org.mbs.budgetplannerserver.domain.code.DetailedHead;
 import org.mbs.budgetplannerserver.domain.code.MajorHead;
@@ -13,7 +14,8 @@ import java.math.BigDecimal;
 
 public class BudgetLineContractMapper {
 
-    public BudgetLineContract map(BudgetLine budgetLine, Budget budget) {
+    public BudgetLineContract map(BudgetLineDetail budgetLineDetail, Budget budget) {
+        BudgetLine budgetLine = budget.getBudgetLineMatching(budgetLineDetail);
         BudgetLineContract budgetLineContract = new BudgetLineContract();
         budgetLineContract.setId(budgetLine.getId());
         budgetLineContract.setName(budgetLine.getName());
@@ -30,7 +32,7 @@ public class BudgetLineContractMapper {
         budgetLineContract.setMajorHeadGroupDisplayOrder(majorHeadGroup.getDisplayOrder());
 
         PreviousYearBudgets previousYearBudgets = budget.getPreviousYearBudgets();
-        BudgetLine[] budgetLinesMatching = previousYearBudgets.getBudgetLinesMatching(budgetLine);
+        BudgetLine[] budgetLinesMatching = previousYearBudgets.getBudgetLinesMatching(budgetLineDetail);
 
         BudgetLine currentYearBudgetLine = budgetLinesMatching[0];
         if (currentYearBudgetLine != null) {
