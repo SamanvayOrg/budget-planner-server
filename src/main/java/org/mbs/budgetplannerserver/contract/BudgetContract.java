@@ -4,9 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BudgetContract {
+	private Long id;
 	private String budgetYear;
 	private List<BudgetLineContract> budgetLines = new ArrayList<>();
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getBudgetYear() {
 		return budgetYear;
 	}

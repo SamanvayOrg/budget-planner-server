@@ -11,11 +11,11 @@ import java.util.Optional;
 @Repository
 public interface BudgetRepository extends CrudRepository<Budget, Long> {
 
-    Budget findById(Optional<String> year);
-
     Budget findByMunicipalityAndFinancialYear(Municipality municipality, int financialYear);
 
     List<Budget> findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(Municipality municipality, int startYear, int endYear);
 
     List<Budget> findByMunicipality(Municipality municipality);
+
+    Budget findByMunicipalityAndId(Municipality municipality, Long id);
 }

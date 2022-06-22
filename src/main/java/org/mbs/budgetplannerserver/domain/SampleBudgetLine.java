@@ -69,10 +69,9 @@ public class SampleBudgetLine  extends BaseModel{
         this.displayOrder = displayOrder;
     }
 
-    public BudgetLine toBudgetLine(Budget budget) {
+    public BudgetLine toBudgetLine() {
         BudgetLine budgetLine = new BudgetLine();
 
-        budgetLine.setBudget(budget);
         budgetLine.setName(getName());
         budgetLine.setFunction(getFunction());
         budgetLine.setDetailedHead(getDetailedHead());

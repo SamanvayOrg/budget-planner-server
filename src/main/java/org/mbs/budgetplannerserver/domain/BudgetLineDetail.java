@@ -14,6 +14,24 @@ public class BudgetLineDetail {
         name = budgetLine.getName();
     }
 
+    public BudgetLineDetail(String functionCode, String detailedHeadCode, String name) {
+        this.functionCode = functionCode;
+        this.detailedHeadCode = detailedHeadCode;
+        this.name = name;
+    }
+
+    public String getFunctionCode() {
+        return functionCode;
+    }
+
+    public String getDetailedHeadCode() {
+        return detailedHeadCode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public boolean matches(BudgetLine budgetLine) {
         return budgetLine.getFunction().getFullCode().equals(functionCode) &&
                 budgetLine.getDetailedHead().getFullCode().equals(detailedHeadCode) &&

@@ -3,7 +3,7 @@ spring:
 #    locations=classpath:db/migration
   jpa:
     database: POSTGRESQL
-    show-sql: false
+    show-sql: true
     generate-ddl: false
     properties.hibernate.jdbc.lob.non_contextual_creation: true
   datasource:
@@ -41,6 +41,8 @@ spring:
   config:
     activate:
       on-profile: production
+  jpa:
+    show-sql: false
 logging:
   level:
     root: INFO

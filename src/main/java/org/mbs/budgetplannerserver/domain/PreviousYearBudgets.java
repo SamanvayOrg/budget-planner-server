@@ -1,38 +1,36 @@
 package org.mbs.budgetplannerserver.domain;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class PreviousYearBudgets {
-    private final Budget yearMinus1;
-    private final Budget yearMinus2;
-    private final Budget yearMinus3;
-    private final Budget yearMinus4;
+    private Budget[] previousYearBudgets;
 
     public PreviousYearBudgets(Budget yearMinus1, Budget yearMinus2, Budget yearMinus3, Budget yearMinus4) {
-        this.yearMinus1 = yearMinus1;
-        this.yearMinus2 = yearMinus2;
-        this.yearMinus3 = yearMinus3;
-        this.yearMinus4 = yearMinus4;
+        previousYearBudgets = new Budget[]{yearMinus1, yearMinus2, yearMinus3, yearMinus4};
     }
 
     public BudgetLine[] getBudgetLinesMatching(BudgetLineDetail budgetLineDetail) {
         return new BudgetLine[]
                 {
-                        yearMinus1.getBudgetLineMatching(budgetLineDetail),
-                        yearMinus2.getBudgetLineMatching(budgetLineDetail),
-                        yearMinus3.getBudgetLineMatching(budgetLineDetail),
-                        yearMinus4.getBudgetLineMatching(budgetLineDetail)
+                        previousYearBudgets[0].matchingBudgetLine(budgetLineDetail),
+                        previousYearBudgets[1].matchingBudgetLine(budgetLineDetail),
+                        previousYearBudgets[2].matchingBudgetLine(budgetLineDetail),
+                        previousYearBudgets[3].matchingBudgetLine(budgetLineDetail)
                 };
     }
 
     public Set<BudgetLineDetail> getUniqueBudgetLineDetails() {
         HashSet<BudgetLineDetail> budgetLineDetails = new HashSet<>();
-        budgetLineDetails.addAll(yearMinus1.getSelfBudgetLineDetails());
-        budgetLineDetails.addAll(yearMinus2.getSelfBudgetLineDetails());
-        budgetLineDetails.addAll(yearMinus3.getSelfBudgetLineDetails());
-        budgetLineDetails.addAll(yearMinus4.getSelfBudgetLineDetails());
-
+        Arrays.stream(previousYearBudgets).forEach(budget -> {
+            budgetLineDetails.addAll(budget.getSelfBudgetLineDetails());
+        });
         return budgetLineDetails;
+    }
+
+    public Budget getBudgetLineForYear(int minus) {
+        assert minus < 4 && minus > 0;
+        return previousYearBudgets[minus - 1];
     }
 }

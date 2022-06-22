@@ -9,16 +9,19 @@ import org.mbs.budgetplannerserver.domain.code.DetailedHead;
 import org.mbs.budgetplannerserver.domain.code.MajorHead;
 import org.mbs.budgetplannerserver.domain.code.MajorHeadGroup;
 import org.mbs.budgetplannerserver.domain.code.MinorHead;
+import org.mbs.budgetplannerserver.service.BudgetLineService;
 
 import java.math.BigDecimal;
 
 public class BudgetLineContractMapper {
 
     public BudgetLineContract map(BudgetLineDetail budgetLineDetail, Budget budget) {
-        BudgetLine budgetLine = budget.getBudgetLineMatching(budgetLineDetail);
+        BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail);
         BudgetLineContract budgetLineContract = new BudgetLineContract();
         budgetLineContract.setId(budgetLine.getId());
         budgetLineContract.setName(budgetLine.getName());
+        budgetLineContract.setFunctionCode(budgetLine.getFunction().getFullCode());
+        budgetLineContract.setDetailedHeadCode(budgetLine.getDetailedHead().getFullCode());
         budgetLineContract.setCode(budgetLine.getFullCode());
         budgetLineContract.setBudgetedAmount(budgetLine.getBudgetedAmount());
         budgetLineContract.setDisplayOrder(budgetLine.getDisplayOrder());
@@ -51,4 +54,28 @@ public class BudgetLineContractMapper {
         return matching == null? null : matching.getActualAmount();
     }
 
+    public BudgetLine updateActuals(BudgetLine lineToBeUpdated, BudgetLineContract budgetLineContract) {
+        BudgetLine budgetLine = lineToBeUpdated == null? createBudgetLine(): lineToBeUpdated;
+        lineToBeUpdated.setActualAmount(budgetLineContract.getPreviousYearActuals());
+        return budgetLine;
+    }
+
+    private BudgetLine createBudgetLine() {
+        //Requires a service
+        BudgetLine budgetLine = new BudgetLine();
+        return budgetLine;
+    }
+
+    public BudgetLine updateEstimates(BudgetLine lineToBeUpdated, BudgetLineContract budgetLineContract) {
+        BudgetLine budgetLine = lineToBeUpdated == null? createBudgetLine(): lineToBeUpdated;
+        lineToBeUpdated.setEightMonthActualAmount(budgetLineContract.getCurrentYear8MonthsActuals());
+        lineToBeUpdated.setFourMonthProbableAmount(budgetLineContract.getCurrentYear4MonthsProbables());
+        return budgetLine;
+    }
+
+    public BudgetLine updateBudgeted(BudgetLine lineToBeUpdated, BudgetLineContract budgetLineContract) {
+        BudgetLine budgetLine = lineToBeUpdated == null? createBudgetLine(): lineToBeUpdated;
+        lineToBeUpdated.setBudgetedAmount(budgetLineContract.getBudgetedAmount());
+        return budgetLine;
+    }
 }

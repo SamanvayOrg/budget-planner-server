@@ -6,6 +6,8 @@ public class BudgetLineContract {
     private Long id;
     private String code;
     private String name;
+    private String functionCode;
+    private String detailedHeadCode;
     private BigDecimal budgetedAmount;
     private BigDecimal currentYear8MonthsActuals;
     private BigDecimal currentYear4MonthsProbables;
@@ -40,6 +42,22 @@ public class BudgetLineContract {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFunctionCode() {
+        return functionCode;
+    }
+
+    public void setFunctionCode(String functionCode) {
+        this.functionCode = functionCode;
+    }
+
+    public String getDetailedHeadCode() {
+        return detailedHeadCode;
+    }
+
+    public void setDetailedHeadCode(String detailedHeadCode) {
+        this.detailedHeadCode = detailedHeadCode;
     }
 
     public BigDecimal getBudgetedAmount() {

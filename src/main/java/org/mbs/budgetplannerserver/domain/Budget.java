@@ -61,6 +61,12 @@ public class Budget extends BaseModel {
 
 	public void setBudgetLines(Set<BudgetLine> budgetLineItems) {
 		this.budgetLines = budgetLineItems;
+		this.budgetLines.forEach(budgetLine -> budgetLine.setBudget(this));
+	}
+
+	public void addBudgetLine(BudgetLine budgetLine) {
+		this.getBudgetLines().add(budgetLine);
+		budgetLine.setBudget(this);
 	}
 
 	public PreviousYearBudgets getPreviousYearBudgets() {
@@ -69,11 +75,12 @@ public class Budget extends BaseModel {
 		}
 		return new PreviousYearBudgets(new NullBudget(), new NullBudget(), new NullBudget(), new NullBudget());
 	}
+
 	public void setPreviousYearBudgets(PreviousYearBudgets previousYearBudgets) {
 		this.previousYearBudgets = previousYearBudgets;
 	}
 
-	public BudgetLine getBudgetLineMatching(BudgetLineDetail budgetLineDetail) {
+	public BudgetLine matchingBudgetLine(BudgetLineDetail budgetLineDetail) {
 		Optional<BudgetLine> matchingLine = getBudgetLines().stream().filter(line -> budgetLineDetail.matches(line)).findFirst();
 		return matchingLine.orElse(null);
 	}
