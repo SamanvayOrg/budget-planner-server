@@ -55,27 +55,22 @@ public class BudgetLineContractMapper {
     }
 
     public BudgetLine updateActuals(BudgetLine lineToBeUpdated, BudgetLineContract budgetLineContract) {
-        BudgetLine budgetLine = lineToBeUpdated == null? createBudgetLine(): lineToBeUpdated;
+        BudgetLine budgetLine = lineToBeUpdated;
         lineToBeUpdated.setActualAmount(budgetLineContract.getPreviousYearActuals());
         return budgetLine;
     }
 
-    private BudgetLine createBudgetLine() {
-        //Requires a service
-        BudgetLine budgetLine = new BudgetLine();
-        return budgetLine;
-    }
-
     public BudgetLine updateEstimates(BudgetLine lineToBeUpdated, BudgetLineContract budgetLineContract) {
-        BudgetLine budgetLine = lineToBeUpdated == null? createBudgetLine(): lineToBeUpdated;
+        BudgetLine budgetLine = lineToBeUpdated;
         lineToBeUpdated.setEightMonthActualAmount(budgetLineContract.getCurrentYear8MonthsActuals());
         lineToBeUpdated.setFourMonthProbableAmount(budgetLineContract.getCurrentYear4MonthsProbables());
         return budgetLine;
     }
 
     public BudgetLine updateBudgeted(BudgetLine lineToBeUpdated, BudgetLineContract budgetLineContract) {
-        BudgetLine budgetLine = lineToBeUpdated == null? createBudgetLine(): lineToBeUpdated;
+        BudgetLine budgetLine = lineToBeUpdated;
         lineToBeUpdated.setBudgetedAmount(budgetLineContract.getBudgetedAmount());
         return budgetLine;
     }
+
 }

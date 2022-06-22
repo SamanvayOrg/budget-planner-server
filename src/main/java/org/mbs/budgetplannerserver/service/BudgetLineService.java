@@ -18,10 +18,11 @@ public class BudgetLineService {
         this.detailedHeadRepository = detailedHeadRepository;
     }
 
-    public BudgetLine createBudgetLine(String functionCode, String detailedHeadCode) {
+    public BudgetLine createBudgetLine(String functionCode, String detailedHeadCode, String name) {
         BudgetLine budgetLine = new BudgetLine();
         budgetLine.setFunction(functionRepository.findByFullCode(functionCode));
         budgetLine.setDetailedHead(detailedHeadRepository.findByFullCode(detailedHeadCode));
+        budgetLine.setName(name);
         return budgetLine;
     }
 }

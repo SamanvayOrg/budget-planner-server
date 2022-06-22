@@ -64,7 +64,7 @@ public class BudgetContractMapper {
     private BudgetLine getOrCreateBudgetLine(BudgetLineContract budgetLineContract, Budget budget, BudgetLineService budgetLineService) {
         BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetLineContract));
         if (budgetLine == null) {
-            budgetLine = budgetLineService.createBudgetLine(budgetLineContract.getFunctionCode(), budgetLineContract.getDetailedHeadCode());
+            budgetLine = budgetLineService.createBudgetLine(budgetLineContract.getFunctionCode(), budgetLineContract.getDetailedHeadCode(), budgetLineContract.getName());
         }
         return budgetLine;
     }
