@@ -1,17 +1,20 @@
 package org.mbs.budgetplannerserver.domain.code;
 
+import org.hibernate.annotations.BatchSize;
 import org.mbs.budgetplannerserver.domain.BaseModel;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "major_head")
+@BatchSize(size = 50)
 public class MajorHead extends BaseModel {
     private String code;
     private String name;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "majorHead")
+    private List<MinorHead> minorHeads;
 
     @ManyToOne(targetEntity = MajorHeadGroup.class)
     @JoinColumn(name = "major_head_group_id")
@@ -39,5 +42,13 @@ public class MajorHead extends BaseModel {
 
     public void setMajorHeadGroup(MajorHeadGroup majorHeadGroup) {
         this.majorHeadGroup = majorHeadGroup;
+    }
+
+    public List<MinorHead> getMinorHeads() {
+        return minorHeads;
+    }
+
+    public void setMinorHeads(List<MinorHead> minorHeads) {
+        this.minorHeads = minorHeads;
     }
 }

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PreviousYearBudgets {
-    private Budget[] previousYearBudgets;
+    private final Budget[] previousYearBudgets;
 
     public PreviousYearBudgets(Budget yearMinus1, Budget yearMinus2, Budget yearMinus3, Budget yearMinus4) {
         previousYearBudgets = new Budget[]{yearMinus1, yearMinus2, yearMinus3, yearMinus4};

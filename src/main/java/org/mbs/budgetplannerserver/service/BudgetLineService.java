@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class BudgetLineService {
 
-    private FunctionRepository functionRepository;
-    private DetailedHeadRepository detailedHeadRepository;
+    private final FunctionRepository functionRepository;
+    private final DetailedHeadRepository detailedHeadRepository;
 
     @Autowired
     public BudgetLineService(FunctionRepository functionRepository, DetailedHeadRepository detailedHeadRepository) {

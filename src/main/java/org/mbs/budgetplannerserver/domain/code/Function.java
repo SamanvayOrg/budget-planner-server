@@ -1,5 +1,6 @@
 package org.mbs.budgetplannerserver.domain.code;
 
+import org.hibernate.annotations.BatchSize;
 import org.mbs.budgetplannerserver.domain.BaseModel;
 
 import javax.persistence.Entity;
@@ -9,6 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "function")
+@BatchSize(size = 50)
 public class Function extends BaseModel {
 
     @ManyToOne(targetEntity = FunctionGroup.class)

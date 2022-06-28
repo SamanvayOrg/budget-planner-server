@@ -2,9 +2,9 @@ package org.mbs.budgetplannerserver.domain.code;
 
 import org.mbs.budgetplannerserver.domain.BaseModel;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "major_head_group")
@@ -12,6 +12,9 @@ public class MajorHeadGroup extends BaseModel {
     private String code;
     private String name;
     private BigDecimal displayOrder;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "majorHeadGroup")
+    private List<MajorHead> majorHeads;
 
     public String getCode() {
         return code;
@@ -35,5 +38,13 @@ public class MajorHeadGroup extends BaseModel {
 
     public void setDisplayOrder(BigDecimal displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    public List<MajorHead> getMajorHeads() {
+        return majorHeads;
+    }
+
+    public void setMajorHeads(List<MajorHead> majorHeads) {
+        this.majorHeads = majorHeads;
     }
 }
