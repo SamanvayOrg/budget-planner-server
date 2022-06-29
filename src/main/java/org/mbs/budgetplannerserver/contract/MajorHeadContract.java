@@ -6,7 +6,7 @@ import java.util.List;
 public class MajorHeadContract {
     private String name;
     private String code;
-    private List<MinorHeadContract> minorHeadContracts = new ArrayList<>();
+    private List<MinorHeadContract> minorHeads= new ArrayList<>();
 
     public String getName() {
         return name;
@@ -24,15 +24,15 @@ public class MajorHeadContract {
         this.code = code;
     }
 
-    public List<MinorHeadContract> getMinorHeadContracts() {
-        return minorHeadContracts;
+    public List<MinorHeadContract> getMinorHeads() {
+        return minorHeads;
     }
 
-    public void setMinorHeadContracts(List<MinorHeadContract> minorHeadContracts) {
-        this.minorHeadContracts = minorHeadContracts;
+    public void setMinorHeads(List<MinorHeadContract> minorHeads) {
+        this.minorHeads = minorHeads;
     }
 
     public void addMinorHeadContract(MinorHeadContract minorHeadContract) {
-        this.getMinorHeadContracts().add(minorHeadContract);
+        this.getMinorHeads().add(minorHeadContract);
     }
 }
