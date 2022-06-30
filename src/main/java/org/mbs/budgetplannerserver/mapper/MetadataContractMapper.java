@@ -27,6 +27,7 @@ public class MetadataContractMapper {
 
     private FunctionContract map(Function function) {
         FunctionContract functionContract = new FunctionContract();
+        functionContract.setId(function.getId());
         functionContract.setName(function.getName());
         functionContract.setCode(function.getCode());
         functionContract.setFullCode(function.getFullCode());
@@ -65,6 +66,7 @@ public class MetadataContractMapper {
 
     private DetailedHeadContract map(DetailedHead detailedHead) {
         DetailedHeadContract detailedHeadContract = new DetailedHeadContract();
+        detailedHeadContract.setId(detailedHead.getId());
         detailedHeadContract.setCode(detailedHead.getCode());
         detailedHeadContract.setName(detailedHead.getName());
         detailedHeadContract.setFullCode(detailedHead.getFullCode());
