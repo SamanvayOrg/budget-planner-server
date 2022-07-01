@@ -1,7 +1,8 @@
 create table state
 (
     id   serial primary key,
-    name text not null
+    name text not null,
+    languages jsonb
 );
 
 create table city_class

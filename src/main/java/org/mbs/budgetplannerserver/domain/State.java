@@ -17,6 +17,7 @@ public class State extends BaseModel {
 	public State() {
 		super();
 	}
+	private String languages;
 
 	public String getName() {
 		return name;
@@ -24,5 +25,13 @@ public class State extends BaseModel {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getLanguages() {
+		return languages;
+	}
+
+	public void setLanguages(String languages) {
+		this.languages = languages;
 	}
 }
