@@ -1,9 +1,11 @@
 package org.mbs.budgetplannerserver.service;
 
-import org.mbs.budgetplannerserver.domain.TranslationTable;
+import org.mbs.budgetplannerserver.domain.Translation;
 import org.mbs.budgetplannerserver.repository.TranslationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 
 @Service
 public class TranslationService {
@@ -14,7 +16,8 @@ public class TranslationService {
         this.translationRepository = translationRepository;
     }
 
-    public Iterable<TranslationTable> getTranslationTable(){
+    @Transactional
+    public Iterable<Translation> getTranslationTable() {
         return translationRepository.findAll();
     }
 }

@@ -1,9 +1,11 @@
 package org.mbs.budgetplannerserver.repository;
 
-import org.mbs.budgetplannerserver.domain.TranslationTable;
+import org.mbs.budgetplannerserver.domain.Translation;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface TranslationRepository extends CrudRepository<TranslationTable, Long> {
+@Repository
+public interface TranslationRepository extends CrudRepository<Translation, Long> {
 }
 
 
