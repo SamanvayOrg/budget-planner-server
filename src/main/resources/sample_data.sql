@@ -71,3 +71,4 @@ SELECT setval('municipality_id_seq', COALESCE((SELECT MAX(id)+1 FROM municipalit
 SELECT setval('budget_id_seq', COALESCE((SELECT MAX(id)+1 FROM budget), 1), false);
 SELECT setval('budget_line_id_seq', COALESCE((SELECT MAX(id)+1 FROM budget_line), 1), false);
 SELECT setval('sample_budget_line_id_seq', COALESCE((SELECT MAX(id)+1 FROM sample_budget_line), 1), false);
+insert into translation (model_name, model_id, language, value) VALUES ('municipality', 1, 'mr', 'सिन्नर');

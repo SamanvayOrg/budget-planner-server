@@ -110,3 +110,11 @@ create table sample_budget_line
     detailed_head_id int     not null references detailed_head (id),
     display_order    numeric(7, 2)
 );
+create table translation
+(
+    id         serial primary key,
+    model_name text not null,
+    model_id   int,
+    language   text,
+    value      text
+);
