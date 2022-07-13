@@ -21,6 +21,7 @@ public class MetadataController {
     @RequestMapping(value = "/api/metadata", method = GET)
     @ResponseBody
     public MetadataContract getMetaData() {
+
         return new MetadataContractMapper().map(metaDataService.getMetadata());
     }
 }
