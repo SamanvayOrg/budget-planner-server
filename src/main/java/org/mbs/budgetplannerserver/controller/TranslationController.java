@@ -1,6 +1,7 @@
 package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.domain.JsonObject;
+import org.mbs.budgetplannerserver.mapper.TranslationContractMapper;
 import org.mbs.budgetplannerserver.service.TranslationService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,7 @@ public class TranslationController {
 
     @RequestMapping(value = "/api/translations", method = GET)
     public JsonObject getTranslation() {
-        return translationService.getTranslations();
+        return new TranslationContractMapper().map(translationService.getTranslations());
     }
 
 }

@@ -1,7 +1,5 @@
 package org.mbs.budgetplannerserver.service;
 
-import org.mbs.budgetplannerserver.contract.TranslationContract;
-import org.mbs.budgetplannerserver.domain.JsonObject;
 import org.mbs.budgetplannerserver.domain.Translation;
 import org.mbs.budgetplannerserver.repository.TranslationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +18,7 @@ public class TranslationService {
     }
 
     @Transactional
-    public JsonObject getTranslations() {
-        Iterable<Translation> translations = translationRepository.findAll();
-        JsonObject jsonObject = new JsonObject();
-        translations.forEach(translation -> {
-            jsonObject.with(translation.getModelName(), translation.getValue());
-        });
-        return jsonObject;
+    public Iterable<Translation> getTranslations() {
+        return translationRepository.findAll();
     }
 }
