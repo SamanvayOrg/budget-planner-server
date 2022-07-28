@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-public class UserService{
+public class UserService {
     private final UserRepository userRepository;
 
     @Autowired
@@ -18,5 +20,10 @@ public class UserService{
     public User getUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUserName(userName);
+    }
+
+    public Iterable<User> getAllUsers() {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        return  userRepository.findByMunicipalityId(userRepository.findByUserName(userName).getMunicipality().getId());
     }
 }

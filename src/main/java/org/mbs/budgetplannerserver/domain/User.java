@@ -7,9 +7,10 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "login_user")
-public class User extends BaseModel{
+public class User extends BaseModel {
     private String userName;
     private String name;
+    private Boolean isAdmin;
 
     @ManyToOne(targetEntity = Municipality.class)
     @JoinColumn(name = "municipality_id")
@@ -29,6 +30,14 @@ public class User extends BaseModel{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 
     public Municipality getMunicipality() {

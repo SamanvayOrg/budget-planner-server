@@ -24,8 +24,6 @@ public class BudgetLineContractMapper {
         budgetLineContract.setDetailedHeadCode(budgetLine.getDetailedHead().getFullCode());
         budgetLineContract.setCode(budgetLine.getFullCode());
         budgetLineContract.setBudgetedAmount(budgetLine.getBudgetedAmount());
-        budgetLineContract.setCurrentYear8MonthsActuals(budgetLine.getEightMonthActualAmount());
-        budgetLineContract.setCurrentYear4MonthsProbables(budgetLine.getFourMonthProbableAmount());
         budgetLineContract.setDisplayOrder(budgetLine.getDisplayOrder());
         DetailedHead detailedHead = budgetLine.getDetailedHead();
         MinorHead minorHead = detailedHead.getMinorHead();
