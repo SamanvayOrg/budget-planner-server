@@ -1,5 +1,8 @@
 package org.mbs.budgetplannerserver.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.mbs.budgetplannerserver.service.MunicipalityService;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -48,6 +51,7 @@ public class User extends BaseModel {
         this.municipality = municipality;
     }
 
+    @JsonIgnore
     public State getState() {
         return getMunicipality().getState();
     }

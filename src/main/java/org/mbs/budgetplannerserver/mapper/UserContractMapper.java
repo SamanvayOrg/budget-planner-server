@@ -4,11 +4,14 @@ import org.mbs.budgetplannerserver.contract.UserContract;
 import org.mbs.budgetplannerserver.domain.User;
 
 public class UserContractMapper {
-    public UserContract map(User user) {
+    public UserContract map(Iterable<User> users) {
         UserContract userContract = new UserContract();
-        userContract.setName(user.getName());
-        userContract.setUserName(user.getUserName());
-        userContract.setAdmin(user.getAdmin());
+        users.forEach(user -> {
+            userContract.setName(user.getName());
+            userContract.setUserName(user.getUserName());
+            userContract.setAdmin(user.getAdmin());
+        });
+
         return userContract;
     }
 }
