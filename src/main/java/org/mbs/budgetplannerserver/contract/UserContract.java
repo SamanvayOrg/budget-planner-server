@@ -1,7 +1,5 @@
 package org.mbs.budgetplannerserver.contract;
 
-import org.mbs.budgetplannerserver.domain.Municipality;
-
 public class UserContract {
     private String name;
     private String userName;

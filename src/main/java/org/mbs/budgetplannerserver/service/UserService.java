@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -15,16 +17,19 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public User getUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUserName(userName);
     }
 
+    @Transactional
     public Iterable<User> getAllUsers() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByMunicipalityId(userRepository.findByUserName(userName).getMunicipality().getId());
     }
 
+    @Transactional
     public User save(User user) {
         return userRepository.save(user);
     }
