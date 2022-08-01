@@ -1,6 +1,8 @@
 package org.mbs.budgetplannerserver.controller;
 
+import org.mbs.budgetplannerserver.contract.UserContract;
 import org.mbs.budgetplannerserver.domain.User;
+import org.mbs.budgetplannerserver.mapper.UserContractMapper;
 import org.mbs.budgetplannerserver.service.UserService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +30,10 @@ public class UserController {
     @RequestMapping(value = "/api/user", method = POST)
     public void updateUser(@RequestBody User user) {
         userService.save(user);
+    }
+
+    @RequestMapping(value = "api/user",method = GET)
+    public UserContract getUser(){
+        return new UserContractMapper().getUser(userService.getUser());
     }
 }

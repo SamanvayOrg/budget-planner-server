@@ -14,4 +14,12 @@ public class UserContractMapper {
 
         return userContract;
     }
+
+    public UserContract getUser(User user) {
+        UserContract userContract = new UserContract();
+        userContract.setName(user.getName());
+        userContract.setUserName(user.getUserName());
+        userContract.setAdmin(user.getAdmin());
+        return userContract;
+    }
 }
