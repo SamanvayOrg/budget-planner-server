@@ -22,18 +22,17 @@ public class UserController {
 
     @RequestMapping(value = "/api/users", method = GET)
     @ResponseBody
-    public Iterable<User> getAllUsers() {
-        return userService.getAllUsers();
-//        return new UserContractMapper().map( userService.getAllUsers());
+    public Iterable<UserContract> getAllUsers() {
+        return new UserContractMapper().map(userService.getAllUsers());
     }
 
     @RequestMapping(value = "/api/user", method = POST)
-    public void updateUser(@RequestBody User user) {
-        userService.save(user);
+    public UserContract updateUser(@RequestBody User user) {
+        return new UserContractMapper().fromUser(userService.save(user));
     }
 
-    @RequestMapping(value = "api/user",method = GET)
+    @RequestMapping(value = "/api/user",method = GET)
     public UserContract getUser(){
-        return new UserContractMapper().getUser(userService.getUser());
+        return new UserContractMapper().fromUser(userService.getUser());
     }
 }

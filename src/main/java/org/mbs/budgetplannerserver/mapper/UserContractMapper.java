@@ -3,19 +3,20 @@ package org.mbs.budgetplannerserver.mapper;
 import org.mbs.budgetplannerserver.contract.UserContract;
 import org.mbs.budgetplannerserver.domain.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserContractMapper {
-    public UserContract map(Iterable<User> users) {
-        UserContract userContract = new UserContract();
+    public List<UserContract> map(Iterable<User> users) {
+        List<UserContract> userContracts = new ArrayList<>();
         users.forEach(user -> {
-            userContract.setName(user.getName());
-            userContract.setUserName(user.getUserName());
-            userContract.setAdmin(user.getAdmin());
+            userContracts.add(fromUser(user));
         });
 
-        return userContract;
+        return userContracts;
     }
 
-    public UserContract getUser(User user) {
+    public UserContract fromUser(User user) {
         UserContract userContract = new UserContract();
         userContract.setName(user.getName());
         userContract.setUserName(user.getUserName());
