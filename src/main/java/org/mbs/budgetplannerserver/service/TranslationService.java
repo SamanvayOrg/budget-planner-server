@@ -21,4 +21,9 @@ public class TranslationService {
     public Iterable<Translation> getTranslations() {
         return translationRepository.findAll();
     }
+
+    @Transactional
+    public Translation save(Translation translation){
+        return translationRepository.save(translation);
+    }
 }
