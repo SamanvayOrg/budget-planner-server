@@ -5,6 +5,7 @@ import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.mapper.UserContractMapper;
 import org.mbs.budgetplannerserver.service.MunicipalityService;
 import org.mbs.budgetplannerserver.service.UserService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,21 +31,19 @@ public class UserController {
     @RequestMapping(value = "/api/user", method = POST)
     @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨
     public UserContract createUser(@RequestBody UserContract userContract) {
-        User user = new User();
-        user.setUserName(userContract.getUserName());
-        user.setName(userContract.getName());
-        user.setAdmin(userContract.getAdmin());
-        user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
-        return new UserContractMapper().fromUser(userService.save(user));
+        if(!userContract.getMunicipalityId().equals(municipalityService.getMunicipality().getId())) {
+            throw new AccessDeniedException("Admin user can only create users in his own municipality");
+        }
+        return new UserContractMapper().fromUser(userService.create(userContract));
     }
 
-    @RequestMapping(value = "/api/user/{userId}", method = PUT)
+    @RequestMapping(value = "/api/user/{id}", method = PUT)
     @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨
-    public UserContract updateUser(@PathVariable Long userId, @RequestBody UserContract userContract) {
-        User user = userService.getUser(userId);
-        user.setName(userContract.getName());
-        user.setAdmin(userContract.getAdmin());
-        return new UserContractMapper().fromUser(userService.save(user));
+    public UserContract updateUser(@PathVariable Long id, @RequestBody UserContract userContract) {
+        if(!userService.getUser(id).getMunicipality().getId().equals(municipalityService.getMunicipality().getId())) {
+            throw new AccessDeniedException("Admin user can only update users in his own municipality");
+        }
+        return new UserContractMapper().fromUser(userService.update(id, userContract));
     }
 
     @RequestMapping(value = "/api/user",method = GET)
