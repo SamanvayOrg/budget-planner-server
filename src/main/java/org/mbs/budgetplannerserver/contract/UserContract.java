@@ -1,9 +1,20 @@
 package org.mbs.budgetplannerserver.contract;
 
 public class UserContract {
+
+    private Long id;
     private String name;
     private String userName;
+    private Long municipalityId;
     private Boolean isAdmin;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -19,6 +30,14 @@ public class UserContract {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Long getMunicipalityId() {
+        return municipalityId;
+    }
+
+    public void setMunicipalityId(Long municipalityId) {
+        this.municipalityId = municipalityId;
     }
 
     public Boolean getAdmin() {

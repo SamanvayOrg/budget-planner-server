@@ -4,6 +4,7 @@ import org.mbs.budgetplannerserver.contract.MunicipalityContract;
 import org.mbs.budgetplannerserver.domain.Municipality;
 import org.mbs.budgetplannerserver.mapper.MunicipalityContractMapper;
 import org.mbs.budgetplannerserver.service.MunicipalityService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,12 +21,17 @@ public class MunicipalityController {
     }
 
     @RequestMapping(value = "/api/municipality", method = GET)
+    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
     public MunicipalityContract getMunicipality() {
         return new MunicipalityContractMapper().map(municipalityService.getMunicipality());
     }
 
     @RequestMapping(value = "/api/municipality", method = POST)
-    public void updateMunicipality(@RequestBody Municipality municipality) {
-        municipalityService.save(municipality);
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public MunicipalityContract updateMunicipality(@RequestBody MunicipalityContract municipalityContract) {
+        Municipality municipality = municipalityService.getMunicipality();
+        municipality.setName(municipalityContract.getName());
+        municipality.setPopulation(municipalityContract.getPopulation());
+        return new MunicipalityContractMapper().map(municipalityService.save(municipality));
     }
 }

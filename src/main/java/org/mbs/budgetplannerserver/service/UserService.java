@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 @Service
@@ -21,6 +22,11 @@ public class UserService {
     public User getUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUserName(userName);
+    }
+
+    @Transactional
+    public User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
     }
 
     @Transactional

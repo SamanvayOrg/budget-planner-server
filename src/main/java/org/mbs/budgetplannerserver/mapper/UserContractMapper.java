@@ -18,9 +18,11 @@ public class UserContractMapper {
 
     public UserContract fromUser(User user) {
         UserContract userContract = new UserContract();
+        userContract.setId(user.getId());
         userContract.setName(user.getName());
         userContract.setUserName(user.getUserName());
         userContract.setAdmin(user.getAdmin());
+        userContract.setMunicipalityId(user.getMunicipality().getId());
         return userContract;
     }
 }
