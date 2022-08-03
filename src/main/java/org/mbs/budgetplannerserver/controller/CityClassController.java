@@ -15,7 +15,7 @@ public class CityClassController {
         this.cityClassService = cityClassService;
     }
 
-    @RequestMapping(value = "/api/class", method = GET)
+    @RequestMapping(value = "/api/cityclasses", method = GET)
     public Iterable<CityClassContract> getAllCities() {
         return new CityClassContractMapper().map(cityClassService.getCityClass());
     }
