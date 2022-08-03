@@ -13,23 +13,16 @@ import javax.persistence.EntityNotFoundException;
 
 @Service
 public class MunicipalityService {
-    private final UserService userService;
     private final MunicipalityRepository municipalityRepository;
     private final StateRepository stateRepository;
     private final CityClassRepository cityClassRepository;
 
     @Autowired
-    public MunicipalityService(UserService userService, MunicipalityRepository municipalityRepository,
+    public MunicipalityService(MunicipalityRepository municipalityRepository,
                                StateRepository stateRepository, CityClassRepository cityClassRepository) {
-        this.userService = userService;
         this.municipalityRepository = municipalityRepository;
         this.stateRepository = stateRepository;
         this.cityClassRepository = cityClassRepository;
-    }
-
-    public Municipality getMunicipality() {
-        User user = userService.getUser();
-        return user.getMunicipality();
     }
 
     public Municipality getMunicipality(Long municipalityId) {

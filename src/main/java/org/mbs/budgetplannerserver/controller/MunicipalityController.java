@@ -28,7 +28,7 @@ public class MunicipalityController {
     @RequestMapping(value = "/api/municipality", method = GET)
     @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
     public MunicipalityContract getMunicipality() {
-        return new MunicipalityContractMapper().map(municipalityService.getMunicipality());
+        return new MunicipalityContractMapper().map(userService.getMunicipality());
     }
 
     @RequestMapping(value = "/api/municipality", method = POST)
@@ -49,7 +49,7 @@ public class MunicipalityController {
     @RequestMapping(value = "/api/municipality/{id}", method = PUT)
     @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨
     public MunicipalityContract updateMunicipality(@PathVariable Long id, @RequestBody MunicipalityContract municipalityContract) {
-        if(!id.equals(municipalityService.getMunicipality().getId())) {
+        if(!id.equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only update his own municipality");
         }
         return new MunicipalityContractMapper().map(municipalityService.update(municipalityContract));

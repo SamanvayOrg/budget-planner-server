@@ -31,7 +31,7 @@ public class UserController {
     @RequestMapping(value = "/api/user", method = POST)
     @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨
     public UserContract createUser(@RequestBody UserContract userContract) {
-        if(!userContract.getMunicipalityId().equals(municipalityService.getMunicipality().getId())) {
+        if(!userContract.getMunicipalityId().equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only create users in his own municipality");
         }
         return new UserContractMapper().fromUser(userService.create(userContract));
@@ -40,7 +40,7 @@ public class UserController {
     @RequestMapping(value = "/api/user/{id}", method = PUT)
     @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨
     public UserContract updateUser(@PathVariable Long id, @RequestBody UserContract userContract) {
-        if(!userService.getUser(id).getMunicipality().getId().equals(municipalityService.getMunicipality().getId())) {
+        if(!userService.getUser(id).getMunicipality().getId().equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only update users in his own municipality");
         }
         return new UserContractMapper().fromUser(userService.update(id, userContract));

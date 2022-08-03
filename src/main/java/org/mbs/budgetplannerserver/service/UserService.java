@@ -1,10 +1,8 @@
 package org.mbs.budgetplannerserver.service;
 
 import org.mbs.budgetplannerserver.contract.UserContract;
+import org.mbs.budgetplannerserver.domain.Municipality;
 import org.mbs.budgetplannerserver.domain.User;
-import org.mbs.budgetplannerserver.repository.CityClassRepository;
-import org.mbs.budgetplannerserver.repository.MunicipalityRepository;
-import org.mbs.budgetplannerserver.repository.StateRepository;
 import org.mbs.budgetplannerserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +22,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    @Transactional
+
     public User getUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUserName(userName);
@@ -41,6 +39,10 @@ public class UserService {
         return userRepository.findByMunicipalityId(userRepository.findByUserName(userName).getMunicipality().getId());
     }
 
+    @Transactional
+    public Municipality getMunicipality() {
+        return getUser().getMunicipality();
+    }
 
     @Transactional
     public User create(UserContract userContract) {
