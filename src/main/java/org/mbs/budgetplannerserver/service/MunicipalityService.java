@@ -44,6 +44,8 @@ public class MunicipalityService {
         Municipality municipality = getMunicipality(municipalityContract.getId());
         municipality.setName(municipalityContract.getName());
         municipality.setPopulation(municipalityContract.getPopulation());
+        municipality.setCityClass(cityClassRepository.findByName(municipalityContract.getCityClass())
+                .orElseThrow(EntityNotFoundException::new));
         return save(municipality);
     }
 
