@@ -11,6 +11,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "login_user")
 public class User extends BaseModel {
+
+    private String email;
     private String userName;
     private String name;
     private Boolean isAdmin;
@@ -18,6 +20,15 @@ public class User extends BaseModel {
     @ManyToOne(targetEntity = Municipality.class)
     @JoinColumn(name = "municipality_id")
     private Municipality municipality;
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getUserName() {
         return userName;
@@ -55,4 +66,5 @@ public class User extends BaseModel {
     public State getState() {
         return getMunicipality().getState();
     }
+
 }

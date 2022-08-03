@@ -1,13 +1,13 @@
 spring:
-#  flyway:
-#    locations=classpath:db/migration
+  #  flyway:
+  #    locations=classpath:db/migration
   jpa:
     database: POSTGRESQL
     show-sql: true
     generate-ddl: false
     properties.hibernate.jdbc.lob.non_contextual_creation: true
   datasource:
-    url: ${BPS_DATASOURCE:jdbc:postgresql://localhost:5432/budget}
+    url: ${BPS_DATASOURCE:jdbc:postgresql://localhost:5442/budget}
     username: ${BPS_DB_USER:budget_user}
     password: ${BPS_DB_PASSWORD:password}
   security:
@@ -21,14 +21,26 @@ spring:
               - openid
               - profile
               - email
+          auth0-mgt:
+            client-id: ${BPS_AUTH_MGT_CLIENT_ID}
+            client-secret: ${BPS_AUTH_MGT_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
         provider:
           auth0:
+            issuer-uri: https://budget-planner.us.auth0.com/
+          auth0-mgt:
             issuer-uri: https://budget-planner.us.auth0.com/
       resource-server:
         jwt:
           issuer-uri: https://budget-planner.us.auth0.com/
 auth0:
   audience: https://api.budget-planner
+  domain: https://budget-planner.us.auth0.com
+auth0-mgt:
+  audience: https://budget-planner.us.auth0.com/api/v2/
   domain: https://budget-planner.us.auth0.com
 debug: false
 budget-planner:

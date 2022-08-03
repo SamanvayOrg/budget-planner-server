@@ -19,6 +19,7 @@ public class UserContractMapper {
     public UserContract fromUser(User user) {
         UserContract userContract = new UserContract();
         userContract.setId(user.getId());
+        userContract.setEmail(user.getEmail());
         userContract.setName(user.getName());
         userContract.setUserName(user.getUserName());
         userContract.setAdmin(user.getAdmin());
