@@ -7,7 +7,7 @@ spring:
     generate-ddl: false
     properties.hibernate.jdbc.lob.non_contextual_creation: true
   datasource:
-    url: ${BPS_DATASOURCE:jdbc:postgresql://localhost:5442/budget}
+    url: ${BPS_DATASOURCE:jdbc:postgresql://localhost:5432/budget}
     username: ${BPS_DB_USER:budget_user}
     password: ${BPS_DB_PASSWORD:password}
   security:
