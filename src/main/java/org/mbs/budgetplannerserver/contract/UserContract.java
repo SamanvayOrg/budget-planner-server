@@ -7,7 +7,7 @@ public class UserContract {
     private String name;
     private String userName;
     private Long municipalityId;
-    private Boolean isAdmin;
+    private Boolean isAdmin = false;
 
     public String getEmail() {
         return email;

@@ -5,10 +5,7 @@ import org.mbs.budgetplannerserver.contract.UserContract;
 import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.mapper.Auth0UserResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,6 +21,8 @@ public class Auth0Service {
     public static final String REQ_KEY_NAME = "name";
     public static final String REQ_KEY_EMAIL = "email";
     public static final String REQ_KEY_ROLES = "roles";
+    public static final String HEADER_AUTHORIZATION = "Authorization";
+    public static final String HEADER_BEARER = "Bearer ";
     @Value("${auth0-mgt.audience}")
     private String audience;
     @Value("${auth0-mgt.domain}")
@@ -58,7 +57,7 @@ public class Auth0Service {
         return result.get("access_token");
     }
 
-    public ResponseEntity<Auth0UserResponse> createUser(UserContract userContract) {
+    public ResponseEntity<Object> createUser(UserContract userContract) {
         JSONObject requestBody = new JSONObject();
         requestBody.put(REQ_KEY_EMAIL, userContract.getEmail());
         requestBody.put(REQ_KEY_NAME, userContract.getName());
@@ -67,11 +66,11 @@ public class Auth0Service {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + getManagementApiToken());
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getManagementApiToken());
 
         HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
         String url = String.format("%s/%s", domain, "api/v2/users");
-        ResponseEntity<Auth0UserResponse> result = restTemplate.postForEntity(url, request.toString(), Auth0UserResponse.class);
+        ResponseEntity<Object> result = restTemplate.exchange(url, HttpMethod.POST, request, Object.class);
         return result;
     }
 
@@ -81,13 +80,13 @@ public class Auth0Service {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + getManagementApiToken());
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getManagementApiToken());
 
         HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
         String url = String.format("%s/%s/%s/%s", domain, "api/v2/users",
-                user.getUserName().substring(user.getUserName().indexOf("|")), "roles");
+                user.getUserName(), "roles");
 
-        ResponseEntity<String> result = restTemplate.postForEntity(url, request.toString(), String.class);
+        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
         return result;
     }
 }
