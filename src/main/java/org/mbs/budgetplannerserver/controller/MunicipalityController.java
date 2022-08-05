@@ -28,13 +28,13 @@ public class MunicipalityController {
     @RequestMapping(value = "/api/municipality", method = GET)
     @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
     public MunicipalityContract getMunicipality() {
-        return new MunicipalityContractMapper().map(userService.getMunicipality());
+        return new MunicipalityContractMapper().fromMunicipality(userService.getMunicipality());
     }
 
     @RequestMapping(value = "/api/municipality", method = POST)
     @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
     public MunicipalityContract createMunicipality(@RequestBody MunicipalityContract municipalityContract) {
-        return new MunicipalityContractMapper().map(municipalityService.create(municipalityContract));
+        return new MunicipalityContractMapper().fromMunicipality(municipalityService.create(municipalityContract));
     }
 
     @RequestMapping(value = "/api/municipality/{id}/adminUser", method = POST)
@@ -52,6 +52,12 @@ public class MunicipalityController {
         if(!id.equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only update his own municipality");
         }
-        return new MunicipalityContractMapper().map(municipalityService.update(municipalityContract));
+        return new MunicipalityContractMapper().fromMunicipality(municipalityService.update(municipalityContract));
+    }
+
+    @RequestMapping(value = "/api/allMunicipalities", method = GET)
+    @PreAuthorize("hasAnyAuthority('superAdmin')")
+    public Iterable<MunicipalityContract> getAllMunicipalities(){
+        return new MunicipalityContractMapper().map(municipalityService.getAllMunicipalities());
     }
 }

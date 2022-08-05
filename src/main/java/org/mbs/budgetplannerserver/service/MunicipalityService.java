@@ -2,7 +2,6 @@ package org.mbs.budgetplannerserver.service;
 
 import org.mbs.budgetplannerserver.contract.MunicipalityContract;
 import org.mbs.budgetplannerserver.domain.Municipality;
-import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.repository.CityClassRepository;
 import org.mbs.budgetplannerserver.repository.MunicipalityRepository;
 import org.mbs.budgetplannerserver.repository.StateRepository;
@@ -51,5 +50,9 @@ public class MunicipalityService {
 
     private Municipality save(Municipality municipality) {
         return municipalityRepository.save(municipality);
+    }
+
+    public Iterable<Municipality> getAllMunicipalities(){
+        return municipalityRepository.findAll();
     }
 }
