@@ -8,10 +8,7 @@ import org.mbs.budgetplannerserver.service.MunicipalityService;
 import org.mbs.budgetplannerserver.service.UserService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -45,6 +42,12 @@ public class MunicipalityController {
         return new UserContractMapper().fromUser(userService.create(userContract));
     }
 
+    @RequestMapping(value = "/api/municipality/admins", method = GET)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
+    public Iterable<UserContract> getAllMunicipalityAdmins() {
+        return new UserContractMapper().map(userService.getAllMunicipalityAdmins());
+    }
 
     @RequestMapping(value = "/api/municipality/{id}", method = PUT)
 //    @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨

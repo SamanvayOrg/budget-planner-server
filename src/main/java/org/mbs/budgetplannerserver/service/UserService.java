@@ -48,6 +48,11 @@ public class UserService {
     }
 
     @Transactional
+    public Iterable<User> getAllMunicipalityAdmins() {
+        return userRepository.findByIsAdmin(true);
+    }
+
+    @Transactional
     public Iterable<User> getAllUsers() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByMunicipalityId(userRepository.findByUserName(userName).getMunicipality().getId());

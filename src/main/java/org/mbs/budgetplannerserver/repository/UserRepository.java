@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends CrudRepository<User, Long> {
     User findByUserName(String userName);
     Iterable<User> findByMunicipalityId(Long municipalityId);
+    Iterable<User> findByIsAdmin(Boolean isAdmin);
 }
