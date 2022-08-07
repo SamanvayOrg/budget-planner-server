@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
@@ -63,20 +64,19 @@ public class UserService {
         return getUser().getMunicipality();
     }
 
-    @Transactional
     public User create(UserContract userContract) {
-        ResponseEntity<Object> response = auth0Service.createUser(userContract);
-        if(!response.getStatusCode().is2xxSuccessful()) {
-            throw new AuthorizationServiceException("Unable to create user");
-        }
-        LinkedHashMap<String, Object> authRes = (LinkedHashMap)response.getBody();
-        User user = new User();
-        user.setUserName((String) authRes.get("user_id"));
-        user.setEmail((String) authRes.get("email"));
-        user.setName((String) authRes.get("name"));
-        user.setAdmin(userContract.getAdmin());
-        user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
-        return assignRolesAndSaveUser(userContract, user);
+            ResponseEntity<Object> response = auth0Service.createUser(userContract);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new AuthorizationServiceException("Unable to create user");
+            }
+            LinkedHashMap<String, Object> authRes = (LinkedHashMap) response.getBody();
+            User user = new User();
+            user.setUserName((String) authRes.get("user_id"));
+            user.setEmail((String) authRes.get("email"));
+            user.setName((String) authRes.get("name"));
+            user.setAdmin(userContract.getAdmin());
+            user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
+            return assignRolesAndSaveUser(userContract, user);
     }
 
     private User assignRolesAndSaveUser(UserContract userContract, User user) {

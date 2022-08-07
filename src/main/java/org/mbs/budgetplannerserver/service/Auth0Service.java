@@ -3,12 +3,16 @@ package org.mbs.budgetplannerserver.service;
 import com.nimbusds.jose.shaded.json.JSONObject;
 import org.mbs.budgetplannerserver.contract.UserContract;
 import org.mbs.budgetplannerserver.domain.User;
-import org.mbs.budgetplannerserver.mapper.Auth0UserResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,30 +35,13 @@ public class Auth0Service {
     private String clientId;
     @Value("${spring.security.oauth2.client.registration.auth0-mgt.client-secret}")
     private String clientSecret;
-
     private final RestTemplate restTemplate;
+    private Duration clockSkew = Duration.ofSeconds(60);
+    private Clock clock = Clock.systemUTC();
+    private OAuth2AccessToken tokenCache;
 
     public Auth0Service(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-    }
-
-    public String getManagementApiToken() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("client_id", clientId);
-        requestBody.put("client_secret", clientSecret);
-        requestBody.put("audience", audience);
-        requestBody.put("grant_type", "client_credentials");
-
-        String url = String.format("%s/%s", domain, "oauth/token");
-        HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
-
-        RestTemplate restTemplate = new RestTemplate();
-        HashMap<String, String> result = restTemplate.postForObject(url, request, HashMap.class);
-
-        return result.get("access_token");
     }
 
     public ResponseEntity<Object> createUser(UserContract userContract) {
@@ -66,7 +53,7 @@ public class Auth0Service {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getManagementApiToken());
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
 
         HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
         String url = String.format("%s/%s", domain, "api/v2/users");
@@ -80,7 +67,7 @@ public class Auth0Service {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getManagementApiToken());
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
 
         HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
         String url = String.format("%s/%s/%s/%s", domain, "api/v2/users",
@@ -88,5 +75,39 @@ public class Auth0Service {
 
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
         return result;
+    }
+
+    private OAuth2AccessToken getRefreshedToken() {
+        if (tokenCache == null || hasTokenExpired(tokenCache)) {
+            tokenCache = getManagementApiToken();
+        }
+
+        return tokenCache;
+    }
+
+    private OAuth2AccessToken getManagementApiToken() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("client_id", clientId);
+        requestBody.put("client_secret", clientSecret);
+        requestBody.put("audience", audience);
+        requestBody.put("grant_type", "client_credentials");
+
+        String url = String.format("%s/%s", domain, "oauth/token");
+        HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        HashMap<String, Object> result = restTemplate.postForObject(url, request, HashMap.class);
+        OAuth2AccessToken a2at = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, (String) result.get("access_token"),
+                this.clock.instant(), this.clock.instant().plusSeconds((Integer) (result.get("expires_in")))
+                .minus(1, ChronoUnit.HOURS));
+
+        return a2at;
+    }
+
+    private boolean hasTokenExpired(OAuth2Token token) {
+        return this.clock.instant().isAfter(token.getExpiresAt().minus(this.clockSkew));
     }
 }
