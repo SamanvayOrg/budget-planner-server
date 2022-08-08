@@ -19,18 +19,8 @@ public class Municipality extends BaseModel{
 	@JoinColumn(name = "class_id")
 	private CityClass cityClass;
 
-	private Long population;
-
 	public String getName() {
 		return name;
-	}
-
-	public Long getPopulation() {
-		return population;
-	}
-
-	public void setPopulation(Long population) {
-		this.population = population;
 	}
 
 	public void setName(String name) {

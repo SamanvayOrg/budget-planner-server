@@ -6,7 +6,6 @@ public class MunicipalityContract {
     private String name;
     private String state;
     private String cityClass;
-    private Long population;
 
     public Long getId() {
         return id;
@@ -40,11 +39,4 @@ public class MunicipalityContract {
         this.cityClass = cityClass;
     }
 
-    public Long getPopulation() {
-        return population;
-    }
-
-    public void setPopulation(Long population) {
-        this.population = population;
-    }
 }

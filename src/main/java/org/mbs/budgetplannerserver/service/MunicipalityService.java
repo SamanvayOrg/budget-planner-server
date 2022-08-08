@@ -31,7 +31,6 @@ public class MunicipalityService {
     public Municipality create(MunicipalityContract municipalityContract) {
         Municipality municipality = new Municipality();
         municipality.setName(municipalityContract.getName());
-        municipality.setPopulation(municipalityContract.getPopulation());
         municipality.setState(stateRepository.findByName(municipalityContract.getState())
                 .orElseThrow(EntityNotFoundException::new));
         municipality.setCityClass(cityClassRepository.findByName(municipalityContract.getCityClass())
@@ -42,7 +41,6 @@ public class MunicipalityService {
     public Municipality update(MunicipalityContract municipalityContract) {
         Municipality municipality = getMunicipality(municipalityContract.getId());
         municipality.setName(municipalityContract.getName());
-        municipality.setPopulation(municipalityContract.getPopulation());
         municipality.setCityClass(cityClassRepository.findByName(municipalityContract.getCityClass())
                 .orElseThrow(EntityNotFoundException::new));
         return save(municipality);

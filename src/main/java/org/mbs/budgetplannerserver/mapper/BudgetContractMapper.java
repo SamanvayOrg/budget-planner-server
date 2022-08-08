@@ -14,14 +14,17 @@ import java.util.stream.Collectors;
 public class BudgetContractMapper {
     public BudgetContract map(Budget budget) {
         BudgetContract budgetContract = new BudgetContract();
+        budgetContract.setOpeningBalance(budget.getOpeningBalance());
+        budgetContract.setClosingBalance(budget.getClosingBalance());
+        budgetContract.setPopulation(budget.getPopulation());
         budgetContract.setBudgetYear(budget.getFinancialYearString());
         budgetContract.setId(budget.getId());
         Set<BudgetLineDetail> budgetLineDetails = budget.getUniqueBudgetLineDetails();
         BudgetLineContractMapper budgetLineContractMapper = new BudgetLineContractMapper();
         List<BudgetLineContract> contractLines = budgetLineDetails
                 .stream()
-                .map(
-                        budgetLineDetail -> budgetLineContractMapper.map(budgetLineDetail, budget))
+                .map(budgetLineDetail -> budgetLineContractMapper.map(budgetLineDetail, budget))
+                .filter(budgetLine -> budgetLine != null)
                 .collect(Collectors.toList());
         budgetContract.setBudgetLines(contractLines);
 
@@ -47,6 +50,9 @@ public class BudgetContractMapper {
     }
 
     public Budget withUpdatedBudgeted(BudgetContract budgetContract, Budget budget, BudgetLineService budgetLineService) {
+        budget.setPopulation(budgetContract.getPopulation());
+        budget.setOpeningBalance(budgetContract.getOpeningBalance());
+        budget.setClosingBalance(budgetContract.getClosingBalance());
         budgetContract
                 .getBudgetLines()
                 .stream()

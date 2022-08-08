@@ -42,21 +42,20 @@ public class BudgetController {
 	@RequestMapping(value = "/api/budget/actuals", method = POST)
 	public void updateActuals(@RequestBody BudgetContract budgetContract) {
 		Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 2, false);
-
 		budgetService.save(new BudgetContractMapper().withUpdatedActuals(budgetContract, budget, budgetLineService));
 	}
 
 	@RequestMapping(value = "/api/budget/estimates", method = POST)
 	public void updateEstimates(@RequestBody BudgetContract budgetContract) {
 		Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 1, false);
-
 		budgetService.save(new BudgetContractMapper().withUpdatedEstimates(budgetContract, budget, budgetLineService));
 	}
 
 	@RequestMapping(value = "/api/budget/budgeted", method = POST)
-	public void updateBudgeted(@RequestBody BudgetContract budgetContract) {
+	public BudgetContract updateBudgeted(@RequestBody BudgetContract budgetContract) {
 		Budget budget = budgetService.findById(budgetContract.getId()).orElseThrow(NOT_FOUND());
-		budgetService.save(new BudgetContractMapper().withUpdatedBudgeted(budgetContract, budget, budgetLineService));
+		return new BudgetContractMapper().map(budgetService
+				.save(new BudgetContractMapper().withUpdatedBudgeted(budgetContract, budget, budgetLineService)));
 	}
 
 	@RequestMapping(value = "/api/budget/current", method = GET)

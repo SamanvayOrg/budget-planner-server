@@ -5,6 +5,7 @@ import org.mbs.budgetplannerserver.domain.BudgetLine;
 import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.repository.SampleBudgetLineRepository;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,8 +18,23 @@ public class BudgetBuilder {
         this.budget.setBudgetLines(new HashSet<>());
     }
 
+    public BudgetBuilder withOpeningBalance(BigDecimal openingBalance) {
+        budget.setOpeningBalance(openingBalance);
+        return this;
+    }
+
+    public BudgetBuilder withClosingBalance(BigDecimal closingBalance) {
+        budget.setClosingBalance(closingBalance);
+        return this;
+    }
+
     public BudgetBuilder withFinancialYear(int year) {
         budget.setFinancialYear(year);
+        return this;
+    }
+
+    public BudgetBuilder withPopulation(Long population) {
+        budget.setPopulation(population);
         return this;
     }
 

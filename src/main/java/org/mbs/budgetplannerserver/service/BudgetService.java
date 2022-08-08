@@ -7,6 +7,7 @@ import org.mbs.budgetplannerserver.repository.SampleBudgetLineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,11 @@ public class BudgetService {
         return budget == null ? createBudgetInternal(year - minus, user, withBudgeLines) : budget;
     }
 
+    public Budget create(int year, Double openingBalance, long population) {
+        User user = userService.getUser();
+        return createBudgetInternal(year, user, true, openingBalance, population);
+    }
+
     public Optional<Budget> getCurrentBudget() {
         return getBudgetForFinancialYear(Year.currentYear());
     }
@@ -56,9 +62,15 @@ public class BudgetService {
     }
 
     private Budget createBudgetInternal(int year, User user, boolean withBudgetLines) {
+        return createBudgetInternal(year, user, withBudgetLines, 0d, 0l);
+    }
+    private Budget createBudgetInternal(int year, User user, boolean withBudgetLines, Double openingBalance, long population) {
         BudgetBuilder budgetBuilder = new BudgetBuilder()
-                .withFinancialYear(year)
-                .forUser(user);
+        .withOpeningBalance(BigDecimal.valueOf(openingBalance))
+        .withClosingBalance(BigDecimal.ZERO)
+        .withPopulation(population)
+        .withFinancialYear(year)
+        .forUser(user);
         if (withBudgetLines) {
             budgetBuilder.withSampleBudgetLines(sampleBudgetLineRepository, user);
         }

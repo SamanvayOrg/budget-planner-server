@@ -3,6 +3,7 @@ package org.mbs.budgetplannerserver.domain;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,9 @@ import java.util.stream.Collectors;
 @BatchSize(size = 100)
 public class Budget extends BaseModel {
 	private int financialYear;
+	private BigDecimal openingBalance;
+	private BigDecimal closingBalance;
+	private Long population;
 
 	@ManyToOne(targetEntity = Municipality.class)
 	@JoinColumn(name = "municipality_id")
@@ -42,6 +46,30 @@ public class Budget extends BaseModel {
 
 	public void setFinancialYear(int year) {
 		this.financialYear = year;
+	}
+
+	public BigDecimal getOpeningBalance() {
+		return openingBalance;
+	}
+
+	public void setOpeningBalance(BigDecimal openingBalance) {
+		this.openingBalance = openingBalance;
+	}
+
+	public BigDecimal getClosingBalance() {
+		return closingBalance;
+	}
+
+	public void setClosingBalance(BigDecimal closingBalance) {
+		this.closingBalance = closingBalance;
+	}
+
+	public Long getPopulation() {
+		return population;
+	}
+
+	public void setPopulation(Long population) {
+		this.population = population;
 	}
 
 	public Set<BudgetLine> getBudgetLines() {

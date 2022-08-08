@@ -21,7 +21,6 @@ public class MunicipalityContractMapper {
         municipalityContract.setName(municipality.getName());
         municipalityContract.setState(municipality.getState().getName());
         municipalityContract.setCityClass(municipality.getCityClass());
-        municipalityContract.setPopulation(municipality.getPopulation());
         return municipalityContract;
     }
 }

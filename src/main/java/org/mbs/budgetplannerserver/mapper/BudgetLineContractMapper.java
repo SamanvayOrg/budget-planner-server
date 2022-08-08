@@ -17,6 +17,9 @@ public class BudgetLineContractMapper {
 
     public BudgetLineContract map(BudgetLineDetail budgetLineDetail, Budget budget) {
         BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail);
+        if(budgetLine == null) {//TODO check if this exception avoidance is correct
+            return null;
+        }
         BudgetLineContract budgetLineContract = new BudgetLineContract();
         budgetLineContract.setId(budgetLine.getId());
         budgetLineContract.setName(budgetLine.getName());
