@@ -15,11 +15,14 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class Auth0Service {
-
-    public static final String DEFAULT_PASSWORD = "password";
+    public static final int leftLimit = 97; // letter 'a'
+    public static final int rightLimit = 122; // letter 'z'
+    public static final int targetStringLength = 10;
+    public static final Random random = new Random();
     public static final String REQ_KEY_PASSWORD = "password";
     public static final String REQ_KEY_CONNECTION = "connection";
     public static final String REQ_KEY_NAME = "name";
@@ -49,7 +52,7 @@ public class Auth0Service {
         requestBody.put(REQ_KEY_EMAIL, userContract.getEmail());
         requestBody.put(REQ_KEY_NAME, userContract.getName());
         requestBody.put(REQ_KEY_CONNECTION, "Username-Password-Authentication");
-        requestBody.put(REQ_KEY_PASSWORD, DEFAULT_PASSWORD);
+        requestBody.put(REQ_KEY_PASSWORD, generatingRandomAlphabeticString());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -76,6 +79,24 @@ public class Auth0Service {
         ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
         return result;
     }
+
+    public ResponseEntity<String> sendChangePasswordEmail(User user) {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("client_id", clientId);
+        requestBody.put("email", user.getEmail());
+        requestBody.put("connection", "Username-Password-Authentication");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
+
+        HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
+        String url = String.format("%s/%s", domain, "dbconnections/change_password");
+
+        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+        return result;
+    }
+
 
     private OAuth2AccessToken getRefreshedToken() {
         if (tokenCache == null || hasTokenExpired(tokenCache)) {
@@ -109,5 +130,12 @@ public class Auth0Service {
 
     private boolean hasTokenExpired(OAuth2Token token) {
         return this.clock.instant().isAfter(token.getExpiresAt().minus(this.clockSkew));
+    }
+
+    private String generatingRandomAlphabeticString() {
+        return random.ints(leftLimit, rightLimit + 1)
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 }

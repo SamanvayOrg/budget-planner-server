@@ -90,6 +90,11 @@ public class UserService {
         return save(user);
     }
 
+    public User sendChangePasswordEmail(User user) {
+        auth0Service.sendChangePasswordEmail(user);
+        return user;
+    }
+
     @Transactional
     public User update(Long userId, UserContract userContract) {
         User user = getUser(userId);

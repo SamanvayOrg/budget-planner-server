@@ -46,6 +46,12 @@ public class UserController {
         return new UserContractMapper().fromUser(userService.update(id, userContract));
     }
 
+    @RequestMapping(value = "/api/user/changePassword", method = POST)
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public UserContract changeUserPassword() {
+        return new UserContractMapper().fromUser(userService.sendChangePasswordEmail(userService.getUser()));
+    }
+
     @RequestMapping(value = "/api/user",method = GET)
     @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
     public UserContract getUser(){
