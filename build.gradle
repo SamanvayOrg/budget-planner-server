@@ -26,6 +26,10 @@ dependencies {
 	implementation 'commons-io:commons-io:2.11.0'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.apache.commons:commons-lang3'
+	annotationProcessor 'org.projectlombok:lombok'
+
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.hamcrest:hamcrest:2.2'
 }

@@ -2,9 +2,9 @@ package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.contract.TranslationContract;
 import org.mbs.budgetplannerserver.domain.JsonObject;
-import org.mbs.budgetplannerserver.domain.Translation;
 import org.mbs.budgetplannerserver.mapper.TranslationContractMapper;
 import org.mbs.budgetplannerserver.service.TranslationService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,12 +21,14 @@ public class TranslationController {
     }
 
     @RequestMapping(value = "/api/translations", method = GET)
-    public JsonObject getTranslation() {
+    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
+    public JsonObject getTranslations() {
         return new TranslationContractMapper().map(translationService.getTranslations());
     }
 
     @RequestMapping(value = "api/translation", method = POST)
-    public TranslationContract createTranslation(@RequestBody TranslationContract translationContract){
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public TranslationContract createTranslation(@RequestBody TranslationContract translationContract) {
         return new TranslationContractMapper().fromTranslation(translationService.save(translationContract));
     }
 
