@@ -1,6 +1,8 @@
 package org.mbs.budgetplannerserver.domain;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -17,6 +19,9 @@ public class State extends BaseModel {
 	public State() {
 		super();
 	}
+
+	@Column(name = "languages", columnDefinition = "json")
+	@JsonRawValue
 	private String languages;
 
 	public String getName() {

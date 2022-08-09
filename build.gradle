@@ -24,6 +24,7 @@ dependencies {
 	implementation 'org.springframework.security:spring-security-oauth2-resource-server'
 	implementation 'org.springframework.security:spring-security-oauth2-jose'
 	implementation 'commons-io:commons-io:2.11.0'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.hamcrest:hamcrest:2.2'

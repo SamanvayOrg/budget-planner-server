@@ -50,7 +50,7 @@ public class MunicipalityController {
     }
 
     @RequestMapping(value = "/api/municipality/{id}", method = PUT)
-//    @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
     public MunicipalityContract updateMunicipality(@PathVariable Long id, @RequestBody MunicipalityContract municipalityContract) {
         if(!id.equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only update his own municipality");
