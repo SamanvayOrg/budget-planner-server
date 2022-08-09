@@ -26,8 +26,8 @@ public class TranslationController {
     }
 
     @RequestMapping(value = "api/translation", method = POST)
-    public TranslationContract updateTranslation(@RequestBody Translation translation){
-        return new TranslationContractMapper().fromTranslation(translationService.save(translation));
+    public TranslationContract createTranslation(@RequestBody TranslationContract translationContract){
+        return new TranslationContractMapper().fromTranslation(translationService.save(translationContract));
     }
 
 }

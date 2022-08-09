@@ -9,15 +9,17 @@ public class TranslationContractMapper {
     public JsonObject map(Iterable<Translation> translations) {
         JsonObject jsonObject = new JsonObject();
         translations.forEach(translation -> {
-             jsonObject.with(translation.getModelName(), translation.getValue());
+             jsonObject.with(translation.getKey(), translation.getValue());
         });
         return jsonObject;
     }
 
     public TranslationContract fromTranslation(Translation translation){
         TranslationContract translationContract = new TranslationContract();
-        translationContract.setModelName(translation.getModelName());
+        translationContract.setKey(translation.getKey());
         translationContract.setValue(translation.getValue());
+        translationContract.setStateId(translation.getState().getId());
+        translationContract.setLanguage(translation.getLanguage());
         return translationContract;
     }
 }

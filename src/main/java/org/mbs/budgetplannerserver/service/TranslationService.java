@@ -1,8 +1,10 @@
 package org.mbs.budgetplannerserver.service;
 
+import org.mbs.budgetplannerserver.contract.TranslationContract;
 import org.mbs.budgetplannerserver.domain.Translation;
 import org.mbs.budgetplannerserver.repository.TranslationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -10,20 +12,29 @@ import javax.transaction.Transactional;
 @Service
 public class TranslationService {
     private final TranslationRepository translationRepository;
+    private final StateService stateService;
+    private final UserService userService;
 
 
     @Autowired
-    public TranslationService(TranslationRepository translationRepository) {
+    public TranslationService(TranslationRepository translationRepository, StateService stateService, UserService userService) {
         this.translationRepository = translationRepository;
+        this.stateService = stateService;
+        this.userService = userService;
     }
 
     @Transactional
     public Iterable<Translation> getTranslations() {
-        return translationRepository.findAll();
+        return translationRepository.findByStateId(userService.getUser().getMunicipality().getState().getId());
     }
 
     @Transactional
-    public Translation save(Translation translation){
+    public Translation save(TranslationContract translationContract) {
+        Translation translation = new Translation();
+        translation.setKey(translationContract.getKey());
+        translation.setValue(translationContract.getValue());
+        translation.setLanguage(translationContract.getLanguage());
+        translation.setState(stateService.getById(translationContract.getStateId()));
         return translationRepository.save(translation);
     }
 }

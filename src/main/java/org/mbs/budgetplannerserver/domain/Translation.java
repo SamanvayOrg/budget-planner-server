@@ -1,30 +1,24 @@
 package org.mbs.budgetplannerserver.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "translation")
 public class Translation extends BaseModel {
-    private String modelName;
-    private Long modelId;
+    private String key;
     private String language;
     private String value;
 
-    public String getModelName() {
-        return modelName;
+    @ManyToOne(targetEntity = State.class)
+    @JoinColumn(name = "state_id")
+    private State state;
+
+    public String getKey() {
+        return key;
     }
 
-    public void setModelName(String modelName) {
-        this.modelName = modelName;
-    }
-
-    public Long getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(Long modelId) {
-        this.modelId = modelId;
+    public void setKey(String modelName) {
+        this.key = modelName;
     }
 
     public String getLanguage() {
@@ -41,5 +35,13 @@ public class Translation extends BaseModel {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 }

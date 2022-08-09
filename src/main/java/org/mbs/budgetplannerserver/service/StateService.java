@@ -21,6 +21,11 @@ public class StateService {
     public State getState(String name) {
         return stateRepository.findByName(name).orElseThrow(NOT_FOUND());
     }
+
+    public State getById(Long id) {
+        return stateRepository.findById(id).orElseThrow(NOT_FOUND());
+    }
+
     private Supplier<ResponseStatusException> NOT_FOUND() {
         return () -> new ResponseStatusException(NOT_FOUND, "entity not found");
     }

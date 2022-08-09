@@ -1,15 +1,17 @@
 package org.mbs.budgetplannerserver.contract;
 
 public class TranslationContract {
-    public String modelName;
+    public String key;
     public String value;
+    public String language;
+    public Long stateId;
 
-    public String getModelName() {
-        return modelName;
+    public String getKey() {
+        return key;
     }
 
-    public void setModelName(String modelName) {
-        this.modelName = modelName;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getValue() {
@@ -19,4 +21,21 @@ public class TranslationContract {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public Long getStateId() {
+        return stateId;
+    }
+
+    public void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
+
 }
