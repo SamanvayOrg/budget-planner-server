@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientResponseException;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
@@ -101,6 +100,14 @@ public class UserService {
         user.setName(userContract.getName());
         user.setAdmin(userContract.getAdmin());
         return save(user);
+    }
+
+
+    @Transactional
+    public User delete(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        userRepository.delete(user);
+        return user;
     }
 
     @Transactional

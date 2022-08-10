@@ -1,5 +1,7 @@
 package org.mbs.budgetplannerserver.domain;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.mbs.budgetplannerserver.domain.code.DetailedHead;
 import org.mbs.budgetplannerserver.domain.code.Function;
 
@@ -11,6 +13,8 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "sample_budget_line")
+@SQLDelete(sql = "UPDATE sample_budget_line SET is_voided = true WHERE id=?")
+@Where(clause = "is_voided=false")
 public class SampleBudgetLine  extends BaseModel{
 
     @ManyToOne(targetEntity = State.class)

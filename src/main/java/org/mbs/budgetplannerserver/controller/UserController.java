@@ -1,7 +1,6 @@
 package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.contract.UserContract;
-import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.mapper.UserContractMapper;
 import org.mbs.budgetplannerserver.service.MunicipalityService;
 import org.mbs.budgetplannerserver.service.UserService;
@@ -44,6 +43,18 @@ public class UserController {
             throw new AccessDeniedException("Admin user can only update users in his own municipality");
         }
         return new UserContractMapper().fromUser(userService.update(id, userContract));
+    }
+
+    @RequestMapping(value = "/api/user/{id}", method = DELETE)
+    @PreAuthorize("hasAuthority('admin')") // ✨ 👈 New line ✨
+    public UserContract deleteUser(@PathVariable Long id) {
+        if(!userService.getUser(id).getMunicipality().getId().equals(userService.getMunicipality().getId())) {
+            throw new AccessDeniedException("Admin user can only delete users in his own municipality");
+        }
+        if(id != userService.getUser().getId()) {
+            throw new AccessDeniedException("Admin user can not delete himself");
+        }
+        return new UserContractMapper().fromUser(userService.delete(id));
     }
 
     @RequestMapping(value = "/api/user/changePassword", method = POST)

@@ -1,6 +1,8 @@
 package org.mbs.budgetplannerserver.domain;
 
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,6 +16,8 @@ import java.util.stream.Collectors;
 		@UniqueConstraint(name = "UniqueFYAndMunicipality", columnNames = { "financialYear", "municipality_id"})
 })
 @BatchSize(size = 100)
+@SQLDelete(sql = "UPDATE budget SET is_voided = true WHERE id=?")
+@Where(clause = "is_voided=false")
 public class Budget extends BaseModel {
 	private int financialYear;
 	private BigDecimal openingBalance;

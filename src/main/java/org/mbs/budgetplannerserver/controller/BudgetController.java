@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 public class BudgetController {
@@ -76,6 +75,14 @@ public class BudgetController {
 	public List<BudgetContract> allBudgets() {
 		List<Budget> budgets = budgetService.getAllBudgets();
 		return budgets.stream().map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
+	}
+
+	@RequestMapping(value = "/api/budget", method = DELETE)
+	@ResponseBody
+	@PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+	public BudgetContract deleteBudgetByYear(@RequestParam("year") Integer year) {
+		Budget budget = budgetService.deleteBudgetForFinancialYear(new Year(year).getYear());
+		return new BudgetContractMapper().map(budget);
 	}
 
 	private Supplier<ResponseStatusException> NOT_FOUND() {

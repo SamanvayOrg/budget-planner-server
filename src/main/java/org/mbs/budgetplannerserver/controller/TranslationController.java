@@ -5,12 +5,12 @@ import org.mbs.budgetplannerserver.domain.JsonObject;
 import org.mbs.budgetplannerserver.mapper.TranslationContractMapper;
 import org.mbs.budgetplannerserver.service.TranslationService;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 public class TranslationController {
@@ -30,6 +30,12 @@ public class TranslationController {
     @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
     public TranslationContract createTranslation(@RequestBody TranslationContract translationContract) {
         return new TranslationContractMapper().fromTranslation(translationService.save(translationContract));
+    }
+
+    @RequestMapping(value = "api/translation/{id}", method = DELETE)
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public TranslationContract deleteTranslation(@PathVariable Long translationId) {
+        return new TranslationContractMapper().fromTranslation(translationService.delete(translationId));
     }
 
 }

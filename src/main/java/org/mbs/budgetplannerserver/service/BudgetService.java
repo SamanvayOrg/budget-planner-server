@@ -86,7 +86,8 @@ public class BudgetService {
             return null;
         }
         int financialYear = budget.getFinancialYear();
-        List<Budget> previousBudgets = budgetRepository.findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(user.getMunicipality(), financialYear - 5, financialYear - 1);
+        List<Budget> previousBudgets = budgetRepository
+                .findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(user.getMunicipality(), financialYear - 5, financialYear - 1);
         PreviousYearBudgets previousYearBudgets = new PreviousYearBudgets(
                 findForYear(previousBudgets, financialYear - 1),
                 findForYear(previousBudgets, financialYear - 2),
@@ -97,6 +98,13 @@ public class BudgetService {
     }
 
     private Budget findForYear(List<Budget> budgets, int year) {
-        return budgets.stream().filter(budget -> budget.getFinancialYear() == year).findFirst().orElse(new NullBudget());
+        return budgets.stream().filter(budget -> budget.getFinancialYear() == year && !budget.isVoided()).findFirst().orElse(new NullBudget());
+    }
+
+    public Budget deleteBudgetForFinancialYear(Integer year) {
+        User user = userService.getUser();
+        Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
+        budgetRepository.delete(budget);
+        return budget;
     }
 }

@@ -10,6 +10,9 @@ public class BaseModel {
 	@Id
 	private Long id;
 
+	@Column
+	private boolean isVoided = Boolean.FALSE;
+
 	public BaseModel(Long id) {
 		this.id = id;
 	}
@@ -23,5 +26,13 @@ public class BaseModel {
 
 	public Long getId() {
 		return id;
+	}
+
+	public boolean isVoided() {
+		return isVoided;
+	}
+
+	public void setVoided(Boolean voided) {
+		isVoided = voided;
 	}
 }

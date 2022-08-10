@@ -4,9 +4,9 @@ import org.mbs.budgetplannerserver.contract.TranslationContract;
 import org.mbs.budgetplannerserver.domain.Translation;
 import org.mbs.budgetplannerserver.repository.TranslationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 @Service
@@ -36,5 +36,11 @@ public class TranslationService {
         translation.setLanguage(translationContract.getLanguage());
         translation.setState(stateService.getById(translationContract.getStateId()));
         return translationRepository.save(translation);
+    }
+
+    public Translation delete(Long translationId) {
+        Translation translation = translationRepository.findById(translationId).orElseThrow(EntityNotFoundException::new);
+        translationRepository.delete(translation);
+        return translation;
     }
 }

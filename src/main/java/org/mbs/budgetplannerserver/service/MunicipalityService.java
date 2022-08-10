@@ -46,6 +46,12 @@ public class MunicipalityService {
         return save(municipality);
     }
 
+    public Municipality delete(Long municipalityId) {
+        Municipality municipality = municipalityRepository.findById(municipalityId).orElseThrow(EntityNotFoundException::new);
+        municipalityRepository.delete(municipality);
+        return municipality;
+    }
+
     private Municipality save(Municipality municipality) {
         return municipalityRepository.save(municipality);
     }

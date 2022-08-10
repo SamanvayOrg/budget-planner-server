@@ -1,11 +1,16 @@
 package org.mbs.budgetplannerserver.domain;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "municipality", uniqueConstraints = {
 		@UniqueConstraint(name = "UniqueNameAndState", columnNames = { "name", "state_id"})
 })
+@SQLDelete(sql = "UPDATE municipality SET is_voided = true WHERE id=?")
+@Where(clause = "is_voided=false")
 public class Municipality extends BaseModel{
 
 	private String name;

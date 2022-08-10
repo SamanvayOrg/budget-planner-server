@@ -1,12 +1,15 @@
 package org.mbs.budgetplannerserver.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.mbs.budgetplannerserver.service.MunicipalityService;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "login_user")
+@SQLDelete(sql = "UPDATE login_user SET is_voided = true WHERE id=?")
+@Where(clause = "is_voided=false")
 public class User extends BaseModel {
 
     @Column(unique = true)

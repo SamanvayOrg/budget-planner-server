@@ -1,11 +1,16 @@
 package org.mbs.budgetplannerserver.domain;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "translation", uniqueConstraints = {
         @UniqueConstraint(name = "UniqueKeyStateAndLanguage", columnNames = { "key", "state_id", "language" })
 })
+@SQLDelete(sql = "UPDATE translation SET is_voided = true WHERE id=?")
+@Where(clause = "is_voided=false")
 public class Translation extends BaseModel {
     private String key;
     private String language;

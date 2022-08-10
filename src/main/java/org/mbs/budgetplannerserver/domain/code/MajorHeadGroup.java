@@ -1,5 +1,7 @@
 package org.mbs.budgetplannerserver.domain.code;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.mbs.budgetplannerserver.domain.BaseModel;
 
 import javax.persistence.*;
@@ -8,6 +10,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "major_head_group")
+@SQLDelete(sql = "UPDATE major_head_group SET is_voided = true WHERE id=?")
+@Where(clause = "is_voided=false")
 public class MajorHeadGroup extends BaseModel {
     private String code;
     private String name;
