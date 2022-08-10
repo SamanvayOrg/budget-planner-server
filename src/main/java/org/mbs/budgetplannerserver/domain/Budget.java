@@ -10,7 +10,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "budget")
+@Table(name = "budget", uniqueConstraints = {
+		@UniqueConstraint(name = "UniqueFYAndMunicipality", columnNames = { "financialYear", "municipality_id"})
+})
 @BatchSize(size = 100)
 public class Budget extends BaseModel {
 	private int financialYear;

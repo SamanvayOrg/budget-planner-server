@@ -3,16 +3,16 @@ package org.mbs.budgetplannerserver.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mbs.budgetplannerserver.service.MunicipalityService;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "login_user")
 public class User extends BaseModel {
 
+    @Column(unique = true)
     private String email;
+
+    @Column(unique = true)
     private String userName;
     private String name;
     private Boolean isAdmin;

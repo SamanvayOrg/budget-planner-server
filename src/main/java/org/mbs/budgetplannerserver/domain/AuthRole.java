@@ -14,7 +14,7 @@ public class AuthRole {
 	@Id
 	private String roleId;
 
-	@Column(name = "role_name", nullable = false)
+	@Column(name = "role_name", nullable = false, unique = true)
 	private String roleName;
 
 	public String getRoleId() {

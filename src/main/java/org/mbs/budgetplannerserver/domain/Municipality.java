@@ -1,12 +1,11 @@
 package org.mbs.budgetplannerserver.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "municipality")
+@Table(name = "municipality", uniqueConstraints = {
+		@UniqueConstraint(name = "UniqueNameAndState", columnNames = { "name", "state_id"})
+})
 public class Municipality extends BaseModel{
 
 	private String name;

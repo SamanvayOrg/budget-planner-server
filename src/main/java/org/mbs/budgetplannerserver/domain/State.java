@@ -14,6 +14,7 @@ public class State extends BaseModel {
 		super(id);
 	}
 
+	@Column(unique = true)
 	private String name;
 
 	public State() {

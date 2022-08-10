@@ -3,7 +3,9 @@ package org.mbs.budgetplannerserver.domain;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "translation")
+@Table(name = "translation", uniqueConstraints = {
+        @UniqueConstraint(name = "UniqueKeyStateAndLanguage", columnNames = { "key", "state_id", "language" })
+})
 public class Translation extends BaseModel {
     private String key;
     private String language;
