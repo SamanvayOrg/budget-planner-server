@@ -26,16 +26,28 @@ public class TranslationController {
         return new TranslationContractMapper().map(translationService.getTranslations());
     }
 
+    @RequestMapping(value = "/api/translation/all", method = GET)
+    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
+    public Iterable<TranslationContract> getAllTranslations() {
+        return new TranslationContractMapper().getAll(translationService.getTranslations());
+    }
+
     @RequestMapping(value = "api/translation", method = POST)
     @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
     public TranslationContract createTranslation(@RequestBody TranslationContract translationContract) {
         return new TranslationContractMapper().fromTranslation(translationService.save(translationContract));
     }
 
+    @RequestMapping(value = "api/translation/{id}", method = PUT)
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public TranslationContract updateTranslation(@PathVariable Long id, @RequestBody TranslationContract translationContract) {
+        return new TranslationContractMapper().fromTranslation(translationService.update(id, translationContract));
+    }
+
     @RequestMapping(value = "api/translation/{id}", method = DELETE)
     @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
-    public TranslationContract deleteTranslation(@PathVariable Long translationId) {
-        return new TranslationContractMapper().fromTranslation(translationService.delete(translationId));
+    public TranslationContract deleteTranslation(@PathVariable Long id) {
+        return new TranslationContractMapper().fromTranslation(translationService.delete(id));
     }
 
 }

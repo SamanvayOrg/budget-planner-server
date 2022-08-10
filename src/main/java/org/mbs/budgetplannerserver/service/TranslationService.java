@@ -38,9 +38,20 @@ public class TranslationService {
         return translationRepository.save(translation);
     }
 
+    @Transactional
+    public Translation update(Long translationId, TranslationContract translationContract) {
+        Translation translation = translationRepository.findById(translationId).orElseThrow(EntityNotFoundException::new);
+        translation.setKey(translationContract.getKey());
+        translation.setValue(translationContract.getValue());
+        translation.setLanguage(translationContract.getLanguage());
+        translation.setState(stateService.getById(translationContract.getStateId()));
+        return translationRepository.save(translation);
+    }
+
     public Translation delete(Long translationId) {
         Translation translation = translationRepository.findById(translationId).orElseThrow(EntityNotFoundException::new);
         translationRepository.delete(translation);
         return translation;
     }
+
 }

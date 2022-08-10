@@ -1,10 +1,19 @@
 package org.mbs.budgetplannerserver.contract;
 
 public class TranslationContract {
+    public Long id;
     public String key;
     public String value;
     public String language;
     public Long stateId;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getKey() {
         return key;
