@@ -19,10 +19,10 @@ import java.util.Random;
 
 @Service
 public class Auth0Service {
-    public static final int leftLimit = 97; // letter 'a'
-    public static final int rightLimit = 122; // letter 'z'
-    public static final int targetStringLength = 10;
-    public static final Random random = new Random();
+    public static final int LEFT_LIMIT = 97; // letter 'a'
+    public static final int RIGHT_LIMIT = 122; // letter 'z'
+    public static final int TARGET_STRING_LENGTH = 10;
+    public static final Random RANDOM = new Random();
     public static final String REQ_KEY_PASSWORD = "password";
     public static final String REQ_KEY_CONNECTION = "connection";
     public static final String REQ_KEY_NAME = "name";
@@ -133,8 +133,8 @@ public class Auth0Service {
     }
 
     private String generatingRandomAlphabeticString() {
-        return random.ints(leftLimit, rightLimit + 1)
-                .limit(targetStringLength)
+        return RANDOM.ints(LEFT_LIMIT, RIGHT_LIMIT + 1)
+                .limit(TARGET_STRING_LENGTH)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
     }
