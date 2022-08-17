@@ -1,5 +1,6 @@
 package org.mbs.budgetplannerserver.service;
 
+import org.mbs.budgetplannerserver.controller.BudgetPropertiesContract;
 import org.mbs.budgetplannerserver.domain.*;
 import org.mbs.budgetplannerserver.domain.builder.BudgetBuilder;
 import org.mbs.budgetplannerserver.repository.BudgetRepository;
@@ -64,13 +65,14 @@ public class BudgetService {
     private Budget createBudgetInternal(int year, User user, boolean withBudgetLines) {
         return createBudgetInternal(year, user, withBudgetLines, 0d, 0l);
     }
+
     private Budget createBudgetInternal(int year, User user, boolean withBudgetLines, Double openingBalance, long population) {
         BudgetBuilder budgetBuilder = new BudgetBuilder()
-        .withOpeningBalance(BigDecimal.valueOf(openingBalance))
-        .withClosingBalance(BigDecimal.ZERO)
-        .withPopulation(population)
-        .withFinancialYear(year)
-        .forUser(user);
+                .withOpeningBalance(BigDecimal.valueOf(openingBalance))
+                .withClosingBalance(BigDecimal.ZERO)
+                .withPopulation(population)
+                .withFinancialYear(year)
+                .forUser(user);
         if (withBudgetLines) {
             budgetBuilder.withSampleBudgetLines(sampleBudgetLineRepository, user);
         }
@@ -106,5 +108,11 @@ public class BudgetService {
         Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year);
         budgetRepository.delete(budget);
         return budget;
+    }
+
+    public Budget updateProperties(Budget budget, BudgetPropertiesContract budgetPropertiesContract) {
+        budget.setPopulation(budgetPropertiesContract.getPopulation());
+        budget.setOpeningBalance(budgetPropertiesContract.getOpeningBalance());
+        return budgetRepository.save(budget);
     }
 }

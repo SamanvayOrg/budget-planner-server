@@ -19,73 +19,80 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 public class BudgetController {
-	private final BudgetService budgetService;
-	private final BudgetLineService budgetLineService;
+    private final BudgetService budgetService;
+    private final BudgetLineService budgetLineService;
 
-	public BudgetController(BudgetService budgetService, BudgetLineService budgetLineService) {
-		this.budgetService = budgetService;
-		this.budgetLineService = budgetLineService;
-	}
+    public BudgetController(BudgetService budgetService, BudgetLineService budgetLineService) {
+        this.budgetService = budgetService;
+        this.budgetLineService = budgetLineService;
+    }
 
-	@RequestMapping(value = "/api/budget", method = GET)
-	@ResponseBody
-	@PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
-	public BudgetContract getBudgetByYear(@RequestParam("year") Integer year) {
-		Budget budget = budgetService.getBudgetForFinancialYear(new Year(year).getYear()).orElseThrow(NOT_FOUND());
-		return new BudgetContractMapper().map(budget);
-	}
+    @RequestMapping(value = "/api/budget", method = GET)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
+    public BudgetContract getBudgetByYear(@RequestParam("year") Integer year) {
+        Budget budget = budgetService.getBudgetForFinancialYear(new Year(year).getYear()).orElseThrow(NOT_FOUND());
+        return new BudgetContractMapper().map(budget);
+    }
 
-	@RequestMapping(value = "/api/budget", method = POST)
-	@PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
-	public void create(@RequestParam("year") Integer year) {
-		budgetService.getOrCreate(year, 0, true);
-	}
+    @RequestMapping(value = "/api/budget", method = POST)
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public void create(@RequestParam("year") Integer year) {
+        budgetService.getOrCreate(year, 0, true);
+    }
 
-	@RequestMapping(value = "/api/budget/actuals", method = POST)
-	@PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
-	public void updateActuals(@RequestBody BudgetContract budgetContract) {
-		Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 2, false);
-		budgetService.save(new BudgetContractMapper().withUpdatedActuals(budgetContract, budget, budgetLineService));
-	}
+    @RequestMapping(value = "/api/budget/actuals", method = POST)
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public void updateActuals(@RequestBody BudgetContract budgetContract) {
+        Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 2, false);
+        budgetService.save(new BudgetContractMapper().withUpdatedActuals(budgetContract, budget, budgetLineService));
+    }
 
-	@RequestMapping(value = "/api/budget/estimates", method = POST)
-	@PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
-	public void updateEstimates(@RequestBody BudgetContract budgetContract) {
-		Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 1, false);
-		budgetService.save(new BudgetContractMapper().withUpdatedEstimates(budgetContract, budget, budgetLineService));
-	}
+    @RequestMapping(value = "/api/budget/estimates", method = POST)
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public void updateEstimates(@RequestBody BudgetContract budgetContract) {
+        Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 1, false);
+        budgetService.save(new BudgetContractMapper().withUpdatedEstimates(budgetContract, budget, budgetLineService));
+    }
 
-	@RequestMapping(value = "/api/budget/budgeted", method = POST)
-	@PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
-	public BudgetContract updateBudgeted(@RequestBody BudgetContract budgetContract) {
-		Budget budget = budgetService.findById(budgetContract.getId()).orElseThrow(NOT_FOUND());
-		return new BudgetContractMapper().map(budgetService
-				.save(new BudgetContractMapper().withUpdatedBudgeted(budgetContract, budget, budgetLineService)));
-	}
+    @RequestMapping(value = "/api/budget/budgeted", method = POST)
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public BudgetContract updateBudgeted(@RequestBody BudgetContract budgetContract) {
+        Budget budget = budgetService.findById(budgetContract.getId()).orElseThrow(NOT_FOUND());
+        return new BudgetContractMapper().map(budgetService
+                .save(new BudgetContractMapper().withUpdatedBudgeted(budgetContract, budget, budgetLineService)));
+    }
 
-	@RequestMapping(value = "/api/budget/current", method = GET)
-	@PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
-	public BudgetContract currentBudget() {
-		Budget budget = budgetService.getCurrentBudget().orElseThrow(NOT_FOUND());
-		return new BudgetContractMapper().map(budget);
-	}
+    @RequestMapping(value = "/api/budget/current", method = GET)
+    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
+    public BudgetContract currentBudget() {
+        Budget budget = budgetService.getCurrentBudget().orElseThrow(NOT_FOUND());
+        return new BudgetContractMapper().map(budget);
+    }
 
-	@RequestMapping(value = "/api/budgets", method = GET)
-	@PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
-	public List<BudgetContract> allBudgets() {
-		List<Budget> budgets = budgetService.getAllBudgets();
-		return budgets.stream().map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
-	}
+    @RequestMapping(value = "/api/budgets", method = GET)
+    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
+    public List<BudgetContract> allBudgets() {
+        List<Budget> budgets = budgetService.getAllBudgets();
+        return budgets.stream().map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
+    }
 
-	@RequestMapping(value = "/api/budget", method = DELETE)
-	@ResponseBody
-	@PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
-	public BudgetContract deleteBudgetByYear(@RequestParam("year") Integer year) {
-		Budget budget = budgetService.deleteBudgetForFinancialYear(new Year(year).getYear());
-		return new BudgetContractMapper().map(budget);
-	}
+    @RequestMapping(value = "/api/budget", method = DELETE)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    public BudgetContract deleteBudgetByYear(@RequestParam("year") Integer year) {
+        Budget budget = budgetService.deleteBudgetForFinancialYear(new Year(year).getYear());
+        return new BudgetContractMapper().map(budget);
+    }
 
-	private Supplier<ResponseStatusException> NOT_FOUND() {
-		return () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
-	}
+    @RequestMapping(value = "/api/budget/{id}/properties", method = PUT)
+    @PreAuthorize("hasAnyAuthority('write')") // ✨ 👈 New line ✨
+    public BudgetContract updatePopulationAndOpeningBalance(@PathVariable Long id, @RequestBody BudgetPropertiesContract budgetPropertiesContract) {
+        Budget budget = budgetService.findById(id).orElseThrow(NOT_FOUND());
+        return new BudgetContractMapper().map(budgetService.updateProperties(budget, budgetPropertiesContract));
+    }
+
+    private Supplier<ResponseStatusException> NOT_FOUND() {
+        return () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
+    }
 }

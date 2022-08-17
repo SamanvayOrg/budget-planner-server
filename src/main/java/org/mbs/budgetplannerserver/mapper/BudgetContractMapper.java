@@ -7,6 +7,7 @@ import org.mbs.budgetplannerserver.domain.BudgetLine;
 import org.mbs.budgetplannerserver.domain.BudgetLineDetail;
 import org.mbs.budgetplannerserver.service.BudgetLineService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,8 +51,9 @@ public class BudgetContractMapper {
     }
 
     public Budget withUpdatedBudgeted(BudgetContract budgetContract, Budget budget, BudgetLineService budgetLineService) {
-        budget.setPopulation(budgetContract.getPopulation());
-        budget.setOpeningBalance(budgetContract.getOpeningBalance());
+        BigDecimal closingBalance = budgetContract.getOpeningBalance();
+//         budgetContract.getBudgetLines().stream().filter(budgetContract -> budgetContract.getMajorHeadGroup().equals("Revenue Receipt"))
+//                 .forEach(budgetLineContract -> closingBalance += budgetLineContract.getBudgetedAmount()); ;
         budget.setClosingBalance(budgetContract.getClosingBalance());
         budgetContract
                 .getBudgetLines()
