@@ -5,6 +5,7 @@ import org.mbs.budgetplannerserver.contract.BudgetLineContract;
 import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.BudgetLine;
 import org.mbs.budgetplannerserver.domain.BudgetLineDetail;
+import org.mbs.budgetplannerserver.domain.PreviousYearBudgets;
 import org.mbs.budgetplannerserver.service.BudgetLineService;
 
 import java.math.BigDecimal;
@@ -25,7 +26,7 @@ public class BudgetContractMapper {
         List<BudgetLineContract> contractLines = budgetLineDetails
                 .stream()
                 .map(budgetLineDetail -> budgetLineContractMapper.map(budgetLineDetail, budget))
-                .filter(budgetLine -> budgetLine != null)
+                .filter(budgetLine -> budgetLine != null && !budgetLine.getVoided())
                 .collect(Collectors.toList());
         budgetContract.setBudgetLines(contractLines);
 
@@ -36,7 +37,13 @@ public class BudgetContractMapper {
         budgetContract
                 .getBudgetLines()
                 .stream()
-                .forEach(budgetlineContract -> budget.addBudgetLine(updateActuals(budgetlineContract, budget, budgetLineService)));
+                .forEach(budgetlineContract -> {
+                    if ((isChosenForDeletionAndIsEligible(budgetlineContract, budget))) {
+                        budget.removeBudgetLine(budget.matchingBudgetLine(budgetLineDetail(budgetlineContract)));
+                    } else {
+                        budget.addBudgetLine(updateActuals(budgetlineContract, budget, budgetLineService));
+                    }
+                });
 
         return budget;
     }
@@ -45,7 +52,13 @@ public class BudgetContractMapper {
         budgetContract
                 .getBudgetLines()
                 .stream()
-                .forEach(budgetlineContract -> budget.addBudgetLine(updateEstimates(budgetlineContract, budget, budgetLineService)));
+                .forEach(budgetlineContract -> {
+                    if ((isChosenForDeletionAndIsEligible(budgetlineContract, budget))) {
+                        budget.removeBudgetLine(budget.matchingBudgetLine(budgetLineDetail(budgetlineContract)));
+                    } else {
+                        budget.addBudgetLine(updateEstimates(budgetlineContract, budget, budgetLineService));
+                    }
+                });
 
         return budget;
     }
@@ -55,7 +68,13 @@ public class BudgetContractMapper {
         budgetContract
                 .getBudgetLines()
                 .stream()
-                .forEach(budgetlineContract -> budget.addBudgetLine(updateBudgeted(budgetlineContract, budget, budgetLineService)));
+                .forEach(budgetlineContract -> {
+                    if ((isChosenForDeletionAndIsEligible(budgetlineContract, budget))) {
+                        budget.removeBudgetLine(budget.matchingBudgetLine(budgetLineDetail(budgetlineContract)));
+                    } else {
+                        budget.addBudgetLine(updateBudgeted(budgetlineContract, budget, budgetLineService));
+                    }
+                });
 
         return budget;
     }
@@ -91,14 +110,6 @@ public class BudgetContractMapper {
         return new BudgetLineContractMapper().updateBudgeted(budgetLine, budgetLineContract);
     }
 
-    private BudgetLine getOrCreateBudgetLine(BudgetLineContract budgetLineContract, Budget budget, BudgetLineService budgetLineService) {
-        BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetLineContract));
-        if (budgetLine == null) {
-            budgetLine = budgetLineService.createBudgetLine(budgetLineContract.getFunctionCode(), budgetLineContract.getDetailedHeadCode(), budgetLineContract.getName());
-        }
-        return budgetLine;
-    }
-
     private BudgetLine updateEstimates(BudgetLineContract budgetLineContract, Budget budget, BudgetLineService budgetLineService) {
         BudgetLine budgetLine = getOrCreateBudgetLine(budgetLineContract, budget, budgetLineService);
 
@@ -111,7 +122,29 @@ public class BudgetContractMapper {
         return new BudgetLineContractMapper().updateActuals(budgetLine, budgetLineContract);
     }
 
+    private BudgetLine getOrCreateBudgetLine(BudgetLineContract budgetLineContract, Budget budget, BudgetLineService budgetLineService) {
+        BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetLineContract));
+        if (budgetLine == null) {
+            budgetLine = budgetLineService.createBudgetLine(budgetLineContract.getFunctionCode(), budgetLineContract.getDetailedHeadCode(), budgetLineContract.getName());
+        }
+        return budgetLine;
+    }
+
     private BudgetLineDetail budgetLineDetail(BudgetLineContract budgetLineContract) {
         return new BudgetLineDetail(budgetLineContract.getFunctionCode(), budgetLineContract.getDetailedHeadCode(), budgetLineContract.getName());
+    }
+
+    private Boolean isChosenForDeletionAndIsEligible(BudgetLineContract budgetLineContract, Budget budget) {
+        if(budgetLineContract == null || !budgetLineContract.getVoided()) {
+            return false;
+        }
+        BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetLineContract));
+        if (budgetLine != null) {
+            PreviousYearBudgets previousYearBudgets = budget.getPreviousYearBudgets();
+            BudgetLine[] budgetLinesMatching = previousYearBudgets.getBudgetLinesMatching(new BudgetLineDetail(budgetLine));
+            return (new BudgetLineContractMapper()
+                    .evaluateBudgetLineEligibilityForDeletion(budgetLineContract, budgetLinesMatching));
+        }
+        return budgetLineContract.getVoided();
     }
 }

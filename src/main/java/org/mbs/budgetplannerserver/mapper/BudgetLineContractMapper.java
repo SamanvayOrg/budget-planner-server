@@ -9,11 +9,16 @@ import org.mbs.budgetplannerserver.domain.code.DetailedHead;
 import org.mbs.budgetplannerserver.domain.code.MajorHead;
 import org.mbs.budgetplannerserver.domain.code.MajorHeadGroup;
 import org.mbs.budgetplannerserver.domain.code.MinorHead;
-import org.mbs.budgetplannerserver.service.BudgetLineService;
 
 import java.math.BigDecimal;
 
 public class BudgetLineContractMapper {
+
+    public static final int PREV_YEAR_MINUS_TWO = 3;
+    public static final int PREV_YEAR_MINUS_ONE = 2;
+    public static final int PREV_YEAR = 1;
+    public static final int CURRENT_YEAR = 0;
+    private static final int INT_CONST_ZERO = 0;
 
     public BudgetLineContract map(BudgetLineDetail budgetLineDetail, Budget budget) {
         BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail);
@@ -40,21 +45,61 @@ public class BudgetLineContractMapper {
         PreviousYearBudgets previousYearBudgets = budget.getPreviousYearBudgets();
         BudgetLine[] budgetLinesMatching = previousYearBudgets.getBudgetLinesMatching(budgetLineDetail);
 
-        BudgetLine currentYearBudgetLine = budgetLinesMatching[0];
+        BudgetLine currentYearBudgetLine = budgetLinesMatching[CURRENT_YEAR];
         if (currentYearBudgetLine != null) {
             budgetLineContract.setCurrentYear8MonthsActuals(currentYearBudgetLine.getEightMonthActualAmount());
             budgetLineContract.setCurrentYear4MonthsProbables(currentYearBudgetLine.getFourMonthProbableAmount());
         }
-        budgetLineContract.setPreviousYearActuals(actualAmount(budgetLinesMatching, 1));
-        budgetLineContract.setYearMinus1Actuals(actualAmount(budgetLinesMatching, 2));
-        budgetLineContract.setYearMinus2Actuals(actualAmount(budgetLinesMatching, 3));
-
+        budgetLineContract.setPreviousYearActuals(actualAmount(budgetLinesMatching, PREV_YEAR));
+        budgetLineContract.setYearMinus1Actuals(actualAmount(budgetLinesMatching, PREV_YEAR_MINUS_ONE));
+        budgetLineContract.setYearMinus2Actuals(actualAmount(budgetLinesMatching, PREV_YEAR_MINUS_TWO));
+        budgetLineContract.setVoided(false);
+        budgetLineContract.setEligibleForDeletion(evaluateBudgetLineEligibilityForDeletion(budgetLineContract, budgetLinesMatching));
         return budgetLineContract;
+    }
+
+    public boolean evaluateBudgetLineEligibilityForDeletion(BudgetLineContract budgetLineContract, BudgetLine[] budgetLinesMatching) {
+        BigDecimal prevYearMinusOneBudgeted = budgetedAmount(budgetLinesMatching, PREV_YEAR_MINUS_ONE);
+        BigDecimal prevYearMinusOneProbables = probableAmount(budgetLinesMatching, PREV_YEAR_MINUS_ONE);
+
+        BigDecimal prevYearBudgeted = budgetedAmount(budgetLinesMatching, PREV_YEAR);
+        BigDecimal prevYearActual = actualAmount(budgetLinesMatching, PREV_YEAR);
+        BigDecimal prevYearEightMonthActual = eightMonthActualAmount(budgetLinesMatching, PREV_YEAR);
+
+        BigDecimal currentYearProbables = probableAmount(budgetLinesMatching, CURRENT_YEAR);
+        BigDecimal currentYearActual = actualAmount(budgetLinesMatching, CURRENT_YEAR);
+        BigDecimal currentYearEightMonthActual = eightMonthActualAmount(budgetLinesMatching, CURRENT_YEAR);
+
+        return (true
+            &&(prevYearMinusOneProbables == null || prevYearMinusOneProbables.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO)
+            &&(prevYearMinusOneBudgeted == null || prevYearMinusOneBudgeted.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO)
+                &&(prevYearBudgeted == null || prevYearBudgeted.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO)
+                &&(prevYearActual == null || prevYearActual.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO)
+                &&(prevYearEightMonthActual == null || prevYearEightMonthActual.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO)
+                    &&(currentYearProbables == null || currentYearProbables.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO)
+                    &&(currentYearActual == null || currentYearActual.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO)
+                    &&(currentYearEightMonthActual == null || currentYearEightMonthActual.compareTo(BigDecimal.ZERO) == INT_CONST_ZERO));
+
     }
 
     private BigDecimal actualAmount(BudgetLine[] budgetLinesMatching, int index) {
         BudgetLine matching = budgetLinesMatching[index];
         return matching == null? null : matching.getActualAmount();
+    }
+
+    private BigDecimal budgetedAmount(BudgetLine[] budgetLinesMatching, int index) {
+        BudgetLine matching = budgetLinesMatching[index];
+        return matching == null? null : matching.getBudgetedAmount();
+    }
+
+    private BigDecimal eightMonthActualAmount(BudgetLine[] budgetLinesMatching, int index) {
+        BudgetLine matching = budgetLinesMatching[index];
+        return matching == null? null : matching.getEightMonthActualAmount();
+    }
+
+    private BigDecimal probableAmount(BudgetLine[] budgetLinesMatching, int index) {
+        BudgetLine matching = budgetLinesMatching[index];
+        return matching == null? null : matching.getFourMonthProbableAmount();
     }
 
     public BudgetLine updateActuals(BudgetLine lineToBeUpdated, BudgetLineContract budgetLineContract) {

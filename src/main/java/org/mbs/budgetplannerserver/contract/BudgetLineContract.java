@@ -19,6 +19,8 @@ public class BudgetLineContract {
     private BigDecimal majorHeadGroupDisplayOrder;
     private String majorHead;
     private String minorHead;
+    private Boolean isEligibleForDeletion;
+    private Boolean isVoided;
 
     public Long getId() {
         return id;
@@ -146,5 +148,21 @@ public class BudgetLineContract {
 
     public void setMinorHead(String minorHead) {
         this.minorHead = minorHead;
+    }
+
+    public Boolean getEligibleForDeletion() {
+        return isEligibleForDeletion;
+    }
+
+    public void setEligibleForDeletion(Boolean eligibleForDeletion) {
+        isEligibleForDeletion = eligibleForDeletion;
+    }
+
+    public Boolean getVoided() {
+        return isVoided;
+    }
+
+    public void setVoided(Boolean voided) {
+        isVoided = voided;
     }
 }

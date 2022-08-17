@@ -103,6 +103,13 @@ public class Budget extends BaseModel {
 		budgetLine.setBudget(this);
 	}
 
+	public void removeBudgetLine(BudgetLine budgetLine) {
+		this.getBudgetLines().remove(budgetLine);
+		if(budgetLine != null) {
+			budgetLine.setVoided(true);
+		}
+	}
+
 	public PreviousYearBudgets getPreviousYearBudgets() {
 		if (previousYearBudgets != null) {
 			return previousYearBudgets;
