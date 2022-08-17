@@ -38,7 +38,7 @@ public class BudgetService {
         return budget == null ? createBudgetInternal(year - minus, user, withBudgeLines) : budget;
     }
 
-    public Budget create(int year, Double openingBalance, long population) {
+    public Budget create(int year, BigDecimal openingBalance, long population) {
         User user = userService.getUser();
         return createBudgetInternal(year, user, true, openingBalance, population);
     }
@@ -63,12 +63,12 @@ public class BudgetService {
     }
 
     private Budget createBudgetInternal(int year, User user, boolean withBudgetLines) {
-        return createBudgetInternal(year, user, withBudgetLines, 0d, 0l);
+        return createBudgetInternal(year, user, withBudgetLines, BigDecimal.ZERO, 0l);
     }
 
-    private Budget createBudgetInternal(int year, User user, boolean withBudgetLines, Double openingBalance, long population) {
+    private Budget createBudgetInternal(int year, User user, boolean withBudgetLines, BigDecimal openingBalance, long population) {
         BudgetBuilder budgetBuilder = new BudgetBuilder()
-                .withOpeningBalance(BigDecimal.valueOf(openingBalance))
+                .withOpeningBalance(openingBalance)
                 .withClosingBalance(BigDecimal.ZERO)
                 .withPopulation(population)
                 .withFinancialYear(year)
