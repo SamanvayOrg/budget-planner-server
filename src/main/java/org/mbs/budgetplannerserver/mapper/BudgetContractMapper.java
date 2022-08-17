@@ -51,16 +51,34 @@ public class BudgetContractMapper {
     }
 
     public Budget withUpdatedBudgeted(BudgetContract budgetContract, Budget budget, BudgetLineService budgetLineService) {
-        BigDecimal closingBalance = budgetContract.getOpeningBalance();
-//         budgetContract.getBudgetLines().stream().filter(budgetContract -> budgetContract.getMajorHeadGroup().equals("Revenue Receipt"))
-//                 .forEach(budgetLineContract -> closingBalance += budgetLineContract.getBudgetedAmount()); ;
-        budget.setClosingBalance(budgetContract.getClosingBalance());
+        computeClosingBalance(budgetContract, budget);
         budgetContract
                 .getBudgetLines()
                 .stream()
                 .forEach(budgetlineContract -> budget.addBudgetLine(updateBudgeted(budgetlineContract, budget, budgetLineService)));
 
         return budget;
+    }
+
+    private void computeClosingBalance(BudgetContract budgetContract, Budget budget) {
+        BigDecimal closingBalance = budgetContract.getOpeningBalance();
+        closingBalance.add(budgetContract.getBudgetLines().stream()
+                .filter(bc -> bc.getMajorHeadGroup().equals("Revenue Receipt"))
+                .map(BudgetLineContract::getBudgetedAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        closingBalance.add(budgetContract.getBudgetLines().stream()
+                .filter(bc -> bc.getMajorHeadGroup().equals("Assets"))
+                .map(BudgetLineContract::getBudgetedAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        closingBalance.subtract(budgetContract.getBudgetLines().stream()
+                .filter(bc -> bc.getMajorHeadGroup().equals("Expenses"))
+                .map(BudgetLineContract::getBudgetedAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        closingBalance.subtract(budgetContract.getBudgetLines().stream()
+                .filter(bc -> bc.getMajorHeadGroup().equals("Liability"))
+                .map(BudgetLineContract::getBudgetedAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        budget.setClosingBalance(budgetContract.getClosingBalance());
     }
 
     private BudgetLine updateBudgeted(BudgetLineContract budgetLineContract, Budget budget, BudgetLineService budgetLineService) {
