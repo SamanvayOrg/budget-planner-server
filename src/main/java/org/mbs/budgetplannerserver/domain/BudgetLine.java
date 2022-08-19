@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "budget_line")
@@ -116,6 +117,25 @@ public class BudgetLine extends BaseModel{
 
     public void setDisplayOrder(BigDecimal order) {
         this.displayOrder = order;
+    }
+
+
+    public enum AmountType {BUDGETED, ESTIMATES, ACTUALS};
+
+    public boolean canBeDeleted(AmountType amountType) {
+        switch(amountType) {
+            case ESTIMATES: return nullOrZero(getBudgetedAmount());
+            case ACTUALS: return isAllNullOrZero(List.of(getBudgetedAmount(), getFourMonthProbableAmount(), getEightMonthActualAmount()));
+            default: return true;
+        }
+    }
+
+    private static boolean isAllNullOrZero(List<BigDecimal> amounts) {
+        return amounts.stream().allMatch(BudgetLine::nullOrZero);
+    }
+
+    private static boolean nullOrZero(BigDecimal amount) {
+        return amount == null || amount.compareTo(BigDecimal.ZERO) == 0;
     }
 
     public String getFullCode() {

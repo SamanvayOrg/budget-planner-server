@@ -5,13 +5,14 @@ import org.mbs.budgetplannerserver.contract.BudgetLineContract;
 import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.BudgetLine;
 import org.mbs.budgetplannerserver.domain.BudgetLineDetail;
-import org.mbs.budgetplannerserver.domain.PreviousYearBudgets;
 import org.mbs.budgetplannerserver.service.BudgetLineService;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.mbs.budgetplannerserver.domain.BudgetLine.AmountType.*;
 
 public class BudgetContractMapper {
     public BudgetContract map(Budget budget) {
@@ -38,8 +39,10 @@ public class BudgetContractMapper {
                 .getBudgetLines()
                 .stream()
                 .forEach(budgetlineContract -> {
-                    if ((isChosenForDeletionAndIsEligible(budgetlineContract, budget))) {
-                        budget.removeBudgetLine(budget.matchingBudgetLine(budgetLineDetail(budgetlineContract)));
+                    BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetlineContract));
+
+                    if ((shouldBeDeleted(budgetlineContract, budgetLine, ACTUALS))) {
+                        budget.removeBudgetLine(budgetLine);
                     } else {
                         budget.addBudgetLine(updateActuals(budgetlineContract, budget, budgetLineService));
                     }
@@ -53,8 +56,10 @@ public class BudgetContractMapper {
                 .getBudgetLines()
                 .stream()
                 .forEach(budgetlineContract -> {
-                    if ((isChosenForDeletionAndIsEligible(budgetlineContract, budget))) {
-                        budget.removeBudgetLine(budget.matchingBudgetLine(budgetLineDetail(budgetlineContract)));
+                    BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetlineContract));
+
+                    if ((shouldBeDeleted(budgetlineContract, budgetLine, ESTIMATES))) {
+                        budget.removeBudgetLine(budgetLine);
                     } else {
                         budget.addBudgetLine(updateEstimates(budgetlineContract, budget, budgetLineService));
                     }
@@ -69,7 +74,9 @@ public class BudgetContractMapper {
                 .getBudgetLines()
                 .stream()
                 .forEach(budgetlineContract -> {
-                    if ((isChosenForDeletionAndIsEligible(budgetlineContract, budget))) {
+                    BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetlineContract));
+
+                    if ((shouldBeDeleted(budgetlineContract, budgetLine, BUDGETED))) {
                         budget.removeBudgetLine(budget.matchingBudgetLine(budgetLineDetail(budgetlineContract)));
                     } else {
                         budget.addBudgetLine(updateBudgeted(budgetlineContract, budget, budgetLineService));
@@ -134,17 +141,13 @@ public class BudgetContractMapper {
         return new BudgetLineDetail(budgetLineContract.getFunctionCode(), budgetLineContract.getDetailedHeadCode(), budgetLineContract.getName());
     }
 
-    private Boolean isChosenForDeletionAndIsEligible(BudgetLineContract budgetLineContract, Budget budget) {
+    private Boolean shouldBeDeleted(BudgetLineContract budgetLineContract, BudgetLine budgetLine, BudgetLine.AmountType amountType) {
+        if (budgetLine == null) {
+            return budgetLineContract.getVoided();
+        }
         if(budgetLineContract == null || !budgetLineContract.getVoided()) {
             return false;
         }
-        BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetLineContract));
-        if (budgetLine != null) {
-            PreviousYearBudgets previousYearBudgets = budget.getPreviousYearBudgets();
-            BudgetLine[] budgetLinesMatching = previousYearBudgets.getBudgetLinesMatching(new BudgetLineDetail(budgetLine));
-            return (new BudgetLineContractMapper()
-                    .evaluateBudgetLineEligibilityForDeletion(budgetLineContract, budgetLinesMatching));
-        }
-        return budgetLineContract.getVoided();
+        return budgetLine.canBeDeleted(amountType) && budgetLineContract.getVoided();
     }
 }
