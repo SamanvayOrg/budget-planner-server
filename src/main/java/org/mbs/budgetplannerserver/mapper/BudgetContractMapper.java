@@ -30,7 +30,8 @@ public class BudgetContractMapper {
                 .filter(budgetLine -> budgetLine != null && !budgetLine.getVoided())
                 .collect(Collectors.toList());
         budgetContract.setBudgetLines(contractLines);
-
+        budgetContract.setBudgetStatusAuditContract(new BudgetStatusAuditContractMapper()
+                .fromBudgetStatusAudit(budget.getLatestBudgetStatusAudit()));
         return budgetContract;
     }
 
@@ -47,7 +48,6 @@ public class BudgetContractMapper {
                         budget.addBudgetLine(updateActuals(budgetlineContract, budget, budgetLineService));
                     }
                 });
-
         return budget;
     }
 

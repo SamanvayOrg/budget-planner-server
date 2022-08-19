@@ -7,6 +7,7 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +31,10 @@ public class Budget extends BaseModel {
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "budget")
 	private Set<BudgetLine> budgetLines;
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "budget")
+	@OrderBy("createdAt desc")
+	private List<BudgetStatusAudit> budgetStatusAudits;
 
 	@Transient
 	private PreviousYearBudgets previousYearBudgets;
@@ -124,5 +129,17 @@ public class Budget extends BaseModel {
 	public BudgetLine matchingBudgetLine(BudgetLineDetail budgetLineDetail) {
 		Optional<BudgetLine> matchingLine = getBudgetLines().stream().filter(line -> budgetLineDetail.matches(line)).findFirst();
 		return matchingLine.orElse(null);
+	}
+
+	public void setBudgetStatusAudits(List<BudgetStatusAudit> budgetStatusAudits) {
+		this.budgetStatusAudits = budgetStatusAudits;
+	}
+
+	public List<BudgetStatusAudit> getBudgetStatusAudits() {
+		return budgetStatusAudits;
+	}
+
+	public BudgetStatusAudit getLatestBudgetStatusAudit() {
+		return budgetStatusAudits.stream().findFirst().orElseThrow(EntityNotFoundException::new);
 	}
 }

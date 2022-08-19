@@ -17,6 +17,8 @@ import java.util.List;
 @SQLDelete(sql = "UPDATE budget_line SET is_voided = true WHERE id=?")
 @Where(clause = "is_voided=false")
 public class BudgetLine extends BaseModel{
+
+    public enum AmountType {BUDGETED, ESTIMATES, ACTUALS};
     @ManyToOne(targetEntity = Budget.class)
     @JoinColumn(name = "budget_id")
     private Budget budget;
@@ -119,8 +121,6 @@ public class BudgetLine extends BaseModel{
         this.displayOrder = order;
     }
 
-
-    public enum AmountType {BUDGETED, ESTIMATES, ACTUALS};
 
     public boolean canBeDeleted(AmountType amountType) {
         switch(amountType) {

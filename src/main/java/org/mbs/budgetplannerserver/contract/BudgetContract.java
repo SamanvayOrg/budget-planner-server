@@ -12,6 +12,8 @@ public class BudgetContract {
 	private Long population;
 	private List<BudgetLineContract> budgetLines = new ArrayList<>();
 
+	private BudgetStatusAuditContract budgetStatusAuditContract;
+
 	public Long getId() {
 		return id;
 	}
@@ -57,5 +59,13 @@ public class BudgetContract {
 
 	public void setBudgetLines(List<BudgetLineContract> budgetLines) {
 		this.budgetLines = budgetLines;
+	}
+
+	public BudgetStatusAuditContract getBudgetStatusAuditContract() {
+		return budgetStatusAuditContract;
+	}
+
+	public void setBudgetStatusAuditContract(BudgetStatusAuditContract budgetStatusAuditContract) {
+		this.budgetStatusAuditContract = budgetStatusAuditContract;
 	}
 }

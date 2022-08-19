@@ -1,11 +1,15 @@
 package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.contract.BudgetContract;
+import org.mbs.budgetplannerserver.contract.BudgetStatusAuditContract;
 import org.mbs.budgetplannerserver.domain.Budget;
+import org.mbs.budgetplannerserver.domain.BudgetStatus;
 import org.mbs.budgetplannerserver.domain.Year;
 import org.mbs.budgetplannerserver.mapper.BudgetContractMapper;
+import org.mbs.budgetplannerserver.mapper.BudgetStatusAuditContractMapper;
 import org.mbs.budgetplannerserver.service.BudgetLineService;
 import org.mbs.budgetplannerserver.service.BudgetService;
+import org.mbs.budgetplannerserver.service.BudgetStatusAuditService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +25,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 public class BudgetController {
     private final BudgetService budgetService;
     private final BudgetLineService budgetLineService;
+    private final BudgetStatusAuditService budgetStatusAuditService;
 
-    public BudgetController(BudgetService budgetService, BudgetLineService budgetLineService) {
+    public BudgetController(BudgetService budgetService, BudgetLineService budgetLineService,
+                            BudgetStatusAuditService budgetStatusAuditService) {
         this.budgetService = budgetService;
         this.budgetLineService = budgetLineService;
+        this.budgetStatusAuditService = budgetStatusAuditService;
     }
 
     @RequestMapping(value = "/api/budget", method = GET)
@@ -90,6 +97,13 @@ public class BudgetController {
     public BudgetContract updatePopulationAndOpeningBalance(@PathVariable Long id, @RequestBody BudgetPropertiesContract budgetPropertiesContract) {
         Budget budget = budgetService.findById(id).orElseThrow(NOT_FOUND());
         return new BudgetContractMapper().map(budgetService.updateProperties(budget, budgetPropertiesContract));
+    }
+
+    @RequestMapping(value = "/api/budget/{id}/status", method = PUT)
+    @PreAuthorize("hasAnyAuthority('write')") // ✨ 👈 New line ✨
+    public BudgetStatusAuditContract updateBudgetStatus(@PathVariable Long id, @RequestParam BudgetStatus budgetStatus) {
+        Budget budget = budgetService.findById(id).orElseThrow(NOT_FOUND());
+        return new BudgetStatusAuditContractMapper().fromBudgetStatusAudit(budgetStatusAuditService.createAuditEntry(budget, budgetStatus));
     }
 
     private Supplier<ResponseStatusException> NOT_FOUND() {

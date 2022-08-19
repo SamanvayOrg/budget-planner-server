@@ -18,12 +18,14 @@ public class BudgetService {
     private final UserService userService;
     private final BudgetRepository budgetRepository;
     private final SampleBudgetLineRepository sampleBudgetLineRepository;
+    private final BudgetStatusAuditService budgetStatusAuditService;
 
     @Autowired
-    public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository) {
+    public BudgetService(UserService userService, BudgetRepository budgetRepository, SampleBudgetLineRepository sampleBudgetLineRepository, BudgetStatusAuditService budgetStatusAuditService) {
         this.userService = userService;
         this.budgetRepository = budgetRepository;
         this.sampleBudgetLineRepository = sampleBudgetLineRepository;
+        this.budgetStatusAuditService = budgetStatusAuditService;
     }
 
     public Optional<Budget> getBudgetForFinancialYear(int year) {
@@ -72,6 +74,7 @@ public class BudgetService {
                 .withClosingBalance(BigDecimal.ZERO)
                 .withPopulation(population)
                 .withFinancialYear(year)
+                .withBudgetStatusAudit(budgetStatusAuditService.buildBudgetStatusAudit(null, BudgetStatus.Draft))
                 .forUser(user);
         if (withBudgetLines) {
             budgetBuilder.withSampleBudgetLines(sampleBudgetLineRepository, user);
@@ -79,6 +82,7 @@ public class BudgetService {
 
         Budget budget = budgetBuilder.build();
         budgetRepository.save(budget);
+
 
         return budget;
     }
