@@ -109,8 +109,8 @@ public class Budget extends BaseModel {
 	}
 
 	public void removeBudgetLine(BudgetLine budgetLine) {
-		this.getBudgetLines().remove(budgetLine);
 		if(budgetLine != null) {
+			this.getBudgetLines().remove(budgetLine);
 			budgetLine.setVoided(true);
 		}
 	}

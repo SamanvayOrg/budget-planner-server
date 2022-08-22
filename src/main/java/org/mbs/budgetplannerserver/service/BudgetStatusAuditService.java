@@ -32,7 +32,9 @@ public class BudgetStatusAuditService {
     public BudgetStatusAudit buildBudgetStatusAudit(Budget budget, BudgetStatus currentBudgetStatus) {
         User user = userService.getUser();
         Optional<BudgetStatusAudit> prevBudgetStatusAudit = budgetStatusAuditRepository.findFirstByBudgetOrderByCreatedAtDesc(budget);
-        BudgetStatus prevBudgetStatus = prevBudgetStatusAudit.isPresent() ? prevBudgetStatusAudit.get().getCurrentBudgetStatus(): BudgetStatus.Draft;
+        BudgetStatus prevBudgetStatus = prevBudgetStatusAudit.isPresent() ?
+                prevBudgetStatusAudit.get().getCurrentBudgetStatus():
+                BudgetStatus.ApprovedByGBM;
         if(prevBudgetStatus.isTransitionAllowed(currentBudgetStatus)) {
             return new BudgetStatusAudit(budget, user, currentBudgetStatus, prevBudgetStatus);
         } else {
