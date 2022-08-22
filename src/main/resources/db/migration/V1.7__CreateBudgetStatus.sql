@@ -20,4 +20,4 @@ alter table budget_status_audit
 
 INSERT INTO public.budget_status_audit
 (is_voided, created_at, current_budget_status, prev_budget_status, budget_id, user_id)
-SELECT false, '2022-08-22 11:10:14.000000', 1, 1, id, 6  FROM budget b;
+SELECT false, '2022-08-22 11:10:14.000000', 0, 0, id, 6  FROM budget b;
