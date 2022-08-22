@@ -42,7 +42,7 @@ public class BudgetContractMapper {
                 .forEach(budgetlineContract -> {
                     BudgetLine budgetLine = budget.matchingBudgetLine(budgetLineDetail(budgetlineContract));
 
-                    if ((shouldBeDeleted(budgetlineContract, budgetLine, ACTUALS))) {
+                    if (shouldBeDeleted(budgetlineContract, budgetLine, ACTUALS)) {
                         budget.removeBudgetLine(budgetLine);
                     } else {
                         budget.addBudgetLine(updateActuals(budgetlineContract, budget, budgetLineService));
@@ -143,9 +143,10 @@ public class BudgetContractMapper {
 
     private Boolean shouldBeDeleted(BudgetLineContract budgetLineContract, BudgetLine budgetLine, BudgetLine.AmountType amountType) {
         if (budgetLine == null) {
-            return budgetLineContract.getVoided();
+            return budgetLineContract.getVoided() != null && budgetLineContract.getVoided();
         }
-        if(budgetLineContract == null || !budgetLineContract.getVoided()) {
+        if(budgetLineContract == null
+                || (budgetLineContract.getVoided() != null && !budgetLineContract.getVoided())) {
             return false;
         }
         return budgetLine.canBeDeleted(amountType) && budgetLineContract.getVoided();
