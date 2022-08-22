@@ -23,7 +23,7 @@ public class BudgetStatusAudit extends BaseModel{
 
     private BudgetStatus prevBudgetStatus;
 
-    @Column(name="created_at", insertable = false, updatable = false)
+    @Column(name="created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
@@ -32,6 +32,7 @@ public class BudgetStatusAudit extends BaseModel{
         this.user = user;
         this.currentBudgetStatus = currentBudgetStatus;
         this.prevBudgetStatus = prevBudgetStatus;
+        this.createdAt = new Date();
     }
 
     public BudgetStatusAudit() {

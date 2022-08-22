@@ -4,16 +4,17 @@ import org.mbs.budgetplannerserver.domain.BudgetStatus;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BudgetStatusAuditContract {
 
         private UserContract userContract;
 
-        private BudgetStatus currentBudgetStatus;
+        private String currentBudgetStatus;
 
-        private BudgetStatus prevBudgetStatus;
+        private String prevBudgetStatus;
 
-        private List<BudgetStatus> allowedNextBudgetStatuses;
+        private List<String> allowedNextBudgetStatuses;
 
         private Date createdAt;
 
@@ -25,28 +26,28 @@ public class BudgetStatusAuditContract {
                 this.userContract = userContract;
         }
 
-        public BudgetStatus getCurrentBudgetStatus() {
+        public String getCurrentBudgetStatus() {
                 return currentBudgetStatus;
         }
 
-        public void setCurrentBudgetStatus(BudgetStatus currentBudgetStatus) {
+        public void setCurrentBudgetStatus(String currentBudgetStatus) {
                 this.currentBudgetStatus = currentBudgetStatus;
         }
 
-        public BudgetStatus getPrevBudgetStatus() {
+        public String getPrevBudgetStatus() {
                 return prevBudgetStatus;
         }
 
-        public void setPrevBudgetStatus(BudgetStatus prevBudgetStatus) {
+        public void setPrevBudgetStatus(String prevBudgetStatus) {
                 this.prevBudgetStatus = prevBudgetStatus;
         }
 
-        public List<BudgetStatus> getAllowedNextBudgetStatuses() {
+        public List<String> getAllowedNextBudgetStatuses() {
                 return allowedNextBudgetStatuses;
         }
 
         public void setAllowedNextBudgetStatuses(List<BudgetStatus> allowedNextBudgetStatuses) {
-                this.allowedNextBudgetStatuses = allowedNextBudgetStatuses;
+                this.allowedNextBudgetStatuses = allowedNextBudgetStatuses.stream().map(BudgetStatus::toString).collect(Collectors.toList());
         }
 
         public Date getCreatedAt() {

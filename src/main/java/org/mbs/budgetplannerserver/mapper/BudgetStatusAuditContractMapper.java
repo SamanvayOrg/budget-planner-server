@@ -18,8 +18,8 @@ public class BudgetStatusAuditContractMapper {
     public BudgetStatusAuditContract fromBudgetStatusAudit(BudgetStatusAudit budgetStatusAudit) {
         BudgetStatusAuditContract budgetStatusAuditContract = new BudgetStatusAuditContract();
         budgetStatusAuditContract.setUserContract(new UserContractMapper().fromUser(budgetStatusAudit.getUser()));
-        budgetStatusAuditContract.setPrevBudgetStatus(budgetStatusAudit.getPrevBudgetStatus());
-        budgetStatusAuditContract.setCurrentBudgetStatus(budgetStatusAudit.getCurrentBudgetStatus());
+        budgetStatusAuditContract.setPrevBudgetStatus(budgetStatusAudit.getPrevBudgetStatus().toString());
+        budgetStatusAuditContract.setCurrentBudgetStatus(budgetStatusAudit.getCurrentBudgetStatus().toString());
         budgetStatusAuditContract.setCreatedAt(budgetStatusAudit.getCreatedAt());
         budgetStatusAuditContract.setAllowedNextBudgetStatuses(budgetStatusAudit.getCurrentBudgetStatus().allowedTransitionValues());
         return budgetStatusAuditContract;
