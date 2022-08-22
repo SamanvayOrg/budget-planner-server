@@ -61,7 +61,9 @@ public class BudgetLineContractMapper {
     }
 
     public boolean evaluateBudgetLineEligibilityForDeletion(BudgetLine budgetLine, BudgetLine currentYearBudgetLine, BudgetLine previousYearBudgetLine) {
-        return currentYearBudgetLine.canBeDeleted(ESTIMATES) && previousYearBudgetLine.canBeDeleted(ACTUALS) && budgetLine.canBeDeleted(BUDGETED);
+        return (currentYearBudgetLine == null || currentYearBudgetLine.canBeDeleted(ESTIMATES)) &&
+                (previousYearBudgetLine == null || previousYearBudgetLine.canBeDeleted(ACTUALS)) &&
+                (budgetLine == null || budgetLine.canBeDeleted(BUDGETED));
     }
 
     private BigDecimal actualAmount(BudgetLine[] budgetLinesMatching, int index) {

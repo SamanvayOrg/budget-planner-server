@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -125,7 +126,7 @@ public class BudgetLine extends BaseModel{
     public boolean canBeDeleted(AmountType amountType) {
         switch(amountType) {
             case ESTIMATES: return nullOrZero(getBudgetedAmount());
-            case ACTUALS: return isAllNullOrZero(List.of(getBudgetedAmount(), getFourMonthProbableAmount(), getEightMonthActualAmount()));
+            case ACTUALS: return isAllNullOrZero(Arrays.asList(getBudgetedAmount(), getFourMonthProbableAmount(), getEightMonthActualAmount()));
             default: return true;
         }
     }
