@@ -145,8 +145,8 @@ public class BudgetContractMapper {
         if (budgetLine == null) {
             return budgetLineContract.getVoided() != null && budgetLineContract.getVoided();
         }
-        if(budgetLineContract == null
-                || (budgetLineContract.getVoided() != null && !budgetLineContract.getVoided())) {
+        if(budgetLineContract == null || budgetLineContract.getVoided() == null
+                || !budgetLineContract.getVoided()) {
             return false;
         }
         return budgetLine.canBeDeleted(amountType) && budgetLineContract.getVoided();

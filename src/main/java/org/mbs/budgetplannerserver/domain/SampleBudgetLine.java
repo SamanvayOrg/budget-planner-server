@@ -80,7 +80,7 @@ public class SampleBudgetLine  extends BaseModel{
         budgetLine.setFunction(getFunction());
         budgetLine.setDetailedHead(getDetailedHead());
         budgetLine.setDisplayOrder(getDisplayOrder());
-
+        budgetLine.setVoided(false);
         return budgetLine;
     }
 }
