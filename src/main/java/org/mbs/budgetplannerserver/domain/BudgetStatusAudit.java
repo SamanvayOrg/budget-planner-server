@@ -58,4 +58,8 @@ public class BudgetStatusAudit extends BaseModel{
     public Date getCreatedAt() {
         return createdAt;
     }
+
+    public void setBudget(Budget budget) {
+        this.budget = budget;
+    }
 }

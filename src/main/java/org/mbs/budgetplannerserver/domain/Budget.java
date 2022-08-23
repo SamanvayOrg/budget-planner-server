@@ -133,6 +133,7 @@ public class Budget extends BaseModel {
 
 	public void setBudgetStatusAudits(List<BudgetStatusAudit> budgetStatusAudits) {
 		this.budgetStatusAudits = budgetStatusAudits;
+		this.budgetStatusAudits.forEach(bsa -> bsa.setBudget(this));
 	}
 
 	public List<BudgetStatusAudit> getBudgetStatusAudits() {

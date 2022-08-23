@@ -74,6 +74,7 @@ public class BudgetService {
                 .withClosingBalance(BigDecimal.ZERO)
                 .withPopulation(population)
                 .withFinancialYear(year)
+                .withBudgetStatusAudit(budgetStatusAuditService.buildBudgetStatusAudit(null, BudgetStatus.Draft))
                 .forUser(user);
         if (withBudgetLines) {
             budgetBuilder.withSampleBudgetLines(sampleBudgetLineRepository, user);
@@ -81,8 +82,6 @@ public class BudgetService {
 
         Budget budget = budgetBuilder.build();
         budget = budgetRepository.save(budget);
-
-        budgetStatusAuditService.createAuditEntry(budget, BudgetStatus.Draft);
         return budget;
     }
 
