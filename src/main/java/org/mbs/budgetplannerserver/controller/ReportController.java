@@ -48,7 +48,7 @@ public class ReportController {
 
     private ResponseEntity<byte[]> createResponseEntity(byte[] report,
             String fileName)  {
-        String headerValue = String.format("attachment; filename=\"%s\".xlsx", fileName);
+        String headerValue = String.format("attachment; filename=%s.xlsx", fileName);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)

@@ -12,7 +12,9 @@ class StylesGenerator {
     Map<CustomCellStyle, CellStyle> prepareStyles(Workbook wb) {
         Font boldArial = createBoldArialFont(wb);
         Font redBoldArial = createRedBoldArialFont(wb);
+        Font largeBoldArial = createLargeBoldArialFont(wb);
 
+        CellStyle centeredBoldArialWithoutBorderStyle = createCenteredBoldArialWithoutBorderStyle(wb, largeBoldArial);
         CellStyle rightAlignedStyle = createRightAlignedStyle(wb);
         CellStyle greyCenteredBoldArialWithBorderStyle =
                 createGreyCenteredBoldArialWithBorderStyle(wb, boldArial);
@@ -22,11 +24,23 @@ class StylesGenerator {
                 createRightAlignedDateFormatStyle(wb);
 
         return Map.of(
+                CustomCellStyle.CENTERED_BOLD_ARIAL_WITHOUT_BORDER, centeredBoldArialWithoutBorderStyle,
                 CustomCellStyle.RIGHT_ALIGNED, rightAlignedStyle,
                 CustomCellStyle.GREY_CENTERED_BOLD_ARIAL_WITH_BORDER, greyCenteredBoldArialWithBorderStyle,
                 CustomCellStyle.RED_BOLD_ARIAL_WITH_BORDER, redBoldArialWithBorderStyle,
                 CustomCellStyle.RIGHT_ALIGNED_DATE_FORMAT, rightAlignedDateFormatStyle
         );
+    }
+
+    private CellStyle createCenteredBoldArialWithoutBorderStyle(Workbook wb, Font largeBoldArial) {
+        CellStyle style = wb.createCellStyle();
+        style.setBorderBottom(BorderStyle.NONE);
+        style.setBorderTop(BorderStyle.NONE);
+        style.setBorderRight(BorderStyle.NONE);
+        style.setBorderLeft(BorderStyle.NONE);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setFont(largeBoldArial);
+        return style;
     }
 
     private CellStyle createRightAlignedDateFormatStyle(Workbook wb) {
@@ -42,7 +56,7 @@ class StylesGenerator {
         return style;
     }
 
-    private CellStyle createGreyCenteredBoldArialWithBorderStyle(Workbook wb , Font boldArial){
+    private CellStyle createGreyCenteredBoldArialWithBorderStyle(Workbook wb, Font boldArial) {
         CellStyle style = createBorderedStyle(wb);
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setFont(boldArial);
@@ -84,6 +98,14 @@ class StylesGenerator {
         Font font = wb.createFont();
         font.setFontName("Arial");
         font.setBold(true);
+        return font;
+    }
+
+    private Font createLargeBoldArialFont(Workbook wb) {
+        Font font = wb.createFont();
+        font.setFontName("Arial");
+        font.setBold(true);
+        font.setFontHeightInPoints((short) 24);
         return font;
     }
 }
