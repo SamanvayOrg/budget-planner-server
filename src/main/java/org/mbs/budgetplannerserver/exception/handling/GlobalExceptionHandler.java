@@ -17,6 +17,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j(topic = "GLOBAL_EXCEPTION_HANDLER")
@@ -59,6 +60,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException dataIntegrityViolationException, WebRequest request) {
         log.error("Encountered dataIntegrityViolationException", dataIntegrityViolationException);
         return buildErrorResponse(dataIntegrityViolationException, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ResponseEntity<Object> handleIOException(IOException exception, WebRequest request) {
+        log.error("IOException error occurred", exception);
+        return buildErrorResponse(exception, "IOException error occurred", HttpStatus.SERVICE_UNAVAILABLE, request);
     }
 
     @ExceptionHandler(Exception.class)
