@@ -12,7 +12,7 @@ import org.mbs.budgetplannerserver.domain.code.MinorHead;
 
 import java.math.BigDecimal;
 
-import static org.mbs.budgetplannerserver.domain.BudgetLine.AmountType.*;
+import static org.mbs.budgetplannerserver.domain.AmountType.*;
 
 public class BudgetLineContractMapper {
 

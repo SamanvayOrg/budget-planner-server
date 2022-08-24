@@ -19,7 +19,6 @@ import java.util.List;
 @Where(clause = "is_voided=false")
 public class BudgetLine extends BaseModel{
 
-    public enum AmountType {BUDGETED, ESTIMATES, ACTUALS};
     @ManyToOne(targetEntity = Budget.class)
     @JoinColumn(name = "budget_id")
     private Budget budget;

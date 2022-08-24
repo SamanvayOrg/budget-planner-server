@@ -2,6 +2,7 @@ package org.mbs.budgetplannerserver.mapper;
 
 import org.mbs.budgetplannerserver.contract.BudgetContract;
 import org.mbs.budgetplannerserver.contract.BudgetLineContract;
+import org.mbs.budgetplannerserver.domain.AmountType;
 import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.BudgetLine;
 import org.mbs.budgetplannerserver.domain.BudgetLineDetail;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.mbs.budgetplannerserver.domain.BudgetLine.AmountType.*;
+import static org.mbs.budgetplannerserver.domain.AmountType.*;
 
 public class BudgetContractMapper {
     public BudgetContract map(Budget budget) {
@@ -141,7 +142,7 @@ public class BudgetContractMapper {
         return new BudgetLineDetail(budgetLineContract.getFunctionCode(), budgetLineContract.getDetailedHeadCode(), budgetLineContract.getName());
     }
 
-    private Boolean shouldBeDeleted(BudgetLineContract budgetLineContract, BudgetLine budgetLine, BudgetLine.AmountType amountType) {
+    private Boolean shouldBeDeleted(BudgetLineContract budgetLineContract, BudgetLine budgetLine, AmountType amountType) {
         if (budgetLine == null) {
             return budgetLineContract.getVoided() != null && budgetLineContract.getVoided();
         }
