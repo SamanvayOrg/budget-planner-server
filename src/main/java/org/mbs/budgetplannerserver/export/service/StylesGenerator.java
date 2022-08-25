@@ -16,8 +16,10 @@ class StylesGenerator {
 
         CellStyle centeredBoldArialWithoutBorderStyle = createCenteredBoldArialWithoutBorderStyle(wb, largeBoldArial);
         CellStyle rightAlignedStyle = createRightAlignedStyle(wb);
+        CellStyle rightAlignedBoldStyle = createRightAlignedBoldStyle(wb, boldArial);
         CellStyle leftAlignedStyle = createLeftAlignedStyle(wb);
         CellStyle centerAlignedStyle = createCenterAlignedStyle(wb);
+        CellStyle centerAlignedBoldStyle = createCenterAlignedBoldStyle(wb, boldArial);
         CellStyle greyCenteredBoldArialWithBorderStyle =
                 createGreyCenteredBoldArialWithBorderStyle(wb, boldArial);
         CellStyle redBoldArialWithBorderStyle =
@@ -28,12 +30,28 @@ class StylesGenerator {
         return Map.of(
                 CustomCellStyle.CENTERED_BOLD_ARIAL_WITHOUT_BORDER, centeredBoldArialWithoutBorderStyle,
                 CustomCellStyle.RIGHT_ALIGNED, rightAlignedStyle,
+                CustomCellStyle.RIGHT_ALIGNED_BOLD, rightAlignedBoldStyle,
+                CustomCellStyle.CENTER_ALIGNED_BOLD, centerAlignedBoldStyle,
                 CustomCellStyle.LEFT_ALIGNED, leftAlignedStyle,
                 CustomCellStyle.CENTER_ALIGNED, centerAlignedStyle,
                 CustomCellStyle.GREY_CENTERED_BOLD_ARIAL_WITH_BORDER, greyCenteredBoldArialWithBorderStyle,
                 CustomCellStyle.RED_BOLD_ARIAL_WITH_BORDER, redBoldArialWithBorderStyle,
                 CustomCellStyle.RIGHT_ALIGNED_DATE_FORMAT, rightAlignedDateFormatStyle
         );
+    }
+
+    private CellStyle createRightAlignedBoldStyle(Workbook wb, Font boldArial) {
+        CellStyle style = wb.createCellStyle();
+        style.setFont(boldArial);
+        style.setAlignment(HorizontalAlignment.RIGHT);
+        return style;
+    }
+
+    private CellStyle createCenterAlignedBoldStyle(Workbook wb, Font boldArial) {
+        CellStyle style = wb.createCellStyle();
+        style.setFont(boldArial);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        return style;
     }
 
     private CellStyle createCenteredBoldArialWithoutBorderStyle(Workbook wb, Font largeBoldArial) {

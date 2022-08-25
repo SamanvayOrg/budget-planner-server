@@ -55,8 +55,8 @@ public class BudgetExcelExcelReportService implements BudgetExcelReportConstants
     }
 
     private void createOpeningBalanceRow(Sheet sheet, Map<CustomCellStyle, CellStyle> styles, Budget budget) {
-        CustomCellStyle rightAligned = CustomCellStyle.RIGHT_ALIGNED;
-        CellStyle cellStyle = styles.get(rightAligned);
+        CustomCellStyle rightAlignedBold = CustomCellStyle.RIGHT_ALIGNED_BOLD;
+        CellStyle cellStyle = styles.get(rightAlignedBold);
         budget.getOpeningBalance();
 
         Row row = sheet.createRow(OPENING_BALANCE_ROW);
@@ -67,7 +67,7 @@ public class BudgetExcelExcelReportService implements BudgetExcelReportConstants
 
         // Creates the cell
         Cell cell = CellUtil.createCell(row, STARTING_COLUMN_NUM, OPENING_BALANCE);
-        cell.setCellStyle(cellStyle);
+        cell.setCellStyle(styles.get(CustomCellStyle.CENTER_ALIGNED_BOLD));
         CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
 
 
