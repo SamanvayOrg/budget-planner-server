@@ -9,14 +9,14 @@ import java.io.IOException;
 
 @Service
 public class ReportService {
-    private final BudgetExcelExcelReportService budgetExcelReportService;
-    public ReportService(BudgetExcelExcelReportService budgetExcelReportService) {
+    private final BudgetExcelReportService budgetExcelReportService;
+    public ReportService(BudgetExcelReportService budgetExcelReportService) {
 
        this.budgetExcelReportService = budgetExcelReportService;
     }
-    public byte[] generateBudgetExcelReport(Integer year, AmountType amountType, Budget budget) throws IOException {
+    public byte[] generateBudgetExcelReport(Integer year, AmountType amountType, Budget budget, String languageCode) throws IOException {
         XSSFWorkbook wb = new XSSFWorkbook();
-        return budgetExcelReportService.generateReport(wb, year, amountType, budget);
+        return budgetExcelReportService.generateReport(wb, year, amountType, budget, languageCode);
     }
 
 }

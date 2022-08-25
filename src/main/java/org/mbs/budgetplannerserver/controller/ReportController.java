@@ -36,9 +36,10 @@ public class ReportController {
     @RequestMapping(value = "/api/report/budget", method = GET)
     @ResponseBody
     @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
-    public ResponseEntity<byte[]> getBudgetReportByYear(@RequestParam("year") Integer year, @RequestParam("amountType") AmountType amountType) throws IOException {
+    public ResponseEntity<byte[]> getBudgetReportByYear(@RequestParam("year") Integer year, @RequestParam(value = "languageCode", required = false, defaultValue = "en") String languageCode,
+                                                        @RequestParam("amountType") AmountType amountType) throws IOException {
         Budget budget = budgetService.getBudgetForFinancialYear(new Year(year).getYear()).orElseThrow(NOT_FOUND());
-        byte[] report = reportService.generateBudgetExcelReport(year, amountType, budget);
+        byte[] report = reportService.generateBudgetExcelReport(year, amountType, budget, languageCode);
         return createResponseEntity(report, generateReportNameString(year, amountType, budget));
     }
 
