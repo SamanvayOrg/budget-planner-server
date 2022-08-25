@@ -35,13 +35,14 @@ public class BudgetExcelExcelReportService implements BudgetExcelReportConstants
 
     public byte[] generateReport(Workbook wb, Integer year, AmountType amountType, Budget budget) throws IOException {
         Map<CustomCellStyle, CellStyle> styles = stylesGenerator.prepareStyles(wb);
-        Sheet sheet = wb.createSheet(amountType + "_" +budget.getFinancialYearString());
+        Sheet sheet = wb.createSheet(amountType + " " +budget.getFinancialYearString());
 
         setColumnsWidth(sheet, BudgetReportHeaderForBudgeted.size());
         createTitleRow(sheet, styles, budget, year);
         createSubTitleRow(sheet, styles, budget, year);
         createMergedCenteredTextRowWithoutBorder(sheet, styles, EMPTY_STRING, SUB_TITLE_ROW+1);
         createHeaderRow(sheet, styles, BudgetReportHeaderForBudgeted.size(), year);
+        createOpeningBalanceRow(sheet, styles, budget);
 
 //        createStringsRow(sheet, styles);
 
@@ -51,6 +52,44 @@ public class BudgetExcelExcelReportService implements BudgetExcelReportConstants
         wb.close();
 
         return out.toByteArray();
+    }
+
+    private void createOpeningBalanceRow(Sheet sheet, Map<CustomCellStyle, CellStyle> styles, Budget budget) {
+        CustomCellStyle rightAligned = CustomCellStyle.RIGHT_ALIGNED;
+        CellStyle cellStyle = styles.get(rightAligned);
+        budget.getOpeningBalance();
+
+        Row row = sheet.createRow(OPENING_BALANCE_ROW);
+        // Merges the cells
+        CellRangeAddress cellRangeAddress = new CellRangeAddress(OPENING_BALANCE_ROW, OPENING_BALANCE_ROW, STARTING_COLUMN_NUM,
+                OPENING_BALANCE_START_NUM-1);
+        sheet.addMergedRegion(cellRangeAddress);
+
+        // Creates the cell
+        Cell cell = CellUtil.createCell(row, STARTING_COLUMN_NUM, OPENING_BALANCE);
+        cell.setCellStyle(cellStyle);
+        CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
+
+
+        ArrayList<CustomCellStyleAndValue> customCellStyleAndValueArrayList = new ArrayList<>();
+        for (int i = 4; i > 0; i--) {
+            customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
+                    budget.getPreviousYearBudgets().getBudgetForYear(i).getOpeningBalance().toPlainString()));
+        }
+        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
+               budget.getPreviousYearBudgets().getBudgetForYear(1).getClosingBalance().toPlainString()));
+        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
+                budget.getOpeningBalance().toPlainString()));
+        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
+                budget.getClosingBalance().toPlainString()));
+
+        for (int i = 0, columnNumber = OPENING_BALANCE_START_NUM; columnNumber < OPENING_BALANCE_START_NUM+ customCellStyleAndValueArrayList.size();
+             columnNumber++, i++) {
+            cell = row.createCell(columnNumber);
+            cell.setCellValue(customCellStyleAndValueArrayList.get(i).getValue());
+            cell.setCellStyle(customCellStyleAndValueArrayList.get(i).getStyle());
+        }
+
     }
 
     private void setColumnsWidth(Sheet sheet, int columns) {
@@ -74,9 +113,6 @@ public class BudgetExcelExcelReportService implements BudgetExcelReportConstants
 
     private void createMergedCenteredTextRowWithoutBorder(Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
                                                           String value, int targetRow) {
-        CustomCellStyle centeredBoldArialWithoutBorder = CustomCellStyle.CENTERED_BOLD_ARIAL_WITHOUT_BORDER;
-        CellStyle cellStyle = styles.get(centeredBoldArialWithoutBorder);
-        cellStyle.setWrapText(false);
         Row row = sheet.createRow(targetRow);
         // Merges the cells
         CellRangeAddress cellRangeAddress = new CellRangeAddress(targetRow, targetRow, STARTING_COLUMN_NUM,
@@ -85,6 +121,13 @@ public class BudgetExcelExcelReportService implements BudgetExcelReportConstants
 
         // Creates the cell
         Cell cell = CellUtil.createCell(row, STARTING_COLUMN_NUM, value);
+        CustomCellStyle centeredBoldArialWithoutBorder = CustomCellStyle.CENTERED_BOLD_ARIAL_WITHOUT_BORDER;
+        CellStyle cellStyle = styles.get(centeredBoldArialWithoutBorder);
+        cellStyle.setWrapText(false);
+        cellStyle.setBorderBottom(BorderStyle.NONE);
+        cellStyle.setBorderTop(BorderStyle.NONE);
+        cellStyle.setBorderRight(BorderStyle.NONE);
+        cellStyle.setBorderLeft(BorderStyle.NONE);
         cell.setCellStyle(cellStyle);
         CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
     }

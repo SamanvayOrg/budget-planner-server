@@ -29,8 +29,8 @@ public class PreviousYearBudgets {
         return budgetLineDetails;
     }
 
-    public Budget getBudgetLineForYear(int minus) {
-        assert minus < 4 && minus > 0;
+    public Budget getBudgetForYear(int minus) {
+        assert minus <= 4  && minus > 0;
         return previousYearBudgets[minus - 1];
     }
 }

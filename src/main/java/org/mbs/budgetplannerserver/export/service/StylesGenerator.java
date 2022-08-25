@@ -16,6 +16,8 @@ class StylesGenerator {
 
         CellStyle centeredBoldArialWithoutBorderStyle = createCenteredBoldArialWithoutBorderStyle(wb, largeBoldArial);
         CellStyle rightAlignedStyle = createRightAlignedStyle(wb);
+        CellStyle leftAlignedStyle = createLeftAlignedStyle(wb);
+        CellStyle centerAlignedStyle = createCenterAlignedStyle(wb);
         CellStyle greyCenteredBoldArialWithBorderStyle =
                 createGreyCenteredBoldArialWithBorderStyle(wb, boldArial);
         CellStyle redBoldArialWithBorderStyle =
@@ -26,6 +28,8 @@ class StylesGenerator {
         return Map.of(
                 CustomCellStyle.CENTERED_BOLD_ARIAL_WITHOUT_BORDER, centeredBoldArialWithoutBorderStyle,
                 CustomCellStyle.RIGHT_ALIGNED, rightAlignedStyle,
+                CustomCellStyle.LEFT_ALIGNED, leftAlignedStyle,
+                CustomCellStyle.CENTER_ALIGNED, centerAlignedStyle,
                 CustomCellStyle.GREY_CENTERED_BOLD_ARIAL_WITH_BORDER, greyCenteredBoldArialWithBorderStyle,
                 CustomCellStyle.RED_BOLD_ARIAL_WITH_BORDER, redBoldArialWithBorderStyle,
                 CustomCellStyle.RIGHT_ALIGNED_DATE_FORMAT, rightAlignedDateFormatStyle
@@ -83,6 +87,18 @@ class StylesGenerator {
     private CellStyle createRightAlignedStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
         style.setAlignment(HorizontalAlignment.RIGHT);
+        return style;
+    }
+
+    private CellStyle createLeftAlignedStyle(Workbook wb) {
+        CellStyle style = wb.createCellStyle();
+        style.setAlignment(HorizontalAlignment.LEFT);
+        return style;
+    }
+
+    private CellStyle createCenterAlignedStyle(Workbook wb) {
+        CellStyle style = wb.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
         return style;
     }
 

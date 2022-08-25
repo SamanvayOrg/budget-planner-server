@@ -16,7 +16,6 @@ public class ReportService {
     }
     public byte[] generateBudgetExcelReport(Integer year, AmountType amountType, Budget budget) throws IOException {
         XSSFWorkbook wb = new XSSFWorkbook();
-
         return budgetExcelReportService.generateReport(wb, year, amountType, budget);
     }
 
