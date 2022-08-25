@@ -20,7 +20,6 @@ public interface BudgetExcelReportConstants {
     String MINUS = "-";
     String TITLE_TEXT = " Budget Estimate of the Receipts and Payments for the financial year ";
     String SUB_TITLE_TEXT = "(Form No. 84) (See Rule No. 406)";
-
     String OPENING_BALANCE = "OPENING BALANCE";
     List<String> BudgetReportHeaderForBudgeted = Arrays.asList(
             "Sr",
@@ -33,6 +32,33 @@ public interface BudgetExcelReportConstants {
             "{"+YEAR_STRING+MINUS+"1} Probables for remaining 4 months",
             "{"+YEAR_STRING+MINUS+"1} Probables for full year",
             "{"+YEAR_STRING+MINUS+"0} Budgeted amount"
+    );
+
+    enum SerialNumberTypes {
+        CAPITALS, SMALL, NUMBERS
+    }
+
+    interface BudgetReportColumns {
+        String SR= "Sr";
+        String PARTICULARS= "Particulars";
+        String CODE_NUMBER= "Code Number";
+        String YEAR_4_ACTUALS= "Year-4 Actuals";
+        String YEAR_3_ACTUALS= "Year-3 Actuals";
+        String YEAR_2_ACTUALS= "Year-2 Actuals";
+        String YEAR_1_ACTUALS_FOR_8_MONTHS= "Year-1 Actuals for 8 months";
+        String YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS= "Year-1 Probables for remaining 4 months";
+        String YEAR_1_PROBABLES_FOR_FULL_YEAR= "Year-1 Probables for full year";
+        String YEAR_0_BUDGETED_AMOUNT= "Year-0 Budgeted amount";
+    }
+
+    List<String> BudgetReportColumnsForBudgeted = Arrays.asList(
+            BudgetReportColumns.YEAR_4_ACTUALS,
+            BudgetReportColumns.YEAR_3_ACTUALS,
+            BudgetReportColumns.YEAR_2_ACTUALS,
+            BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS,
+            BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS,
+            BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR,
+            BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT
     );
 }
 
