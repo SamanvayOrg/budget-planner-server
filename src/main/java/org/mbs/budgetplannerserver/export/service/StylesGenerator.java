@@ -10,22 +10,25 @@ import java.util.Map;
 class StylesGenerator {
 
     Map<CustomCellStyle, CellStyle> prepareStyles(Workbook wb) {
+        Font arial = createArialFont(wb);
         Font boldArial = createBoldArialFont(wb);
         Font redBoldArial = createRedBoldArialFont(wb);
         Font largeBoldArial = createLargeBoldArialFont(wb);
 
         CellStyle centeredBoldArialWithoutBorderStyle = createCenteredBoldArialWithoutBorderStyle(wb, largeBoldArial);
-        CellStyle rightAlignedStyle = createRightAlignedStyle(wb);
+        CellStyle rightAlignedStyle = createRightAlignedStyle(wb, arial);
         CellStyle rightAlignedBoldStyle = createRightAlignedBoldStyle(wb, boldArial);
-        CellStyle leftAlignedStyle = createLeftAlignedStyle(wb);
+        CellStyle leftAlignedStyle = createLeftAlignedStyle(wb, arial);
         CellStyle centerAlignedStyle = createCenterAlignedStyle(wb);
         CellStyle centerAlignedBoldStyle = createCenterAlignedBoldStyle(wb, boldArial);
         CellStyle greyCenteredBoldArialWithBorderStyle =
                 createGreyCenteredBoldArialWithBorderStyle(wb, boldArial);
+        CellStyle lightGreyLeftAlignedArialWithBorderStyle =
+                createLightGreyLeftAlignedArialWithBorderStyle(wb, arial);
         CellStyle redBoldArialWithBorderStyle =
                 createRedBoldArialWithBorderStyle(wb, redBoldArial);
         CellStyle rightAlignedDateFormatStyle =
-                createRightAlignedDateFormatStyle(wb);
+                createRightAlignedDateFormatStyle(wb, arial);
 
         return Map.of(
                 CustomCellStyle.CENTERED_BOLD_ARIAL_WITHOUT_BORDER, centeredBoldArialWithoutBorderStyle,
@@ -33,6 +36,7 @@ class StylesGenerator {
                 CustomCellStyle.RIGHT_ALIGNED_BOLD, rightAlignedBoldStyle,
                 CustomCellStyle.CENTER_ALIGNED_BOLD, centerAlignedBoldStyle,
                 CustomCellStyle.LEFT_ALIGNED, leftAlignedStyle,
+                CustomCellStyle.LIGHT_GREY_LEFT_ALIGNED_ARIAL_WITH_BORDER, lightGreyLeftAlignedArialWithBorderStyle,
                 CustomCellStyle.CENTER_ALIGNED, centerAlignedStyle,
                 CustomCellStyle.GREY_CENTERED_BOLD_ARIAL_WITH_BORDER, greyCenteredBoldArialWithBorderStyle,
                 CustomCellStyle.RED_BOLD_ARIAL_WITH_BORDER, redBoldArialWithBorderStyle,
@@ -40,15 +44,26 @@ class StylesGenerator {
         );
     }
 
+    private CellStyle createLightGreyLeftAlignedArialWithBorderStyle(Workbook wb, Font arial) {
+        CellStyle style = createBorderedStyle(wb);
+        style.setAlignment(HorizontalAlignment.LEFT);
+        style.setFont(arial);
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return style;
+    }
+
     private CellStyle createRightAlignedBoldStyle(Workbook wb, Font boldArial) {
-        CellStyle style = wb.createCellStyle();
+        CellStyle style = createBorderedStyle(wb);
         style.setFont(boldArial);
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setAlignment(HorizontalAlignment.RIGHT);
         return style;
     }
 
     private CellStyle createCenterAlignedBoldStyle(Workbook wb, Font boldArial) {
-        CellStyle style = wb.createCellStyle();
+        CellStyle style = createBorderedStyle(wb);
         style.setFont(boldArial);
         style.setAlignment(HorizontalAlignment.CENTER);
         return style;
@@ -65,9 +80,10 @@ class StylesGenerator {
         return style;
     }
 
-    private CellStyle createRightAlignedDateFormatStyle(Workbook wb) {
-        CellStyle style = wb.createCellStyle();
+    private CellStyle createRightAlignedDateFormatStyle(Workbook wb, Font arial) {
+        CellStyle style = createBorderedStyle(wb);
         style.setAlignment(HorizontalAlignment.RIGHT);
+        style.setFont(arial);
         style.setDataFormat((short) 14);
         return style;
     }
@@ -102,14 +118,16 @@ class StylesGenerator {
         return style;
     }
 
-    private CellStyle createRightAlignedStyle(Workbook wb) {
+    private CellStyle createRightAlignedStyle(Workbook wb, Font arial) {
         CellStyle style = wb.createCellStyle();
+        style.setFont(arial);
         style.setAlignment(HorizontalAlignment.RIGHT);
         return style;
     }
 
-    private CellStyle createLeftAlignedStyle(Workbook wb) {
+    private CellStyle createLeftAlignedStyle(Workbook wb, Font arial) {
         CellStyle style = wb.createCellStyle();
+        style.setFont(arial);
         style.setAlignment(HorizontalAlignment.LEFT);
         return style;
     }
@@ -125,6 +143,12 @@ class StylesGenerator {
         font.setFontName("Arial");
         font.setBold(true);
         font.setColor(IndexedColors.RED.index);
+        return font;
+    }
+
+    private Font createArialFont(Workbook wb) {
+        Font font = wb.createFont();
+        font.setFontName("Arial");
         return font;
     }
 

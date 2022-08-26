@@ -7,13 +7,12 @@ public interface BudgetExcelReportConstants {
 
     int TITLE_ROW = 0;
     int SUB_TITLE_ROW = TITLE_ROW + 1;
-
     int HEADER_ROW = 3;
     int STARTING_COLUMN_NUM = 0;
-
     int OPENING_BALANCE_ROW = HEADER_ROW +1;
     int OPENING_BALANCE_START_NUM = STARTING_COLUMN_NUM + 3;
-
+    int INT_CONSTANT_ZERO = 0;
+    String TOTAL = " Total";
     String EMPTY_STRING = "";
     String REPLACE_PATTERN = "\\{(.*?)\\}";
     String YEAR_STRING = "yearString";
