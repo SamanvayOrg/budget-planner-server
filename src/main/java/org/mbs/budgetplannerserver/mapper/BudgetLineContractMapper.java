@@ -54,8 +54,8 @@ public class BudgetLineContractMapper {
         if (currentYearBudgetLine != null) {
             budgetLineContract.setCurrentYear8MonthsActuals(currentYearBudgetLine.getEightMonthActualAmount());
             budgetLineContract.setCurrentYear4MonthsProbables(currentYearBudgetLine.getFourMonthProbableAmount());
+            budgetLineContract.setCurrentYearBudgetedAmount(currentYearBudgetLine.getBudgetedAmount());
         }
-        budgetLineContract.setCurrentYearBudgetedAmount(currentYearBudgetLine.getBudgetedAmount());
         budgetLineContract.setCurrentYearActuals(actualAmount(budgetLinesMatching, CURRENT_YEAR));
         budgetLineContract.setPreviousYearActuals(actualAmount(budgetLinesMatching, PREV_YEAR));
         budgetLineContract.setYearMinus1Actuals(actualAmount(budgetLinesMatching, PREV_YEAR_MINUS_ONE));
