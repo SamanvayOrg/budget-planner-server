@@ -34,6 +34,7 @@ public interface BudgetExcelReportConstants {
         String YEAR_2_ACTUALS= "Year-2 Actuals";
 
         String YEAR_1_ACTUALS= "Year-1 Actuals";
+        String YEAR_1_BUDGETED_AMOUNT= "Year-1 Budgeted amount";
         String YEAR_1_ACTUALS_FOR_8_MONTHS= "Year-1 Actuals for 8 months";
         String YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS= "Year-1 Probables for remaining 4 months";
         String YEAR_1_PROBABLES_FOR_FULL_YEAR= "Year-1 Probables for full year";
@@ -51,6 +52,7 @@ public interface BudgetExcelReportConstants {
             "{"+YEAR_STRING+MINUS+"4} Actuals",
             "{"+YEAR_STRING+MINUS+"3} Actuals",
             "{"+YEAR_STRING+MINUS+"2} Actuals",
+            "{"+YEAR_STRING+MINUS+"1} Budgeted amount",
             "{"+YEAR_STRING+MINUS+"1} Actuals for 8 months",
             "{"+YEAR_STRING+MINUS+"1} Probables for remaining 4 months",
             "{"+YEAR_STRING+MINUS+"1} Probables for full year",
@@ -61,6 +63,7 @@ public interface BudgetExcelReportConstants {
             BudgetReportColumns.YEAR_4_ACTUALS,
             BudgetReportColumns.YEAR_3_ACTUALS,
             BudgetReportColumns.YEAR_2_ACTUALS,
+            BudgetReportColumns.YEAR_1_BUDGETED_AMOUNT,
             BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS,
             BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS,
             BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR,
@@ -74,20 +77,22 @@ public interface BudgetExcelReportConstants {
             "{"+YEAR_STRING+MINUS+"4} Actuals",
             "{"+YEAR_STRING+MINUS+"3} Actuals",
             "{"+YEAR_STRING+MINUS+"2} Actuals",
-            "{"+YEAR_STRING+MINUS+"1} Actuals for 8 months",
-            "{"+YEAR_STRING+MINUS+"1} Probables for remaining 4 months",
-            "{"+YEAR_STRING+MINUS+"1} Probables for full year",
-            "{"+YEAR_STRING+MINUS+"0} Budgeted amount"
+            "{"+YEAR_STRING+MINUS+"1} Actuals",
+            "{"+YEAR_STRING+MINUS+"0} Budgeted amount",
+            "{"+YEAR_STRING+MINUS+"0} Actuals for 8 months",
+            "{"+YEAR_STRING+MINUS+"0} Probables for remaining 4 months",
+            "{"+YEAR_STRING+MINUS+"0} Probables for full year"
     );
 
     List<String> BudgetReportColumnsForEstimates = Arrays.asList(
             BudgetReportColumns.YEAR_4_ACTUALS,
             BudgetReportColumns.YEAR_3_ACTUALS,
             BudgetReportColumns.YEAR_2_ACTUALS,
-            BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS,
-            BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS,
-            BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR,
-            BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT
+            BudgetReportColumns.YEAR_1_ACTUALS,
+            BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT,
+            BudgetReportColumns.YEAR_0_ACTUALS_FOR_8_MONTHS,
+            BudgetReportColumns.YEAR_0_PROBABLES_FOR_REMAINING_4_MONTHS,
+            BudgetReportColumns.YEAR_0_PROBABLES_FOR_FULL_YEAR
     );
 
     List<String> BudgetReportHeaderForActuals = Arrays.asList(
@@ -97,20 +102,24 @@ public interface BudgetExcelReportConstants {
             "{"+YEAR_STRING+MINUS+"4} Actuals",
             "{"+YEAR_STRING+MINUS+"3} Actuals",
             "{"+YEAR_STRING+MINUS+"2} Actuals",
-            "{"+YEAR_STRING+MINUS+"1} Actuals for 8 months",
-            "{"+YEAR_STRING+MINUS+"1} Probables for remaining 4 months",
-            "{"+YEAR_STRING+MINUS+"1} Probables for full year",
-            "{"+YEAR_STRING+MINUS+"0} Budgeted amount"
+            "{"+YEAR_STRING+MINUS+"1} Actuals",
+            "{"+YEAR_STRING+MINUS+"0} Budgeted amount",
+            "{"+YEAR_STRING+MINUS+"0} Actuals for 8 months",
+            "{"+YEAR_STRING+MINUS+"0} Probables for remaining 4 months",
+            "{"+YEAR_STRING+MINUS+"0} Probables for full year",
+            "{"+YEAR_STRING+MINUS+"0} Actuals"
     );
 
     List<String> BudgetReportColumnsForActuals = Arrays.asList(
             BudgetReportColumns.YEAR_4_ACTUALS,
             BudgetReportColumns.YEAR_3_ACTUALS,
             BudgetReportColumns.YEAR_2_ACTUALS,
-            BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS,
-            BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS,
-            BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR,
-            BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT
+            BudgetReportColumns.YEAR_1_ACTUALS,
+            BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT,
+            BudgetReportColumns.YEAR_0_ACTUALS_FOR_8_MONTHS,
+            BudgetReportColumns.YEAR_0_PROBABLES_FOR_REMAINING_4_MONTHS,
+            BudgetReportColumns.YEAR_0_PROBABLES_FOR_FULL_YEAR,
+            BudgetReportColumns.YEAR_0_ACTUALS
     );
 }
 

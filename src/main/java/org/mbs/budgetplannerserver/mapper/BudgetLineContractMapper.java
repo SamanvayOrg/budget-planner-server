@@ -33,6 +33,9 @@ public class BudgetLineContractMapper {
         budgetLineContract.setDetailedHeadCode(budgetLine.getDetailedHead().getFullCode());
         budgetLineContract.setCode(budgetLine.getFullCode());
         budgetLineContract.setBudgetedAmount(budgetLine.getBudgetedAmount());
+        budgetLineContract.setActuals(budgetLine.getActualAmount());
+        budgetLineContract.setEightMonthsActuals(budgetLine.getEightMonthActualAmount());
+        budgetLineContract.setFourMonthsProbables(budgetLine.getFourMonthProbableAmount());
         budgetLineContract.setDisplayOrder(budgetLine.getDisplayOrder());
         DetailedHead detailedHead = budgetLine.getDetailedHead();
         MinorHead minorHead = detailedHead.getMinorHead();
@@ -52,6 +55,8 @@ public class BudgetLineContractMapper {
             budgetLineContract.setCurrentYear8MonthsActuals(currentYearBudgetLine.getEightMonthActualAmount());
             budgetLineContract.setCurrentYear4MonthsProbables(currentYearBudgetLine.getFourMonthProbableAmount());
         }
+        budgetLineContract.setCurrentYearBudgetedAmount(currentYearBudgetLine.getBudgetedAmount());
+        budgetLineContract.setCurrentYearActuals(actualAmount(budgetLinesMatching, CURRENT_YEAR));
         budgetLineContract.setPreviousYearActuals(actualAmount(budgetLinesMatching, PREV_YEAR));
         budgetLineContract.setYearMinus1Actuals(actualAmount(budgetLinesMatching, PREV_YEAR_MINUS_ONE));
         budgetLineContract.setYearMinus2Actuals(actualAmount(budgetLinesMatching, PREV_YEAR_MINUS_TWO));

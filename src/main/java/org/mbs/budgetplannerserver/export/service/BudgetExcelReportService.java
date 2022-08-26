@@ -329,6 +329,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
             case BudgetReportColumns.YEAR_4_ACTUALS: return budgetLine.getYearMinus2Actuals();
             case BudgetReportColumns.YEAR_3_ACTUALS: return budgetLine.getYearMinus1Actuals();
             case BudgetReportColumns.YEAR_2_ACTUALS: return budgetLine.getPreviousYearActuals();
+            case BudgetReportColumns.YEAR_1_BUDGETED_AMOUNT: return budgetLine.getCurrentYearBudgetedAmount();
             case BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS: return budgetLine.getCurrentYear8MonthsActuals();
             case BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS: return budgetLine.getCurrentYear4MonthsProbables();
             case BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR: {
@@ -343,6 +344,21 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
                 }
             }
             case BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT: return budgetLine.getBudgetedAmount();
+            case BudgetReportColumns.YEAR_1_ACTUALS: return budgetLine.getCurrentYearActuals();
+            case BudgetReportColumns.YEAR_0_ACTUALS_FOR_8_MONTHS: return budgetLine.getEightMonthsActuals();
+            case BudgetReportColumns.YEAR_0_PROBABLES_FOR_REMAINING_4_MONTHS: return budgetLine.getFourMonthsProbables();
+            case BudgetReportColumns.YEAR_0_PROBABLES_FOR_FULL_YEAR: {
+                if(budgetLine.getEightMonthsActuals() != null && budgetLine.getFourMonthsProbables() != null) {
+                    return budgetLine.getEightMonthsActuals().add(budgetLine.getFourMonthsProbables());
+                } else {
+                    if(budgetLine.getEightMonthsActuals() != null) {
+                        return budgetLine.getEightMonthsActuals();
+                    } else {
+                        return budgetLine.getFourMonthsProbables();
+                    }
+                }
+            }
+            case BudgetReportColumns.YEAR_0_ACTUALS: return budgetLine.getActuals();
             default: throw new RuntimeException("Mapping not found for columnName" + columnName);
         }
     }
@@ -352,10 +368,20 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
             case BudgetReportColumns.YEAR_4_ACTUALS: return budget.getPreviousYearBudgets().getBudgetForYear(4).getOpeningBalance();
             case BudgetReportColumns.YEAR_3_ACTUALS: return budget.getPreviousYearBudgets().getBudgetForYear(3).getOpeningBalance();
             case BudgetReportColumns.YEAR_2_ACTUALS: return budget.getPreviousYearBudgets().getBudgetForYear(2).getOpeningBalance();
-            case BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS: return budget.getPreviousYearBudgets().getBudgetForYear(1).getOpeningBalance();
-            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS: return budget.getPreviousYearBudgets().getBudgetForYear(1).getClosingBalance();
-            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR: return budget.getOpeningBalance();
-            case BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT: return budget.getClosingBalance();
+            case BudgetReportColumns.YEAR_1_BUDGETED_AMOUNT:
+            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS:
+                return budget.getPreviousYearBudgets().getBudgetForYear(1).getClosingBalance();
+            case BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS:
+            case BudgetReportColumns.YEAR_1_ACTUALS:
+                return budget.getPreviousYearBudgets().getBudgetForYear(1).getOpeningBalance();
+            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR:
+            case BudgetReportColumns.YEAR_0_ACTUALS_FOR_8_MONTHS:
+            case BudgetReportColumns.YEAR_0_ACTUALS:
+                return budget.getOpeningBalance();
+            case BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT:
+            case BudgetReportColumns.YEAR_0_PROBABLES_FOR_REMAINING_4_MONTHS:
+            case BudgetReportColumns.YEAR_0_PROBABLES_FOR_FULL_YEAR:
+                return budget.getClosingBalance();
             default: throw new RuntimeException("OpeningBalance Mapping not found for columnName" + columnName);
         }
     }

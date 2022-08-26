@@ -9,8 +9,14 @@ public class BudgetLineContract {
     private String functionCode;
     private String detailedHeadCode;
     private BigDecimal budgetedAmount;
+    private BigDecimal actuals;
+    private BigDecimal eightMonthsActuals;
+    private BigDecimal fourMonthsProbables;
     private BigDecimal currentYear8MonthsActuals;
     private BigDecimal currentYear4MonthsProbables;
+    private BigDecimal currentYearBudgetedAmount;
+
+    private BigDecimal currentYearActuals;
     private BigDecimal previousYearActuals;
     private BigDecimal yearMinus1Actuals;
     private BigDecimal yearMinus2Actuals;
@@ -164,5 +170,45 @@ public class BudgetLineContract {
 
     public void setVoided(Boolean voided) {
         isVoided = voided;
+    }
+
+    public BigDecimal getCurrentYearBudgetedAmount() {
+        return currentYearBudgetedAmount;
+    }
+
+    public void setCurrentYearBudgetedAmount(BigDecimal currentYearBudgetedAmount) {
+        this.currentYearBudgetedAmount = currentYearBudgetedAmount;
+    }
+
+    public BigDecimal getActuals() {
+        return actuals;
+    }
+
+    public void setActuals(BigDecimal actuals) {
+        this.actuals = actuals;
+    }
+
+    public BigDecimal getCurrentYearActuals() {
+        return currentYearActuals;
+    }
+
+    public void setCurrentYearActuals(BigDecimal currentYearActuals) {
+        this.currentYearActuals = currentYearActuals;
+    }
+
+    public BigDecimal getEightMonthsActuals() {
+        return eightMonthsActuals;
+    }
+
+    public void setEightMonthsActuals(BigDecimal eightMonthsActuals) {
+        this.eightMonthsActuals = eightMonthsActuals;
+    }
+
+    public BigDecimal getFourMonthsProbables() {
+        return fourMonthsProbables;
+    }
+
+    public void setFourMonthsProbables(BigDecimal fourMonthsProbables) {
+        this.fourMonthsProbables = fourMonthsProbables;
     }
 }
