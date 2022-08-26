@@ -43,17 +43,31 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     }
 
     public byte[] generateReport(Workbook wb, Integer year, AmountType amountType, Budget budget, String languageCode) throws IOException {
+        switch (amountType) {
+            case BUDGETED:
+                return generateReport(wb, year, amountType.name(), BudgetReportHeaderForBudgeted, BudgetReportColumnsForBudgeted, budget, languageCode);
+            case ESTIMATES:
+                return generateReport(wb, year, amountType.name(), BudgetReportHeaderForEstimates, BudgetReportColumnsForEstimates, budget, languageCode);
+            case ACTUALS:
+                return generateReport(wb, year, amountType.name(), BudgetReportHeaderForActuals, BudgetReportColumnsForActuals, budget, languageCode);
+            default:
+                throw new RuntimeException("UnSupported value specified for AmountType "+ amountType);
+        }
+    }
+
+    public byte[] generateReport(Workbook wb, Integer year, String reportType, List<String> budgetReportHeaders, List<String> budgetReportColumns,
+                                 Budget budget, String languageCode) throws IOException {
         Map<CustomCellStyle, CellStyle> styles = stylesGenerator.prepareStyles(wb);
-        Sheet sheet = wb.createSheet(amountType + " " +budget.getFinancialYearString());
+        Sheet sheet = wb.createSheet(reportType + " " +budget.getFinancialYearString());
         TranslationSearchHelper translationSearchHelper = new TranslationSearchHelper(translationService.getTranslations(),
                 languageCode, budget.getMunicipality().getState());
-        setColumnsWidth(sheet, BudgetReportHeaderForBudgeted.size());
-        createTitleRow(sheet, styles, budget, year, translationSearchHelper);
-        createSubTitleRow(sheet, styles, budget, year, translationSearchHelper);
-        createMergedCenteredTextRowWithoutBorder(sheet, styles, EMPTY_STRING, SUB_TITLE_ROW+1);
-        createHeaderRow(sheet, styles, BudgetReportHeaderForBudgeted, year, translationSearchHelper);
-        createOpeningBalanceRow(sheet, styles, budget, translationSearchHelper);
-        createBudgetRows(sheet, styles, BudgetReportColumnsForBudgeted, year, budget, translationSearchHelper);
+        setColumnsWidth(sheet, budgetReportHeaders.size());
+        createTitleRow(sheet, styles, budget, year, translationSearchHelper, budgetReportHeaders);
+        createSubTitleRow(sheet, styles, budget, year, translationSearchHelper, budgetReportHeaders);
+        createMergedCenteredTextRowWithoutBorder(sheet, styles, EMPTY_STRING, SUB_TITLE_ROW+1, budgetReportHeaders);
+        createHeaderRow(sheet, styles, budgetReportHeaders, year, translationSearchHelper);
+        createOpeningBalanceRow(sheet, styles, budgetReportColumns, budget, translationSearchHelper);
+        createBudgetRows(sheet, styles, budgetReportColumns, year, budget, translationSearchHelper);
 //TODO        createTotalsRow(sheet, styles);
 //TODO        createFooterRow(sheet, styles);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -85,15 +99,15 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
                 int budgetRowIndex=1;
                 for (BudgetLineContract blc : sEntry.getValue()) {
                     createBudgetRow(rowIndex++, sheet, styles, blc, budgetRowIndex++, translationSearchHelper,
-                            majorHeadColumnTotals);
+                            majorHeadColumnTotals, budgetReportColumns);
                 }
-                createTotalsRow(rowIndex++, sheet, styles, majorHead, translationSearchHelper, majorHeadColumnTotals);
+                createTotalsRow(rowIndex++, sheet, styles, majorHead, translationSearchHelper, majorHeadColumnTotals, budgetReportColumns);
                 addTotals(majorHeadColumnTotals, majorHeadGroupColumnTotals);
             }
-            createTotalsRow(rowIndex++, sheet, styles, majorHeadGroup, translationSearchHelper, majorHeadGroupColumnTotals);
+            createTotalsRow(rowIndex++, sheet, styles, majorHeadGroup, translationSearchHelper, majorHeadGroupColumnTotals, budgetReportColumns);
             addTotals(majorHeadGroupColumnTotals, budgetTotals);
         }
-        createTotalsRow(rowIndex++, sheet, styles, EMPTY_STRING, translationSearchHelper, budgetTotals);
+        createTotalsRow(rowIndex++, sheet, styles, EMPTY_STRING, translationSearchHelper, budgetTotals, budgetReportColumns);
     }
 
     private void addTotals(HashMap<String, BigDecimal> majorHeadColumnTotals, HashMap<String, BigDecimal> majorHeadGroupColumnTotals) {
@@ -120,7 +134,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     private void createMajorHeadRow(int rowIndex, Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
                                          String majorHead, int displayOrder,
                                          TranslationSearchHelper translations) {
-        CustomCellStyle centerAligned = CustomCellStyle.CENTER_ALIGNED;
+        CustomCellStyle centerAligned = CustomCellStyle.LEFT_ALIGNED;
         CellStyle cellStyle = styles.get(centerAligned);
         cellStyle.setWrapText(true);
         ArrayList<CustomCellStyleAndValue> customCellStyleAndValueArrayList = new ArrayList<>();
@@ -133,18 +147,19 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
 
     private void createBudgetRow(int rowIndex, Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
                                  BudgetLineContract budgetLineContract, int budgetRowIndex,
-                                 TranslationSearchHelper translations, HashMap<String, BigDecimal> majorHeadColumnTotals) {
+                                 TranslationSearchHelper translations, HashMap<String, BigDecimal> majorHeadColumnTotals,
+                                 List<String> budgetReportColumns) {
         CustomCellStyle rightAligned = CustomCellStyle.RIGHT_ALIGNED;
         CellStyle cellStyle = styles.get(rightAligned);
         cellStyle.setWrapText(false);
         ArrayList<CustomCellStyleAndValue> customCellStyleAndValueArrayList = new ArrayList<>();
         customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
                 getTranslatedValue(getSerialNumber(budgetRowIndex, SerialNumberTypes.NUMBERS), translations)));
-        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(styles.get(CustomCellStyle.CENTER_ALIGNED),
+        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(styles.get(CustomCellStyle.LEFT_ALIGNED),
                 getTranslatedValue(budgetLineContract.getName(), translations)));
         customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
                 budgetLineContract.getCode()));
-        BudgetReportColumnsForBudgeted.forEach( columnName -> {
+        budgetReportColumns.forEach(columnName -> {
             BigDecimal value = getColumnValue(budgetLineContract, columnName);
             addColumnValueToTotals(majorHeadColumnTotals, columnName, value);
             customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
@@ -154,7 +169,8 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     }
 
     private void createTotalsRow(int rowIndex, Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
-                                 String name, TranslationSearchHelper translations, HashMap<String, BigDecimal> columnTotals) {
+                                 String name, TranslationSearchHelper translations, HashMap<String, BigDecimal> columnTotals,
+                                 List<String> budgetReportColumns) {
         CustomCellStyle greyCenteredBoldArialWithBorder = CustomCellStyle.LIGHT_GREY_LEFT_ALIGNED_ARIAL_WITH_BORDER;
         CellStyle cellStyle = styles.get(greyCenteredBoldArialWithBorder);
         cellStyle.setWrapText(true);
@@ -167,7 +183,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
                 EMPTY_STRING));
         CellStyle totalsCellStyle = styles.get(CustomCellStyle.RIGHT_ALIGNED_BOLD);
         totalsCellStyle.setWrapText(false);
-        BudgetReportColumnsForBudgeted.forEach( columnName -> {
+        budgetReportColumns.forEach(columnName -> {
             BigDecimal value = columnTotals.get(columnName);
             customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(totalsCellStyle,
                     value == null ? EMPTY_STRING : value.toPlainString()));
@@ -186,8 +202,8 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         columnTotals.put(columnName, oldValue);
     }
 
-    private void createOpeningBalanceRow(Sheet sheet, Map<CustomCellStyle, CellStyle> styles, Budget budget,
-                                         TranslationSearchHelper translations) {
+    private void createOpeningBalanceRow(Sheet sheet, Map<CustomCellStyle, CellStyle> styles, List<String> budgetReportColumns,
+                                         Budget budget, TranslationSearchHelper translations) {
         CustomCellStyle rightAlignedBold = CustomCellStyle.RIGHT_ALIGNED_BOLD;
         CellStyle cellStyle = styles.get(rightAlignedBold);
 
@@ -200,21 +216,14 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         // Creates the cell
         Cell cell = CellUtil.createCell(row, STARTING_COLUMN_NUM, translations.getTranslationValue(OPENING_BALANCE));
         cell.setCellStyle(styles.get(CustomCellStyle.GREY_CENTERED_BOLD_ARIAL_WITH_BORDER));
-//        CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
-
 
         ArrayList<CustomCellStyleAndValue> customCellStyleAndValueArrayList = new ArrayList<>();
-        for (int i = 4; i > INT_CONSTANT_ZERO; i--) {
-            customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
-                    budget.getPreviousYearBudgets().getBudgetForYear(i).getOpeningBalance().toPlainString()));
-        }
-        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
-               budget.getPreviousYearBudgets().getBudgetForYear(1).getClosingBalance().toPlainString()));
-        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
-                budget.getOpeningBalance().toPlainString()));
-        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
-                budget.getClosingBalance().toPlainString()));
 
+        budgetReportColumns.forEach(columnName -> {
+            BigDecimal value = getOpeningBalanceValue(budget, columnName);
+            customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
+                    value == null ? EMPTY_STRING : value.toPlainString()));
+        });
         for (int i = INT_CONSTANT_ZERO, columnNumber = OPENING_BALANCE_START_NUM; columnNumber <
                 OPENING_BALANCE_START_NUM+customCellStyleAndValueArrayList.size(); columnNumber++, i++) {
             cell = row.createCell(columnNumber);
@@ -234,26 +243,26 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     }
 
     private void createTitleRow(Sheet sheet, Map<CustomCellStyle, CellStyle> styles, Budget budget, Integer year,
-                                TranslationSearchHelper translations) {
+                                TranslationSearchHelper translations, List<String> columnHeaders) {
         String munName = translations.getTranslationValue(budget.getMunicipality().getName());
         String title = translations.getTranslationValue(TITLE_TEXT);
         createMergedCenteredTextRowWithoutBorder(sheet, styles,
-                munName+title+budget.getFinancialYearString(), TITLE_ROW);
+                munName+title+budget.getFinancialYearString(), TITLE_ROW, columnHeaders);
 
     }
 
     private void createSubTitleRow(Sheet sheet, Map<CustomCellStyle, CellStyle> styles, Budget budget, Integer year,
-                                   TranslationSearchHelper translations) {
+                                   TranslationSearchHelper translations, List<String> columnHeaders) {
         String subTitle = translations.getTranslationValue(SUB_TITLE_TEXT);
-        createMergedCenteredTextRowWithoutBorder(sheet, styles, subTitle, SUB_TITLE_ROW);
+        createMergedCenteredTextRowWithoutBorder(sheet, styles, subTitle, SUB_TITLE_ROW, columnHeaders);
     }
 
     private void createMergedCenteredTextRowWithoutBorder(Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
-                                                          String value, int targetRow) {
+                                                          String value, int targetRow, List<String> columnHeaders) {
         Row row = sheet.createRow(targetRow);
         // Merges the cells
         CellRangeAddress cellRangeAddress = new CellRangeAddress(targetRow, targetRow, STARTING_COLUMN_NUM,
-                STARTING_COLUMN_NUM+BudgetReportHeaderForBudgeted.size()-1);
+                STARTING_COLUMN_NUM+columnHeaders.size()-1);
         sheet.addMergedRegion(cellRangeAddress);
 
         // Creates the cell
@@ -335,6 +344,19 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
             }
             case BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT: return budgetLine.getBudgetedAmount();
             default: throw new RuntimeException("Mapping not found for columnName" + columnName);
+        }
+    }
+
+    private BigDecimal getOpeningBalanceValue(Budget budget, String columnName) {
+        switch(columnName) {
+            case BudgetReportColumns.YEAR_4_ACTUALS: return budget.getPreviousYearBudgets().getBudgetForYear(4).getOpeningBalance();
+            case BudgetReportColumns.YEAR_3_ACTUALS: return budget.getPreviousYearBudgets().getBudgetForYear(3).getOpeningBalance();
+            case BudgetReportColumns.YEAR_2_ACTUALS: return budget.getPreviousYearBudgets().getBudgetForYear(2).getOpeningBalance();
+            case BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS: return budget.getPreviousYearBudgets().getBudgetForYear(1).getOpeningBalance();
+            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS: return budget.getPreviousYearBudgets().getBudgetForYear(1).getClosingBalance();
+            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR: return budget.getOpeningBalance();
+            case BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT: return budget.getClosingBalance();
+            default: throw new RuntimeException("OpeningBalance Mapping not found for columnName" + columnName);
         }
     }
 
