@@ -30,6 +30,8 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class BudgetExcelReportService implements BudgetExcelReportConstants {
+    public static final int CHAR_LOWER_CASE_A = 96;
+    public static final int CHAR_UPPER_CASE_A = 64;
     private final BudgetService budgetService;
     private final BudgetLineService budgetLineService;
     private final StylesGenerator stylesGenerator;
@@ -134,7 +136,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     private void createMajorHeadRow(int rowIndex, Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
                                          String majorHead, int displayOrder,
                                          TranslationSearchHelper translations) {
-        CustomCellStyle centerAligned = CustomCellStyle.LEFT_ALIGNED;
+        CustomCellStyle centerAligned = CustomCellStyle.CENTER_ALIGNED;
         CellStyle cellStyle = styles.get(centerAligned);
         cellStyle.setWrapText(true);
         ArrayList<CustomCellStyleAndValue> customCellStyleAndValueArrayList = new ArrayList<>();
@@ -388,8 +390,8 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
 
     private String getSerialNumber(int index, SerialNumberTypes serialNumberTypes) {
         switch (serialNumberTypes) {
-            case CAPITALS: return Character.toString(64+index);
-            case SMALL: return Character.toString(96+index);
+            case CAPITALS: return Character.toString(CHAR_UPPER_CASE_A +index);
+            case SMALL: return Character.toString(CHAR_LOWER_CASE_A +index);
             default: return String.valueOf(index);
         }
     }
