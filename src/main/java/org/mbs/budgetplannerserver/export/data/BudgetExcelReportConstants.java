@@ -5,6 +5,12 @@ import java.util.List;
 
 public interface BudgetExcelReportConstants {
 
+    int CHAR_LOWER_CASE_A = 96;
+    int CHAR_UPPER_CASE_A = 64;
+    String REVENUE_RECEIPT = "Revenue Receipt";
+    String ASSETS = "Assets";
+    String EXPENSES = "Expenses";
+    String LIABILITY = "Liability";
     int TITLE_ROW = 0;
     int SUB_TITLE_ROW = TITLE_ROW + 1;
     int HEADER_ROW = 3;

@@ -25,13 +25,12 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class BudgetExcelReportService implements BudgetExcelReportConstants {
-    public static final int CHAR_LOWER_CASE_A = 96;
-    public static final int CHAR_UPPER_CASE_A = 64;
     private final BudgetService budgetService;
     private final BudgetLineService budgetLineService;
     private final StylesGenerator stylesGenerator;
@@ -68,9 +67,12 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         createSubTitleRow(sheet, styles, budget, year, translationSearchHelper, budgetReportHeaders);
         createMergedCenteredTextRowWithoutBorder(sheet, styles, EMPTY_STRING, SUB_TITLE_ROW+1, budgetReportHeaders);
         createHeaderRow(sheet, styles, budgetReportHeaders, year, translationSearchHelper);
-        createOpeningBalanceRow(sheet, styles, budgetReportColumns, budget, translationSearchHelper);
-        createBudgetRows(sheet, styles, budgetReportColumns, year, budget, translationSearchHelper);
-//TODO        createTotalsRow(sheet, styles);
+        HashMap<String, BigDecimal> budgetTotals = new HashMap<>();
+        HashMap<String, BigDecimal> majorHeadColumnTotals = new HashMap<>();
+        createOpeningBalanceRow(sheet, styles, budgetReportColumns, budget, translationSearchHelper, majorHeadColumnTotals);
+        addTotals(majorHeadColumnTotals, budgetTotals);
+        int rowIndex = createBudgetRows(sheet, styles, budgetReportColumns, year, budget, translationSearchHelper, budgetTotals);
+        createTotalsRow(rowIndex++, sheet, styles, EMPTY_STRING, translationSearchHelper, budgetTotals, budgetReportColumns);
 //TODO        createFooterRow(sheet, styles);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         wb.write(out);
@@ -79,15 +81,15 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         return out.toByteArray();
     }
 
-    private void createBudgetRows(Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
-                                  List<String> budgetReportColumns, Integer year, Budget budget,
-                                  TranslationSearchHelper translationSearchHelper) {
+    private int createBudgetRows(Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
+                                 List<String> budgetReportColumns, Integer year, Budget budget,
+                                 TranslationSearchHelper translationSearchHelper, HashMap<String, BigDecimal> budgetTotals) {
         BudgetContract budgetContract = new BudgetContractMapper().map(budget);
         Map<String, Map<String, List<BudgetLineContract>>> mapOfBLC = budgetContract.getBudgetLines().stream()
                 .sorted(Comparator.comparing(BudgetLineContract::getMajorHeadGroupDisplayOrder))
-                .collect(groupingBy(BudgetLineContract::getMajorHeadGroup, groupingBy(BudgetLineContract::getMajorHead)));
+                .collect(groupingBy(BudgetLineContract::getMajorHeadGroup, LinkedHashMap::new,
+                        groupingBy(BudgetLineContract::getMajorHead, LinkedHashMap::new, Collectors.toList())));
         int rowIndex=OPENING_BALANCE_ROW+1;
-        HashMap<String, BigDecimal> budgetTotals = new HashMap<>();
         int majorHeadGroupDisplayOrder=1;
         for (Map.Entry<String,Map<String, List<BudgetLineContract>>> entry : mapOfBLC.entrySet()) {
             String majorHeadGroup = entry.getKey();
@@ -107,14 +109,26 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
                 addTotals(majorHeadColumnTotals, majorHeadGroupColumnTotals);
             }
             createTotalsRow(rowIndex++, sheet, styles, majorHeadGroup, translationSearchHelper, majorHeadGroupColumnTotals, budgetReportColumns);
-            addTotals(majorHeadGroupColumnTotals, budgetTotals);
+            if(majorHeadGroup.equals(REVENUE_RECEIPT) || majorHeadGroup.equals(ASSETS)) {
+                addTotals(majorHeadGroupColumnTotals, budgetTotals);
+            } else if(majorHeadGroup.equals(EXPENSES) || majorHeadGroup.equals(LIABILITY)) {
+                subTotals(majorHeadGroupColumnTotals, budgetTotals);
+            } else {
+                throw new RuntimeException("Error computing Total, unknown majorHeadGroup value "+majorHeadGroup);
+            }
         }
-        createTotalsRow(rowIndex++, sheet, styles, EMPTY_STRING, translationSearchHelper, budgetTotals, budgetReportColumns);
+        return rowIndex;
     }
 
     private void addTotals(HashMap<String, BigDecimal> majorHeadColumnTotals, HashMap<String, BigDecimal> majorHeadGroupColumnTotals) {
         majorHeadColumnTotals.forEach( (key,value) -> {
             addColumnValueToTotals(majorHeadGroupColumnTotals, key, value);
+        });
+    }
+
+    private void subTotals(HashMap<String, BigDecimal> majorHeadColumnTotals, HashMap<String, BigDecimal> majorHeadGroupColumnTotals) {
+        majorHeadColumnTotals.forEach( (key,value) -> {
+            subColumnValueFromTotals(majorHeadGroupColumnTotals, key, value);
         });
     }
 
@@ -136,11 +150,11 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     private void createMajorHeadRow(int rowIndex, Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
                                          String majorHead, int displayOrder,
                                          TranslationSearchHelper translations) {
-        CustomCellStyle centerAligned = CustomCellStyle.CENTER_ALIGNED;
+        CustomCellStyle centerAligned = CustomCellStyle.LEFT_ALIGNED;
         CellStyle cellStyle = styles.get(centerAligned);
         cellStyle.setWrapText(true);
         ArrayList<CustomCellStyleAndValue> customCellStyleAndValueArrayList = new ArrayList<>();
-        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
+        customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(styles.get(CustomCellStyle.CENTER_ALIGNED),
                 getTranslatedValue(getSerialNumber(displayOrder, SerialNumberTypes.SMALL), translations)));
         customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
                 getTranslatedValue(majorHead, translations)));
@@ -204,8 +218,20 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         columnTotals.put(columnName, oldValue);
     }
 
+    private void subColumnValueFromTotals(HashMap<String, BigDecimal> columnTotals, String columnName, BigDecimal value) {
+        BigDecimal oldValue = columnTotals.get(columnName);
+        if(oldValue == null) {
+            oldValue = new BigDecimal(INT_CONSTANT_ZERO);
+        }
+        if(value != null) {
+            oldValue = oldValue.subtract(value);
+        }
+        columnTotals.put(columnName, oldValue);
+    }
+
+
     private void createOpeningBalanceRow(Sheet sheet, Map<CustomCellStyle, CellStyle> styles, List<String> budgetReportColumns,
-                                         Budget budget, TranslationSearchHelper translations) {
+                                         Budget budget, TranslationSearchHelper translations, HashMap<String, BigDecimal> majorHeadColumnTotals) {
         CustomCellStyle rightAlignedBold = CustomCellStyle.RIGHT_ALIGNED_BOLD;
         CellStyle cellStyle = styles.get(rightAlignedBold);
 
@@ -223,6 +249,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
 
         budgetReportColumns.forEach(columnName -> {
             BigDecimal value = getOpeningBalanceValue(budget, columnName);
+            addColumnValueToTotals(majorHeadColumnTotals, columnName, value);
             customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
                     value == null ? EMPTY_STRING : value.toPlainString()));
         });
