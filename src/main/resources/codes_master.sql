@@ -1308,3 +1308,19 @@ SELECT setval('major_head_group_id_seq', COALESCE((SELECT MAX(id)+1 FROM major_h
 SELECT setval('major_head_id_seq', COALESCE((SELECT MAX(id)+1 FROM major_head), 1), false);
 SELECT setval('minor_head_id_seq', COALESCE((SELECT MAX(id)+1 FROM minor_head), 1), false);
 SELECT setval('detailed_head_id_seq', COALESCE((SELECT MAX(id)+1 FROM detailed_head), 1), false);
+
+
+-------Insert categories in function_groups---------
+
+alter table function_group add column category text;
+
+update function_group set category='Administrative Expense' where code in ('1','3','4','5','6','7','8','9');
+update function_group set category='Building and Town Planning' where code in ('11','12','13','14','15');
+update function_group set category='Earmarked Funds' where code in ('72');
+update function_group set category='Non-Tax Income' where code in ('45','97','98','99');
+update function_group set category='Own Tax Income' where code in ('46','91','92','93','94');
+update function_group set category='Public Health' where code in ('41','42','43','44','61','63','64','67','68','71');
+update function_group set category='Roads' where code in ('21','22','23','24','25','26','27','28');
+update function_group set category='Sanitation (Public Health and Welfare)' where code in ('33','34','35');
+update function_group set category='Social Welfare' where code in ('51','52','53','54','55','56','57','58','73','74','81','82','83','84','85');
+update function_group set category='Water Supply (Public Health and Welfare)' where code in ('31','32');
