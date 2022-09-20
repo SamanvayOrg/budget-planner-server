@@ -16,6 +16,7 @@ import java.util.List;
 public class MinorHead extends BaseModel {
     private String code;
     private String name;
+    private String category;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "minorHead")
     private List<DetailedHead> detailedHeads;
@@ -54,5 +55,13 @@ public class MinorHead extends BaseModel {
 
     public void setDetailedHeads(List<DetailedHead> detailedHeads) {
         this.detailedHeads = detailedHeads;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -7,6 +7,7 @@ public class MinorHeadContract {
     private String name;
     private String code;
     private List<DetailedHeadContract> detailedHeads = new ArrayList<>();
+    private String category;
 
     public String getName() {
         return name;
@@ -22,6 +23,14 @@ public class MinorHeadContract {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public List<DetailedHeadContract> getDetailedHeads() {

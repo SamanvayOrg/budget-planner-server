@@ -27,6 +27,7 @@ public class BudgetLineContract {
     private String minorHead;
     private Boolean isEligibleForDeletion;
     private Boolean isVoided;
+    private String category;
 
     public Long getId() {
         return id;
@@ -172,6 +173,13 @@ public class BudgetLineContract {
         isVoided = voided;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
     public BigDecimal getCurrentYearBudgetedAmount() {
         return currentYearBudgetedAmount;
     }
