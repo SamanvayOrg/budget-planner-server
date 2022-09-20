@@ -1324,3 +1324,28 @@ update function_group set category='Roads' where code in ('21','22','23','24','2
 update function_group set category='Sanitation (Public Health and Welfare)' where code in ('33','34','35');
 update function_group set category='Social Welfare' where code in ('51','52','53','54','55','56','57','58','73','74','81','82','83','84','85');
 update function_group set category='Water Supply (Public Health and Welfare)' where code in ('31','32');
+
+
+
+----------------Insert Categories in minor_head----------
+
+alter table minor_head add column category text ;
+
+update minor_head set category='Own Tax' where  major_head_id in (select id from major_head where major_head.code='1' and major_head_group_id=1);
+update minor_head set category='Non Tax' where  major_head_id in (select id from major_head where major_head.code in ('2','4','5','6','7','8','9') and major_head_group_id=1);
+update minor_head set category='Revenue Grants' where  major_head_id in (select id from major_head where major_head.code='3' and major_head_group_id=1);
+update minor_head set category='Salary and allowances' where  major_head_id in (select id from major_head where major_head.code='1' and major_head_group_id=2);
+update minor_head set category='Administrative Expense' where  major_head_id in (select id from major_head where major_head.code='2' and major_head_group_id=2);
+update minor_head set category='Others' where  major_head_id in (select id from major_head where major_head.code='3' and major_head_group_id=2);
+update minor_head set category='Operations and Maintenance' where  major_head_id in (select id from major_head where major_head.code='4' and major_head_group_id=2);
+update minor_head set category='Water Supply (Public Health and Welfare)' where  major_head_id in (select id from major_head where major_head.code='5' and major_head_group_id=2);
+update minor_head set category='Others' where  major_head_id in (select id from major_head where major_head.code='6' and major_head_group_id=2);
+update minor_head set category='Others' where  code in ('0','1','2','3','9') and major_head_id in (select id from major_head where major_head.code='7' and major_head_group_id=2) ;
+update minor_head set category='Social Welfare' where  code ='4' and major_head_id in (select id from major_head where major_head.code='7' and major_head_group_id=2) ;
+update minor_head set category='Others' where  major_head_id in (select id from major_head where major_head.code in ('8','9') and major_head_group_id=2);
+update minor_head set category='Reserves' where  major_head_id in (select id from major_head where major_head.code ='1' and major_head_group_id=3);
+update minor_head set category='Central, State Schemes and Grants' where  major_head_id in (select id from major_head where major_head.code ='2' and major_head_group_id=3);
+update minor_head set category='Loans, Advances and Deposits' where  major_head_id in (select id from major_head where major_head.code in ('3','4','5','6','7') and major_head_group_id=3);
+update minor_head set category='Others' where  major_head_id in (select id from major_head where major_head.code ='9' and major_head_group_id=3);
+update minor_head set category='Capital Budgeted Expenses' where  major_head_id in (select id from major_head where major_head.code ='3' and major_head_group_id=4);
+
