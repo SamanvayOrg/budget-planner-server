@@ -15,6 +15,7 @@ import java.util.List;
 public class FunctionGroup extends BaseModel {
     private String code;
     private String name;
+    private String category;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "functionGroup")
     private List<Function> functions;
@@ -41,5 +42,13 @@ public class FunctionGroup extends BaseModel {
 
     public void setFunctions(List<Function> functions) {
         this.functions = functions;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -7,6 +7,7 @@ public class FunctionGroupContract {
     private String code;
     private String name;
     private List<FunctionContract> functions = new ArrayList<>();
+    private String functionGroupCategory;
 
     public String getCode() {
         return code;
@@ -34,5 +35,13 @@ public class FunctionGroupContract {
 
     public void addFunction(FunctionContract functionContract) {
         this.getFunctions().add(functionContract);
+    }
+
+    public String getFunctionGroupCategory() {
+        return functionGroupCategory;
+    }
+
+    public void setFunctionGroupCategory(String functionGroupCategory) {
+        this.functionGroupCategory = functionGroupCategory;
     }
 }

@@ -28,6 +28,7 @@ public class BudgetLineContract {
     private Boolean isEligibleForDeletion;
     private Boolean isVoided;
     private String category;
+    private String functionGroupCategory;
 
     public Long getId() {
         return id;
@@ -218,5 +219,13 @@ public class BudgetLineContract {
 
     public void setFourMonthsProbables(BigDecimal fourMonthsProbables) {
         this.fourMonthsProbables = fourMonthsProbables;
+    }
+
+    public String getFunctionGroupCategory() {
+        return functionGroupCategory;
+    }
+
+    public void setFunctionGroupCategory(String functionGroupCategory) {
+        this.functionGroupCategory = functionGroupCategory;
     }
 }

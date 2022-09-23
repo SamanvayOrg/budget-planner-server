@@ -30,6 +30,7 @@ public class BudgetLineContractMapper {
         budgetLineContract.setId(budgetLine.getId());
         budgetLineContract.setName(budgetLine.getName());
         budgetLineContract.setFunctionCode(budgetLine.getFunction().getFullCode());
+        budgetLineContract.setFunctionGroupCategory(budgetLine.getFunction().getFunctionGroup().getCategory());
         budgetLineContract.setDetailedHeadCode(budgetLine.getDetailedHead().getFullCode());
         budgetLineContract.setCode(budgetLine.getFullCode());
         budgetLineContract.setBudgetedAmount(budgetLine.getBudgetedAmount());
