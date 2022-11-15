@@ -4,8 +4,10 @@ import javax.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 public enum BudgetStatus {
-    Draft("Draft"), ApprovedByGBM("Approved by GBM"), ApprovedByDistrict("Approved by District");
+    Draft("Draft"), SubmittedToGB("Submitted to GB"), ApprovedByGB("Approved by GBM"), ApprovedByDistrict("Approved by District");
 
     String name;
 
@@ -14,10 +16,18 @@ public enum BudgetStatus {
     }
 
     public List<BudgetStatus> allowedTransitionValues() {
-        if (this == BudgetStatus.ApprovedByGBM) {
-            return Arrays.asList(Draft, ApprovedByDistrict);
+        switch(this) {
+            case Draft:
+                return asList(SubmittedToGB);
+            case SubmittedToGB:
+                return asList(ApprovedByGB, Draft);
+            case ApprovedByGB:
+                return asList(Draft, ApprovedByGB, ApprovedByDistrict);
+            case ApprovedByDistrict:
+                return asList(Draft);
+            default:
+                return asList(Draft, SubmittedToGB, ApprovedByGB, ApprovedByDistrict);
         }
-        return Arrays.asList(ApprovedByGBM);
     }
 
     public Boolean isTransitionAllowed(BudgetStatus nextBS) {

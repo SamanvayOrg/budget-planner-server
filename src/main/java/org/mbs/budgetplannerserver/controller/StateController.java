@@ -13,12 +13,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 public class StateController {
-    private final StateService stateService;
     private final UserService userService;
 
-    public StateController(StateService stateService, UserService userService) {
+    public StateController(UserService userService) {
         this.userService = userService;
-        this.stateService = stateService;
     }
 
     @RequestMapping(value = "/api/state", method = GET)

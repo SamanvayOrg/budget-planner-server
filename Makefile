@@ -19,3 +19,6 @@ build-server: ## Builds the jar file
 test-server: ## Builds the jar file after tests
 	./gradlew clean build
 
+start: 
+	./gradlew bootRun
+
