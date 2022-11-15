@@ -13,6 +13,8 @@ public interface BudgetRepository extends CrudRepository<Budget, Long> {
 
     Budget findByMunicipalityAndFinancialYear(Municipality municipality, int financialYear);
 
+    List<Budget> findByFinancialYear(int financialYear);
+
     List<Budget> findByMunicipalityAndFinancialYearBetweenOrderByFinancialYearDesc(Municipality municipality, int startYear, int endYear);
 
     List<Budget> findByMunicipality(Municipality municipality);

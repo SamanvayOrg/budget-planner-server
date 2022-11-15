@@ -6,6 +6,7 @@ import org.mbs.budgetplannerserver.domain.Budget;
 import org.mbs.budgetplannerserver.domain.Year;
 import org.mbs.budgetplannerserver.export.service.ReportService;
 import org.mbs.budgetplannerserver.service.BudgetService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,6 +29,7 @@ public class ReportController {
     private final BudgetService budgetService;
     private final ReportService reportService;
 
+    @Autowired
     public ReportController(BudgetService budgetService, ReportService reportService) {
         this.budgetService = budgetService;
         this.reportService = reportService;

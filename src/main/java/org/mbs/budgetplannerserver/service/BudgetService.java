@@ -117,4 +117,8 @@ public class BudgetService {
         budget.setOpeningBalance(budgetPropertiesContract.getOpeningBalance());
         return budgetRepository.save(budget);
     }
+
+    public List<Budget> getAllForFinancialYear() {
+        return budgetRepository.findByFinancialYear(Year.currentYear());
+    }
 }
