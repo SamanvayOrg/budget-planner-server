@@ -1,6 +1,6 @@
 spring:
-  #  flyway:
-  #    locations=classpath:db/migration
+  flyway:
+    locations=classpath:db/migration
   jpa:
     database: POSTGRESQL
     show-sql: true
@@ -30,19 +30,19 @@ spring:
               - email
         provider:
           auth0:
-            issuer-uri: https://budget-planner.us.auth0.com/
+            issuer-uri: ${BPS_AUTH_ISSUER_URI:https://budget-planner.us.auth0.com}/
           auth0-mgt:
-            issuer-uri: https://budget-planner.us.auth0.com/
+            issuer-uri: ${BPS_AUTH_ISSUER_URI:https://budget-planner.us.auth0.com}/
       resource-server:
         jwt:
-          issuer-uri: https://budget-planner.us.auth0.com/
+          issuer-uri: ${BPS_AUTH_ISSUER_URI:https://budget-planner.us.auth0.com}/
 auth0:
   audience: https://api.budget-planner
-  domain: https://budget-planner.us.auth0.com
+  domain: ${BPS_AUTH_ISSUER_URI:https://budget-planner.us.auth0.com}
 auth0-mgt:
-  audience: https://budget-planner.us.auth0.com/api/v2/
-  domain: https://budget-planner.us.auth0.com
-debug: false
+  audience: ${BPS_AUTH_ISSUER_URI:https://budget-planner.us.auth0.com}/api/v2/
+  domain: ${BPS_AUTH_ISSUER_URI:https://budget-planner.us.auth0.com}
+debug: true
 budget-planner:
   static:
     path: ${BPS_STATIC_PATH:/var/www/budget-planner}
@@ -59,5 +59,4 @@ logging:
   level:
     root: INFO
   file:
-    path: /var/log/budget-planner
-    name: budget-planner_appserver.log
+    name: /var/log/budget-planner/budget-planner_appserver.log
