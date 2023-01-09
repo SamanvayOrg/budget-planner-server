@@ -21,12 +21,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.apache.poi:poi:5.2.2'
 	implementation 'org.apache.poi:poi-ooxml:5.2.2'
+	implementation 'org.flywaydb:flyway-core'
 
-	implementation 'com.auth0:auth0:1.42.0'
+	implementation 'com.auth0:auth0:1.44.1'
 	implementation 'org.springframework.security:spring-security-oauth2-resource-server'
 	implementation 'org.springframework.security:spring-security-oauth2-jose'
 	implementation 'commons-io:commons-io:2.11.0'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.passay:passay:1.6.2'
 
 	compileOnly 'org.projectlombok:lombok'
 	implementation 'org.apache.commons:commons-lang3'
