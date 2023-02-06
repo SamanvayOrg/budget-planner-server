@@ -20,7 +20,6 @@ import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
 
-@Slf4j(topic = "GLOBAL_EXCEPTION_HANDLER")
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -45,34 +44,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({NoSuchElementFoundException.class, EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Object> handleNoSuchElementFoundException(Exception itemNotFoundException, WebRequest request) {
-        log.error("Failed to find the requested element", itemNotFoundException);
+        logger.error("Failed to find the requested element", itemNotFoundException);
         return buildErrorResponse(itemNotFoundException, HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler({RestClientResponseException.class})
     public ResponseEntity<Object> handleRestClientResponseException(RestClientResponseException restClientResponseException, WebRequest request) {
-        log.error("Encountered Rest Client exception", restClientResponseException);
+        logger.error("Encountered Rest Client exception", restClientResponseException);
         return buildErrorResponse(restClientResponseException, HttpStatus.resolve(restClientResponseException.getRawStatusCode()), request);
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException dataIntegrityViolationException, WebRequest request) {
-        log.error("Encountered dataIntegrityViolationException", dataIntegrityViolationException);
+        logger.error("Encountered dataIntegrityViolationException", dataIntegrityViolationException);
         return buildErrorResponse(dataIntegrityViolationException, HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(IOException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ResponseEntity<Object> handleIOException(IOException exception, WebRequest request) {
-        log.error("IOException error occurred", exception);
+        logger.error("IOException error occurred", exception);
         return buildErrorResponse(exception, "IOException error occurred", HttpStatus.SERVICE_UNAVAILABLE, request);
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> handleAllUncaughtException(Exception exception, WebRequest request) {
-        log.error("Unknown error occurred", exception);
+        logger.error("Unknown error occurred", exception);
         return buildErrorResponse(exception, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
