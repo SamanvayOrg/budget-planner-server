@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,12 @@ public class BudgetService {
 
     public Optional<Budget> getCurrentBudget() {
         return getBudgetForFinancialYear(Year.currentYear());
+    }
+
+    public Optional<Budget> getLatestBudget() {
+        Comparator<Budget> latestBudgetComparator = Comparator.comparing(Budget::getFinancialYear);
+        Budget latestBudget = getAllBudgets().stream().max(latestBudgetComparator).get();
+        return Optional.ofNullable(latestBudget);
     }
 
     public List<Budget> getAllBudgets() {

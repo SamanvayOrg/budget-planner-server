@@ -76,6 +76,12 @@ public class BudgetController {
         Budget budget = budgetService.getCurrentBudget().orElseThrow(NOT_FOUND());
         return new BudgetContractMapper().map(budget);
     }
+    @RequestMapping(value = "/api/budget/latest", method = GET)
+    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
+    public BudgetContract latestBudget() {
+        Budget budget = budgetService.getLatestBudget().orElseThrow(NOT_FOUND());
+        return new BudgetContractMapper().map(budget);
+    }
 
     @RequestMapping(value = "/api/budgets", method = GET)
     @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
