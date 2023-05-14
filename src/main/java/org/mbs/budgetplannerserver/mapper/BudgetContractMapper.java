@@ -95,7 +95,7 @@ public class BudgetContractMapper {
                 .map(BudgetLineContract::getBudgetedAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
         closingBalance = closingBalance.add(budgetContract.getBudgetLines().stream()
-                .filter(bc -> bc.getMajorHeadGroup().equals("Assets"))
+                .filter(bc -> bc.getMajorHeadGroup().equals("Assets (Capital Expenditure)"))
                 .filter(bc -> bc.getBudgetedAmount() != null)
                 .map(BudgetLineContract::getBudgetedAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
@@ -105,7 +105,7 @@ public class BudgetContractMapper {
                 .map(BudgetLineContract::getBudgetedAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
         closingBalance = closingBalance.subtract(budgetContract.getBudgetLines().stream()
-                .filter(bc -> bc.getMajorHeadGroup().equals("Liability"))
+                .filter(bc -> bc.getMajorHeadGroup().equals("Liability (Capital Income)"))
                 .filter(bc -> bc.getBudgetedAmount() != null)
                 .map(BudgetLineContract::getBudgetedAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
