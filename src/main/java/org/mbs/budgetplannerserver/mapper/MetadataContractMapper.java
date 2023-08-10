@@ -47,6 +47,7 @@ public class MetadataContractMapper {
         MajorHeadContract majorHeadContract=new MajorHeadContract();
         majorHeadContract.setName(majorHead.getName());
         majorHeadContract.setCode(majorHead.getCode());
+        majorHeadContract.setMajorHeadDisplayOrder(majorHead.getDisplayOrder());
         majorHead.getMinorHeads().forEach(minorHead -> {
             majorHeadContract.addMinorHeadContract(map(minorHead));
         });

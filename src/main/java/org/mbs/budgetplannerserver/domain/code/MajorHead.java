@@ -6,6 +6,7 @@ import org.hibernate.annotations.Where;
 import org.mbs.budgetplannerserver.domain.BaseModel;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -16,6 +17,7 @@ import java.util.List;
 public class MajorHead extends BaseModel {
     private String code;
     private String name;
+    private BigDecimal displayOrder;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "majorHead")
     private List<MinorHead> minorHeads;
@@ -55,4 +57,13 @@ public class MajorHead extends BaseModel {
     public void setMinorHeads(List<MinorHead> minorHeads) {
         this.minorHeads = minorHeads;
     }
+
+    public BigDecimal getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(BigDecimal displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+
 }

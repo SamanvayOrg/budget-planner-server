@@ -44,6 +44,7 @@ public class BudgetLineContractMapper {
         budgetLineContract.setMinorHeadCategory(minorHead.getCategory());
         MajorHead majorHead = minorHead.getMajorHead();
         budgetLineContract.setMajorHead(majorHead.getName());
+        budgetLineContract.setMajorHeadDisplayOrder(majorHead.getDisplayOrder());
         MajorHeadGroup majorHeadGroup = majorHead.getMajorHeadGroup();
         budgetLineContract.setMajorHeadGroup(majorHeadGroup.getName());
         budgetLineContract.setMajorHeadGroupDisplayOrder(majorHeadGroup.getDisplayOrder());

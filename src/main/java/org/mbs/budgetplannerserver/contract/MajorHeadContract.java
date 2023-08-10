@@ -1,11 +1,13 @@
 package org.mbs.budgetplannerserver.contract;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MajorHeadContract {
     private String name;
     private String code;
+    private BigDecimal majorHeadDisplayOrder;
     private List<MinorHeadContract> minorHeads= new ArrayList<>();
 
     public String getName() {
@@ -34,5 +36,13 @@ public class MajorHeadContract {
 
     public void addMinorHeadContract(MinorHeadContract minorHeadContract) {
         this.getMinorHeads().add(minorHeadContract);
+    }
+
+    public BigDecimal getMajorHeadDisplayOrder() {
+        return majorHeadDisplayOrder;
+    }
+
+    public void setMajorHeadDisplayOrder(BigDecimal majorHeadDisplayOrder) {
+        this.majorHeadDisplayOrder = majorHeadDisplayOrder;
     }
 }

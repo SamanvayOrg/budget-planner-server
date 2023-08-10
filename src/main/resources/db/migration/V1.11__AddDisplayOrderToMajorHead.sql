@@ -1,0 +1,40 @@
+alter table major_head add column display_order numeric(7, 2) ;
+update major_head set display_order=1.00 where name='Tax Revenue';
+update major_head set display_order=2.00 where name='Assigned Revenues & Compensations';
+update major_head set display_order=3.00 where name='Revenue Grants, Contributions and Subsidies';
+update major_head set display_order=4.00 where name='Rental Income from Municipal Properties';
+update major_head set display_order=5.00 where name='Fees,User Charges & Fines';
+update major_head set display_order=6.00 where name='Sales and Hire Charges';
+update major_head set display_order=7.00 where name='Income from Interest';
+update major_head set display_order=8.00 where name='Deposits Forfeited/Non Refundable Deposits etc.';
+update major_head set display_order=9.00 where name='Other Income';
+update major_head set display_order=10.00 where name='Establishment Expenses';
+update major_head set display_order=11.00  where name='Administrative Expenses';
+update major_head set display_order=12.00  where name='Interest and Finance Charges';
+update major_head set display_order=13.00  where name='Repairs and Maintenance of Assets';
+update major_head set display_order=14.00  where name='Purchases for Operations and Programme implements tion';
+update major_head set display_order=15.00  where name='Provisions and Write offs';
+update major_head set display_order=16.00  where name='Reserve Fund & Mkt Expenses';
+update major_head set display_order=17.00  where name='Depreciation';
+update major_head set display_order=18.00  where name='Revenue Grants, Contributions and Subsidies given';
+
+update major_head set display_order=19.00  where name='Grants, Contributions for Specific Purpose (Earmarked Funds)';
+update major_head set display_order=20.00  where name='Secured and Unsecured Loans';
+update major_head set display_order=21.00  where name='Municipal Fund and Reserves';
+update major_head set display_order=23.00  where name='Other Liabilities';
+update major_head set display_order=24.00  where name='Interest on Loans';
+update major_head set display_order=25.00  where name='Employers Liability';
+update major_head set display_order=26.00  where name='Suppliers and Contractors Liability';
+update major_head set display_order=27.00  where name='Liability to Citizens';
+update major_head set display_order=28.00  where name='Amount payable to Government';
+
+
+update major_head set display_order=29.00  where name='Fixed & Movable Assets';
+update major_head set display_order=30.00  where name='Capital Work in Progress';
+update major_head set display_order=31.00  where name='Investments';
+update major_head set display_order=32.00  where name='Stock in Hand';
+update major_head set display_order=33.00  where name='Sundry Debtors';
+update major_head set display_order=34.00  where name='Loans , Advances and Deposits';
+update major_head set display_order=35.00  where name='Cash and Bank Balance';
+update major_head set display_order=36.00  where name='Other Assets';
+update major_head set display_order=37.00  where name='Accumulated Depreciation';

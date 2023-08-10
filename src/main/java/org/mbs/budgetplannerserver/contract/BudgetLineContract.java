@@ -22,6 +22,7 @@ public class BudgetLineContract {
     private BigDecimal yearMinus2Actuals;
     private BigDecimal displayOrder;
     private String majorHeadGroup;
+    private BigDecimal majorHeadDisplayOrder;
     private BigDecimal majorHeadGroupDisplayOrder;
     private String majorHead;
     private String minorHead;
@@ -181,6 +182,7 @@ public class BudgetLineContract {
     public void setMinorHeadCategory(String minorHeadCategory) {
         this.minorHeadCategory = minorHeadCategory;
     }
+
     public BigDecimal getCurrentYearBudgetedAmount() {
         return currentYearBudgetedAmount;
     }
@@ -228,4 +230,13 @@ public class BudgetLineContract {
     public void setFunctionGroupCategory(String functionGroupCategory) {
         this.functionGroupCategory = functionGroupCategory;
     }
+
+    public BigDecimal getMajorHeadDisplayOrder() {
+        return majorHeadDisplayOrder;
+    }
+
+    public void setMajorHeadDisplayOrder(BigDecimal majorHeadDisplayOrder) {
+        this.majorHeadDisplayOrder = majorHeadDisplayOrder;
+    }
+
 }
