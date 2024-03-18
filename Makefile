@@ -19,6 +19,9 @@ build-server: ## Builds the jar file
 test-server: ## Builds the jar file after tests
 	./gradlew clean build
 
-start: 
+start:
 	./gradlew bootRun
+
+start-with-local-db:
+	BPS_DATASOURCE=jdbc:postgresql://localhost:5442/budget GRADLE_OPTS="-Xmx256m" ./gradlew bootRun
 
