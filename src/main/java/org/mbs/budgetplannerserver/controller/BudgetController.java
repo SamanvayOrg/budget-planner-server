@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -87,7 +88,8 @@ public class BudgetController {
     @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
     public List<BudgetContract> allBudgets() {
         List<Budget> budgets = budgetService.getAllBudgets();
-        return budgets.stream().map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
+        return budgets.stream().sorted(Comparator.comparingInt(Budget::getFinancialYear))
+                .map(budget -> new BudgetContractMapper().map(budget)).collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/api/budget", method = DELETE)
