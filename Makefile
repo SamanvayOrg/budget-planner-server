@@ -25,7 +25,7 @@ start:
 start-with-local-db:
 	BPS_DATASOURCE=jdbc:postgresql://localhost:5442/budget GRADLE_OPTS="-Xmx2048m" ./gradlew bootRun
 
-debug-with-local-db:
+debug-with-local-db: build-server
 	BPS_DATASOURCE=jdbc:postgresql://localhost:5442/budget java -Xmx2048m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/budget-planner-server-0.0.1-SNAPSHOT.jar
 
 start-with-remote-db:
@@ -39,7 +39,7 @@ ifndef dbPassword
 endif
 	BPS_DB_PASSWORD=$(dbPassword) BPS_DB_USER=$(dbUser) BPS_DATASOURCE=jdbc:postgresql://localhost:6015/budget GRADLE_OPTS="-Xmx2048m" ./gradlew bootRun
 
-debug-with-remote-db:
+debug-with-remote-db: build-server
 ifndef dbUser
 	@echo "Provde the dbUser variable"
 	exit 1
