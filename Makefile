@@ -25,3 +25,5 @@ start:
 start-with-local-db:
 	BPS_DATASOURCE=jdbc:postgresql://localhost:5442/budget GRADLE_OPTS="-Xmx256m" ./gradlew bootRun
 
+debug-with-local-db:
+	BPS_DATASOURCE=jdbc:postgresql://localhost:5442/budget java -Xmx2048m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/budget-planner-server-0.0.1-SNAPSHOT.jar
