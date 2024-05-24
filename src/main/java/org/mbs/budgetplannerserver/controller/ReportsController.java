@@ -25,7 +25,7 @@ public class ReportsController {
 
     @RequestMapping(value = "/api/report/allBudgetsForCurrentYear", method = GET)
     @ResponseBody
-    @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('superAdmin')")
     public List<BudgetReportsContract> findAllForCurrentYear() {
         return new BudgetReportsContractMapper().map(budgetService.getAllForFinancialYear());
     }

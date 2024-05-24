@@ -23,19 +23,19 @@ public class MunicipalityController {
     }
 
     @RequestMapping(value = "/api/municipality", method = GET)
-    @PreAuthorize("hasAuthority('read')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('read')")
     public MunicipalityContract getMunicipality() {
         return new MunicipalityContractMapper().fromMunicipality(userService.getMunicipality());
     }
 
     @RequestMapping(value = "/api/municipality", method = POST)
-    @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('superAdmin')")
     public MunicipalityContract createMunicipality(@RequestBody MunicipalityContract municipalityContract) {
         return new MunicipalityContractMapper().fromMunicipality(municipalityService.create(municipalityContract));
     }
 
     @RequestMapping(value = "/api/municipality/{id}/adminUser", method = POST)
-    @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('superAdmin')")
     public UserContract createMunicipalityAdminUser(@PathVariable Long id, @RequestBody UserContract userContract) {
         userContract.setMunicipalityId(id);
         userContract.setAdmin(true);
@@ -43,7 +43,7 @@ public class MunicipalityController {
     }
 
     @RequestMapping(value = "/api/municipality/adminUser/{id}", method = DELETE)
-    @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('superAdmin')")
     public UserContract deleteMunicipalityAdminUser(@PathVariable Long id) {
         if(!userService.getUser(id).getAdmin()) {
             throw new AccessDeniedException("SuperAdmin user can only delete Admin users of other Municipalities");
@@ -56,13 +56,13 @@ public class MunicipalityController {
 
     @RequestMapping(value = "/api/municipality/admins", method = GET)
     @ResponseBody
-    @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('superAdmin')")
     public Iterable<UserContract> getAllMunicipalityAdmins() {
         return new UserContractMapper().map(userService.getAllMunicipalityAdmins());
     }
 
     @RequestMapping(value = "/api/municipality/{id}", method = PUT)
-    @PreAuthorize("hasAuthority('write')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('write')")
     public MunicipalityContract updateMunicipality(@PathVariable Long id, @RequestBody MunicipalityContract municipalityContract) {
         if(!id.equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only update his own municipality");
@@ -71,7 +71,7 @@ public class MunicipalityController {
     }
 
     @RequestMapping(value = "/api/municipality/{id}", method = DELETE)
-    @PreAuthorize("hasAuthority('superAdmin')") // ✨ 👈 New line ✨
+    @PreAuthorize("hasAuthority('superAdmin')")
     public MunicipalityContract deleteMunicipality(@PathVariable Long id) {
         return new MunicipalityContractMapper().fromMunicipality(municipalityService.delete(id));
     }
