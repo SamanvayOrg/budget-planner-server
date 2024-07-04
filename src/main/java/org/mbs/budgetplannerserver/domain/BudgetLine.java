@@ -151,7 +151,7 @@ public class BudgetLine extends BaseModel{
 
     public BigDecimal getPreviousFourMonthProbables(int index) {
         BudgetLine matchingBudgetLine = matchingBudgetLine(index);
-        return matchingBudgetLine == null ? null : matchingBudgetLine.getActualAmount();
+        return matchingBudgetLine == null ? null : matchingBudgetLine.getFourMonthProbableAmount();
     }
 
     public BigDecimal getPreviousBudgeted(int index) {

@@ -356,7 +356,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
             case BudgetReportColumns.YEAR_4_ACTUALS: return budgetLine.getPreviousActuals(PreviousYears.PREV_YEAR_MINUS_3);
             case BudgetReportColumns.YEAR_3_ACTUALS: return budgetLine.getPreviousActuals(PreviousYears.PREV_YEAR_MINUS_2);
             case BudgetReportColumns.YEAR_2_ACTUALS: return budgetLine.getPreviousActuals(PreviousYears.PREV_YEAR_MINUS_1);
-            case BudgetReportColumns.YEAR_1_BUDGETED_AMOUNT: return budgetLine.getBudgetedAmount();
+            case BudgetReportColumns.YEAR_1_BUDGETED_AMOUNT: return budgetLine.getPreviousBudgeted(PREV_YEAR);
             case BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS: return budgetLine.getPreviousEightMonthActuals(PREV_YEAR);
             case BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS: return budgetLine.getPreviousFourMonthProbables(PREV_YEAR);
             case BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR: {
