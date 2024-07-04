@@ -88,7 +88,7 @@ public class Budget extends BaseModel {
 	}
 
 	public Set<BudgetLineDetail> getSelfBudgetLineDetails() {
-		return getBudgetLines().stream().map(BudgetLineDetail::new).collect(Collectors.toSet());
+		return getBudgetLines().stream().map(BudgetLineDetail::forBudgetLine).collect(Collectors.toSet());
 	}
 
 	public Set<BudgetLineDetail> getUniqueBudgetLineDetails() {

@@ -64,4 +64,8 @@ public class MinorHead extends BaseModel {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    public MajorHeadGroup getMajorHeadGroup() {
+        return getMajorHead().getMajorHeadGroup();
+    }
 }

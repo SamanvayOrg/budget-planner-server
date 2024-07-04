@@ -4,16 +4,12 @@ import lombok.NonNull;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
-import org.mbs.budgetplannerserver.contract.BudgetContract;
-import org.mbs.budgetplannerserver.contract.BudgetLineContract;
-import org.mbs.budgetplannerserver.domain.AmountType;
-import org.mbs.budgetplannerserver.domain.Budget;
+import org.mbs.budgetplannerserver.domain.*;
+import org.mbs.budgetplannerserver.domain.code.MajorHead;
+import org.mbs.budgetplannerserver.domain.code.MajorHeadGroup;
 import org.mbs.budgetplannerserver.export.data.BudgetExcelReportConstants;
 import org.mbs.budgetplannerserver.export.data.CustomCellStyle;
 import org.mbs.budgetplannerserver.export.data.CustomCellStyleAndValue;
-import org.mbs.budgetplannerserver.mapper.BudgetContractMapper;
-import org.mbs.budgetplannerserver.service.BudgetLineService;
-import org.mbs.budgetplannerserver.service.BudgetService;
 import org.mbs.budgetplannerserver.service.TranslationService;
 import org.mbs.budgetplannerserver.util.BudgetStringUtils;
 import org.mbs.budgetplannerserver.util.TranslationSearchHelper;
@@ -28,17 +24,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
+import static org.mbs.budgetplannerserver.domain.PreviousYears.PREV_YEAR;
 
 @Service
 public class BudgetExcelReportService implements BudgetExcelReportConstants {
-    private final BudgetService budgetService;
-    private final BudgetLineService budgetLineService;
     private final StylesGenerator stylesGenerator;
     private final TranslationService translationService;
-    public BudgetExcelReportService(BudgetService budgetService, BudgetLineService budgetLineService,
-                                    StylesGenerator stylesGenerator, TranslationService translationService) {
-        this.budgetService = budgetService;
-        this.budgetLineService = budgetLineService;
+    public BudgetExcelReportService(StylesGenerator stylesGenerator, TranslationService translationService) {
         this.stylesGenerator = stylesGenerator;
         this.translationService = translationService;
     }
@@ -71,7 +63,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         HashMap<String, BigDecimal> majorHeadColumnTotals = new HashMap<>();
         createOpeningBalanceRow(sheet, styles, budgetReportColumns, budget, translationSearchHelper, majorHeadColumnTotals);
         addTotals(majorHeadColumnTotals, budgetTotals);
-        int rowIndex = createBudgetRows(sheet, styles, budgetReportColumns, year, budget, translationSearchHelper, budgetTotals);
+        int rowIndex = createBudgetRows(sheet, styles, budgetReportColumns, budget, translationSearchHelper, budgetTotals);
         createTotalsRow(rowIndex++, sheet, styles, EMPTY_STRING, translationSearchHelper, budgetTotals, budgetReportColumns);
 //TODO        createFooterRow(sheet, styles);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -82,41 +74,47 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     }
 
     private int createBudgetRows(Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
-                                 List<String> budgetReportColumns, Integer year, Budget budget,
+                                 List<String> budgetReportColumns, Budget budget,
                                  TranslationSearchHelper translationSearchHelper, HashMap<String, BigDecimal> budgetTotals) {
-        BudgetContract budgetContract = new BudgetContractMapper().map(budget);
-        Map<String, Map<String, List<BudgetLineContract>>> mapOfBLC = budgetContract.getBudgetLines().stream()
-                .sorted(Comparator.comparing(BudgetLineContract::getMajorHeadGroupDisplayOrder))
-                .collect(groupingBy(BudgetLineContract::getMajorHeadGroup, LinkedHashMap::new,
-                        groupingBy(BudgetLineContract::getMajorHead, LinkedHashMap::new, Collectors.toList())));
+        Map<MajorHeadGroup, Map<MajorHead, List<BudgetLine>>> allMajorHeadGroupsMap = budget
+                .getBudgetLines()
+                .stream()
+                .collect(groupingBy(BudgetLine::getMajorHeadGroup,
+                        LinkedHashMap::new,
+                        groupingBy(BudgetLine::getMajorHead, LinkedHashMap::new, Collectors.toList())));
+
         int rowIndex=OPENING_BALANCE_ROW+1;
         int majorHeadGroupDisplayOrder=1;
-        for (Map.Entry<String,Map<String, List<BudgetLineContract>>> entry : mapOfBLC.entrySet()) {
-            String majorHeadGroup = entry.getKey();
-            createMajorHeadGroupRow(rowIndex++, sheet, styles, majorHeadGroup, majorHeadGroupDisplayOrder++, translationSearchHelper);
+        List<MajorHeadGroup> allMajorHeadGroups = allMajorHeadGroupsMap.keySet().stream().sorted(Comparator.comparing(MajorHeadGroup::getDisplayOrder)).collect(Collectors.toList());
+        for(MajorHeadGroup majorHeadGroup: allMajorHeadGroups) {
+            createMajorHeadGroupRow(rowIndex++, sheet, styles, majorHeadGroup.getName(), majorHeadGroupDisplayOrder++, translationSearchHelper);
             HashMap<String, BigDecimal> majorHeadGroupColumnTotals = new HashMap<>();
             int majorHeadDisplayOrder=1;
-            for (Map.Entry<String, List<BudgetLineContract>> sEntry : entry.getValue().entrySet()) {
-                String majorHead = sEntry.getKey();
-                createMajorHeadRow(rowIndex++, sheet, styles, majorHead, majorHeadDisplayOrder++, translationSearchHelper);
+            Map<MajorHead, List<BudgetLine>> majorHeadMap = allMajorHeadGroupsMap.get(majorHeadGroup);
+            List<MajorHead> allMajorHeads = majorHeadMap.keySet().stream().sorted(Comparator.comparing(MajorHead::getDisplayOrder)).collect(Collectors.toList());
+
+            for(MajorHead majorHead: allMajorHeads) {
+                createMajorHeadRow(rowIndex++, sheet, styles, majorHead.getName(), majorHeadDisplayOrder++, translationSearchHelper);
                 HashMap<String, BigDecimal> majorHeadColumnTotals = new HashMap<>();
                 int budgetRowIndex=1;
-                for (BudgetLineContract blc : sEntry.getValue()) {
-                    createBudgetRow(rowIndex++, sheet, styles, blc, budgetRowIndex++, translationSearchHelper,
+                List<BudgetLine> budgetLines = majorHeadMap.get(majorHead).stream().sorted(Comparator.comparing(BudgetLine::getName)).collect(Collectors.toList());
+                for (BudgetLine budgetLine : budgetLines) {
+                    createBudgetRow(rowIndex++, sheet, styles, budgetLine, budgetRowIndex++, translationSearchHelper,
                             majorHeadColumnTotals, budgetReportColumns);
                 }
-                createTotalsRow(rowIndex++, sheet, styles, majorHead, translationSearchHelper, majorHeadColumnTotals, budgetReportColumns);
+                createTotalsRow(rowIndex++, sheet, styles, majorHead.getName(), translationSearchHelper, majorHeadColumnTotals, budgetReportColumns);
                 addTotals(majorHeadColumnTotals, majorHeadGroupColumnTotals);
             }
-            createTotalsRow(rowIndex++, sheet, styles, majorHeadGroup, translationSearchHelper, majorHeadGroupColumnTotals, budgetReportColumns);
-            if(majorHeadGroup.equals(REVENUE_RECEIPT) || majorHeadGroup.equals(ASSETS)) {
+            createTotalsRow(rowIndex++, sheet, styles, majorHeadGroup.getName(), translationSearchHelper, majorHeadGroupColumnTotals, budgetReportColumns);
+
+            if(majorHeadGroup.getName().equals(REVENUE_RECEIPT) || majorHeadGroup.getName().equals(ASSETS)) {
                 addTotals(majorHeadGroupColumnTotals, budgetTotals);
-            } else if(majorHeadGroup.equals(EXPENSES) || majorHeadGroup.equals(LIABILITY)) {
+            } else if(majorHeadGroup.getName().equals(EXPENSES) || majorHeadGroup.getName().equals(LIABILITY)) {
                 subTotals(majorHeadGroupColumnTotals, budgetTotals);
             } else {
                 throw new RuntimeException("Error computing Total, unknown majorHeadGroup value "+majorHeadGroup);
             }
-        }
+        };
         return rowIndex;
     }
 
@@ -162,7 +160,7 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
     }
 
     private void createBudgetRow(int rowIndex, Sheet sheet, Map<CustomCellStyle, CellStyle> styles,
-                                 BudgetLineContract budgetLineContract, int budgetRowIndex,
+                                 BudgetLine budgetLine, int budgetRowIndex,
                                  TranslationSearchHelper translations, HashMap<String, BigDecimal> majorHeadColumnTotals,
                                  List<String> budgetReportColumns) {
         CustomCellStyle rightAligned = CustomCellStyle.RIGHT_ALIGNED;
@@ -172,11 +170,11 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
                 getTranslatedValue(getSerialNumber(budgetRowIndex, SerialNumberTypes.NUMBERS), translations)));
         customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(styles.get(CustomCellStyle.LEFT_ALIGNED),
-                getTranslatedValue(budgetLineContract.getName(), translations)));
+                getTranslatedValue(budgetLine.getName(), translations)));
         customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
-                budgetLineContract.getCode()));
+                budgetLine.getFullCode()));
         budgetReportColumns.forEach(columnName -> {
-            BigDecimal value = getColumnValue(budgetLineContract, columnName);
+            BigDecimal value = getColumnValue(budgetLine, columnName);
             addColumnValueToTotals(majorHeadColumnTotals, columnName, value);
             customCellStyleAndValueArrayList.add(new CustomCellStyleAndValue(cellStyle,
                     value == null ? EMPTY_STRING : value.toPlainString()));
@@ -353,41 +351,41 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
         }
     }
 
-    private BigDecimal getColumnValue(BudgetLineContract budgetLine, String columnName) {
+    private BigDecimal getColumnValue(BudgetLine budgetLine, String columnName) {
         switch(columnName) {
-            case BudgetReportColumns.YEAR_4_ACTUALS: return budgetLine.getYearMinus2Actuals();
-            case BudgetReportColumns.YEAR_3_ACTUALS: return budgetLine.getYearMinus1Actuals();
-            case BudgetReportColumns.YEAR_2_ACTUALS: return budgetLine.getPreviousYearActuals();
-            case BudgetReportColumns.YEAR_1_BUDGETED_AMOUNT: return budgetLine.getCurrentYearBudgetedAmount();
-            case BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS: return budgetLine.getCurrentYear8MonthsActuals();
-            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS: return budgetLine.getCurrentYear4MonthsProbables();
+            case BudgetReportColumns.YEAR_4_ACTUALS: return budgetLine.getPreviousActuals(PreviousYears.PREV_YEAR_MINUS_3);
+            case BudgetReportColumns.YEAR_3_ACTUALS: return budgetLine.getPreviousActuals(PreviousYears.PREV_YEAR_MINUS_2);
+            case BudgetReportColumns.YEAR_2_ACTUALS: return budgetLine.getPreviousActuals(PreviousYears.PREV_YEAR_MINUS_1);
+            case BudgetReportColumns.YEAR_1_BUDGETED_AMOUNT: return budgetLine.getBudgetedAmount();
+            case BudgetReportColumns.YEAR_1_ACTUALS_FOR_8_MONTHS: return budgetLine.getPreviousEightMonthActuals(PREV_YEAR);
+            case BudgetReportColumns.YEAR_1_PROBABLES_FOR_REMAINING_4_MONTHS: return budgetLine.getPreviousFourMonthProbables(PREV_YEAR);
             case BudgetReportColumns.YEAR_1_PROBABLES_FOR_FULL_YEAR: {
-                if(budgetLine.getCurrentYear8MonthsActuals() != null && budgetLine.getCurrentYear4MonthsProbables() != null) {
-                    return budgetLine.getCurrentYear8MonthsActuals().add(budgetLine.getCurrentYear4MonthsProbables());
+                if(budgetLine.getPreviousEightMonthActuals(PREV_YEAR) != null && budgetLine.getPreviousFourMonthProbables(PREV_YEAR) != null) {
+                    return budgetLine.getPreviousEightMonthActuals(PREV_YEAR).add(budgetLine.getPreviousFourMonthProbables(PREV_YEAR));
                 } else {
-                    if(budgetLine.getCurrentYear8MonthsActuals() != null) {
-                        return budgetLine.getCurrentYear8MonthsActuals();
+                    if(budgetLine.getPreviousEightMonthActuals(PREV_YEAR) != null) {
+                        return budgetLine.getPreviousEightMonthActuals(PREV_YEAR);
                     } else {
-                        return budgetLine.getCurrentYear4MonthsProbables();
+                        return budgetLine.getPreviousFourMonthProbables(PREV_YEAR);
                     }
                 }
             }
             case BudgetReportColumns.YEAR_0_BUDGETED_AMOUNT: return budgetLine.getBudgetedAmount();
-            case BudgetReportColumns.YEAR_1_ACTUALS: return budgetLine.getCurrentYearActuals();
-            case BudgetReportColumns.YEAR_0_ACTUALS_FOR_8_MONTHS: return budgetLine.getEightMonthsActuals();
-            case BudgetReportColumns.YEAR_0_PROBABLES_FOR_REMAINING_4_MONTHS: return budgetLine.getFourMonthsProbables();
+            case BudgetReportColumns.YEAR_1_ACTUALS: return budgetLine.getPreviousActuals(PREV_YEAR);
+            case BudgetReportColumns.YEAR_0_ACTUALS_FOR_8_MONTHS: return budgetLine.getEightMonthActualAmount();
+            case BudgetReportColumns.YEAR_0_PROBABLES_FOR_REMAINING_4_MONTHS: return budgetLine.getFourMonthProbableAmount();
             case BudgetReportColumns.YEAR_0_PROBABLES_FOR_FULL_YEAR: {
-                if(budgetLine.getEightMonthsActuals() != null && budgetLine.getFourMonthsProbables() != null) {
-                    return budgetLine.getEightMonthsActuals().add(budgetLine.getFourMonthsProbables());
+                if(budgetLine.getEightMonthActualAmount() != null && budgetLine.getFourMonthProbableAmount() != null) {
+                    return budgetLine.getEightMonthActualAmount().add(budgetLine.getFourMonthProbableAmount());
                 } else {
-                    if(budgetLine.getEightMonthsActuals() != null) {
-                        return budgetLine.getEightMonthsActuals();
+                    if(budgetLine.getEightMonthActualAmount() != null) {
+                        return budgetLine.getEightMonthActualAmount();
                     } else {
-                        return budgetLine.getFourMonthsProbables();
+                        return budgetLine.getFourMonthProbableAmount();
                     }
                 }
             }
-            case BudgetReportColumns.YEAR_0_ACTUALS: return budgetLine.getActuals();
+            case BudgetReportColumns.YEAR_0_ACTUALS: return budgetLine.getActualAmount();
             default: throw new RuntimeException("Mapping not found for columnName" + columnName);
         }
     }

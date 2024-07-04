@@ -54,4 +54,12 @@ public class DetailedHead extends BaseModel {
     public void setFullCode(String fullCode) {
         this.fullCode = fullCode;
     }
+
+    public MajorHead getMajorHead() {
+        return getMinorHead().getMajorHead();
+    }
+
+    public MajorHeadGroup getMajorHeadGroup() {
+        return getMinorHead().getMajorHeadGroup();
+    }
 }

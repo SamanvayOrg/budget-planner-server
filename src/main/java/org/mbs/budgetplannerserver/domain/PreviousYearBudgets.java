@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PreviousYearBudgets {
+
     private final Budget[] previousYearBudgets;
 
     public PreviousYearBudgets(Budget yearMinus1, Budget yearMinus2, Budget yearMinus3, Budget yearMinus4) {
@@ -19,6 +20,10 @@ public class PreviousYearBudgets {
                         previousYearBudgets[2].matchingBudgetLine(budgetLineDetail),
                         previousYearBudgets[3].matchingBudgetLine(budgetLineDetail)
                 };
+    }
+
+    public BudgetLine getBudgetLinesMatching(BudgetLineDetail budgetLineDetail, int index) {
+        return getBudgetLinesMatching(budgetLineDetail)[index];
     }
 
     public Set<BudgetLineDetail> getUniqueBudgetLineDetails() {

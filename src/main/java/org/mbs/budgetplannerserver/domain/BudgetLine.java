@@ -2,8 +2,7 @@ package org.mbs.budgetplannerserver.domain;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-import org.mbs.budgetplannerserver.domain.code.DetailedHead;
-import org.mbs.budgetplannerserver.domain.code.Function;
+import org.mbs.budgetplannerserver.domain.code.*;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -13,12 +12,15 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mbs.budgetplannerserver.domain.AmountType.*;
+import static org.mbs.budgetplannerserver.domain.PreviousYears.PREV_YEAR;
+import static org.mbs.budgetplannerserver.domain.PreviousYears.PREV_YEAR_MINUS_1;
+
 @Entity
 @Table(name = "budget_line")
 @SQLDelete(sql = "UPDATE budget_line SET is_voided = true WHERE id=?")
 @Where(clause = "is_voided=false")
 public class BudgetLine extends BaseModel{
-
     @ManyToOne(targetEntity = Budget.class)
     @JoinColumn(name = "budget_id")
     private Budget budget;
@@ -140,5 +142,54 @@ public class BudgetLine extends BaseModel{
 
     public String getFullCode() {
         return getFunction().getFullCode() + "-" + getDetailedHead().getFullCode();
+    }
+
+    public BigDecimal getPreviousActuals(int index) {
+        BudgetLine matchingBudgetLine = matchingBudgetLine(index);
+        return matchingBudgetLine == null ? null : matchingBudgetLine.getActualAmount();
+    }
+
+    public BigDecimal getPreviousFourMonthProbables(int index) {
+        BudgetLine matchingBudgetLine = matchingBudgetLine(index);
+        return matchingBudgetLine == null ? null : matchingBudgetLine.getActualAmount();
+    }
+
+    public BigDecimal getPreviousBudgeted(int index) {
+        BudgetLine matchingBudgetLine = matchingBudgetLine(index);
+        return matchingBudgetLine == null ? null : matchingBudgetLine.getBudgetedAmount();
+    }
+
+    public MinorHead getMinorHead() {
+        return getDetailedHead().getMinorHead();
+    }
+
+    public MajorHead getMajorHead() {
+        return getDetailedHead().getMajorHead();
+    }
+
+    public MajorHeadGroup getMajorHeadGroup() {
+        return getDetailedHead().getMajorHeadGroup();
+    }
+
+    public BigDecimal getPreviousEightMonthActuals(int index) {
+        BudgetLine matchingBudgetLine = matchingBudgetLine(index);
+        return matchingBudgetLine == null ? null : matchingBudgetLine.getEightMonthActualAmount();
+    }
+
+    public BudgetLine matchingBudgetLine(int index) {
+        return matchingPreviousBudgetLines()[index];
+    }
+
+    public BudgetLine[] matchingPreviousBudgetLines() {
+        return getBudget().getPreviousYearBudgets().getBudgetLinesMatching(BudgetLineDetail.forBudgetLine(this));
+    }
+
+    public boolean canBeDeleted() {
+        BudgetLine currentYearBudgetLine = matchingBudgetLine(PREV_YEAR);
+        BudgetLine previousYearBudgetLine = matchingBudgetLine(PREV_YEAR_MINUS_1);
+
+        return (currentYearBudgetLine == null || currentYearBudgetLine.canBeDeleted(ESTIMATES)) &&
+                (previousYearBudgetLine == null || previousYearBudgetLine.canBeDeleted(ACTUALS)) &&
+                canBeDeleted(BUDGETED);
     }
 }

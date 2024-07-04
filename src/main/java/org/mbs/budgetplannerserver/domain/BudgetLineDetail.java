@@ -14,6 +14,10 @@ public class BudgetLineDetail {
         name = budgetLine.getName();
     }
 
+    public static BudgetLineDetail forBudgetLine(BudgetLine budgetLine) {
+        return new BudgetLineDetail(budgetLine);
+    }
+
     public BudgetLineDetail(String functionCode, String detailedHeadCode, String name) {
         this.functionCode = functionCode;
         this.detailedHeadCode = detailedHeadCode;
