@@ -107,9 +107,9 @@ public class BudgetExcelReportService implements BudgetExcelReportConstants {
             }
             createTotalsRow(rowIndex++, sheet, styles, majorHeadGroup.getName(), translationSearchHelper, majorHeadGroupColumnTotals, budgetReportColumns);
 
-            if(majorHeadGroup.getName().equals(REVENUE_RECEIPT) || majorHeadGroup.getName().equals(ASSETS)) {
+            if(majorHeadGroup.getName().equals(REVENUE_RECEIPT) || majorHeadGroup.getName().equals(CAPITAL_INCOME)) {
                 addTotals(majorHeadGroupColumnTotals, budgetTotals);
-            } else if(majorHeadGroup.getName().equals(EXPENSES) || majorHeadGroup.getName().equals(LIABILITY)) {
+            } else if(majorHeadGroup.getName().equals(EXPENSES) || majorHeadGroup.getName().equals(CAPITAL_EXPENDITURE)) {
                 subTotals(majorHeadGroupColumnTotals, budgetTotals);
             } else {
                 throw new RuntimeException("Error computing Total, unknown majorHeadGroup value "+majorHeadGroup);
