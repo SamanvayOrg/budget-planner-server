@@ -1,17 +1,22 @@
 package org.mbs.budgetplannerserver.controller;
 
 import org.mbs.budgetplannerserver.contract.UserContract;
+import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.mapper.UserContractMapper;
 import org.mbs.budgetplannerserver.service.MunicipalityService;
 import org.mbs.budgetplannerserver.service.UserService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 public class UserController {
+    private static final String SUPER_ADMIN_AUTHORITY = "superAdmin";
+
     private final UserService userService;
     private final MunicipalityService municipalityService;
 
@@ -33,16 +38,43 @@ public class UserController {
         if(!userContract.getMunicipalityId().equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only create users in his own municipality");
         }
+        if (isRequestingAdminPrivilege(userContract) && !currentUserIsSuperAdmin()) {
+            throw new AccessDeniedException(
+                    "A Municipality Admin can only create regular users. Creating another Admin requires a Super Admin.");
+        }
         return new UserContractMapper().fromUser(userService.create(userContract));
     }
 
     @RequestMapping(value = "/api/user/{id}", method = PUT)
     @PreAuthorize("hasAuthority('admin')")
     public UserContract updateUser(@PathVariable Long id, @RequestBody UserContract userContract) {
-        if(!userService.getUser(id).getMunicipality().getId().equals(userService.getMunicipality().getId())) {
+        User existingUser = userService.getUser(id);
+        if(!existingUser.getMunicipality().getId().equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only update users in his own municipality");
         }
+        // Without this, the create restriction above is trivially bypassed: make a regular
+        // user, then promote them. Demotion and ordinary edits are left alone — only the
+        // privilege escalation is blocked.
+        boolean isPromotion = isRequestingAdminPrivilege(userContract) && !Boolean.TRUE.equals(existingUser.getAdmin());
+        if (isPromotion && !currentUserIsSuperAdmin()) {
+            throw new AccessDeniedException(
+                    "A Municipality Admin cannot promote a user to Admin. That requires a Super Admin.");
+        }
         return new UserContractMapper().fromUser(userService.update(id, userContract));
+    }
+
+    private boolean isRequestingAdminPrivilege(UserContract userContract) {
+        return Boolean.TRUE.equals(userContract.getAdmin());
+    }
+
+    // A Super Admin also carries the 'admin' authority, so the @PreAuthorize above cannot
+    // tell the two apart — the distinction has to be made explicitly here. Super Admins
+    // create Admins through their own endpoint (/api/municipality/{id}/adminUser), but the
+    // update path below is shared, so they must still be allowed through it.
+    private boolean currentUserIsSuperAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> SUPER_ADMIN_AUTHORITY.equals(authority.getAuthority()));
     }
 
     @RequestMapping(value = "/api/user/{id}", method = DELETE)

@@ -45,21 +45,55 @@ public class BudgetController {
 
     @RequestMapping(value = "/api/budget", method = POST)
     @PreAuthorize("hasAuthority('write')")
-    public void create(@RequestParam("year") Integer year) {
-        budgetService.getOrCreate(year, 0, true);
+    public BudgetContract create(@RequestParam("year") Integer year) {
+        Integer currentFinancialYear = Year.currentYear();
+        if (!currentFinancialYear.equals(year)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("Budgets can only be created for the current financial year (%s)",
+                            financialYearLabel(currentFinancialYear)));
+        }
+        Budget budget = budgetService.getOrCreate(year, 0, true);
+        return new BudgetContractMapper().map(budget);
+    }
+
+    // Mirrors Budget#getFinancialYearString so messages read "2027-28" like the rest of the UI.
+    private String financialYearLabel(int financialYear) {
+        return financialYear + "-" + String.valueOf(financialYear + 1).substring(2);
+    }
+
+    // /budget/actuals and /budget/estimates deliberately get-or-create *prior-year* budgets
+    // (year-2 / year-1) to hold comparison figures, so they cannot reject unknown years the
+    // way create() does. What they must not do is let an arbitrary client-supplied year
+    // conjure a brand-new budget out of nothing — posting budgetYear "2099-00" previously
+    // created a budget for financial year 2097. Requiring that the budget being edited
+    // already exists for this municipality bounds that.
+    private int yearOfExistingBudget(BudgetContract budgetContract) {
+        String budgetYear = budgetContract == null ? null : budgetContract.getBudgetYear();
+        if (budgetYear == null || budgetYear.length() < 4) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "budgetYear is required");
+        }
+        int year;
+        try {
+            year = Integer.parseInt(budgetYear.substring(0, 4));
+        } catch (NumberFormatException malformed) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("Unrecognised budgetYear '%s'", budgetYear));
+        }
+        budgetService.getBudgetForFinancialYear(year).orElseThrow(NOT_FOUND());
+        return year;
     }
 
     @RequestMapping(value = "/api/budget/actuals", method = POST)
     @PreAuthorize("hasAuthority('write')")
     public void updateActuals(@RequestBody BudgetContract budgetContract) {
-        Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 2, false);
+        Budget budget = budgetService.getOrCreate(yearOfExistingBudget(budgetContract), 2, false);
         budgetService.save(new BudgetContractMapper().withUpdatedActuals(budgetContract, budget, budgetLineService));
     }
 
     @RequestMapping(value = "/api/budget/estimates", method = POST)
     @PreAuthorize("hasAuthority('write')")
     public void updateEstimates(@RequestBody BudgetContract budgetContract) {
-        Budget budget = budgetService.getOrCreate(Integer.parseInt(budgetContract.getBudgetYear().substring(0, 4)), 1, false);
+        Budget budget = budgetService.getOrCreate(yearOfExistingBudget(budgetContract), 1, false);
         budgetService.save(new BudgetContractMapper().withUpdatedEstimates(budgetContract, budget, budgetLineService));
     }
 

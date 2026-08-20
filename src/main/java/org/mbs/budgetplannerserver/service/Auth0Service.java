@@ -8,17 +8,21 @@ import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class Auth0Service {
@@ -41,6 +45,10 @@ public class Auth0Service {
     private Duration clockSkew = Duration.ofSeconds(60);
     private Clock clock = Clock.systemUTC();
     private OAuth2AccessToken tokenCache;
+    // Roles are effectively static for the life of a tenant, so one lookup per name per
+    // process is plenty. Cleared on restart, which is the only time a role change here
+    // would realistically need picking up.
+    private final Map<String, String> roleIdCache = new ConcurrentHashMap<>();
 
     public Auth0Service(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -61,6 +69,43 @@ public class Auth0Service {
         String url = String.format("%s/%s", domain, "api/v2/users");
         ResponseEntity<Object> result = restTemplate.exchange(url, HttpMethod.POST, request, Object.class);
         return result;
+    }
+
+    // Resolves an Auth0 role id from its NAME, against whichever tenant this instance is
+    // pointed at.
+    //
+    // Previously these ids were read from the auth_role table, seeded once by
+    // V1.2__AlterLoginUser.sql with literal rol_... values seen in one tenant. Role ids are
+    // tenant-specific, so that binds the app to a single Auth0 tenant: pointed anywhere else
+    // (this project has both budget-planner and budget-planner-prod), every stored id 404s
+    // and user creation fails with nothing in the code to indicate why. Asking Auth0 for the
+    // id by name removes the coupling entirely — no seeding, no drift, same behaviour in
+    // dev, staging and prod.
+    public String getRoleIdByName(String roleName) {
+        String cached = roleIdCache.get(roleName);
+        if (cached != null) {
+            return cached;
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
+
+        String url = String.format("%s/api/v2/roles?name_filter=%s", domain,
+                URLEncoder.encode(roleName, StandardCharsets.UTF_8));
+        ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET,
+                new HttpEntity<>(headers), List.class);
+
+        List<Map<String, Object>> roles = response.getBody() == null ? List.of() : response.getBody();
+        // name_filter is a substring match, so "Admin" also returns "SuperAdmin" — match the
+        // name exactly or we would hand out the wrong privilege level.
+        String roleId = roles.stream()
+                .filter(role -> roleName.equals(role.get("name")))
+                .map(role -> (String) role.get("id"))
+                .findFirst()
+                .orElseThrow(() -> new AuthorizationServiceException(String.format(
+                        "Auth0 tenant %s has no role named '%s' — cannot assign it to a new user",
+                        domain, roleName)));
+        roleIdCache.put(roleName, roleId);
+        return roleId;
     }
 
     public ResponseEntity<String> assignRole(User user, List<String> roles) {

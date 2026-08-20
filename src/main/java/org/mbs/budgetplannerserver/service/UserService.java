@@ -1,10 +1,8 @@
 package org.mbs.budgetplannerserver.service;
 
 import org.mbs.budgetplannerserver.contract.UserContract;
-import org.mbs.budgetplannerserver.domain.AuthRole;
 import org.mbs.budgetplannerserver.domain.Municipality;
 import org.mbs.budgetplannerserver.domain.User;
-import org.mbs.budgetplannerserver.repository.AuthRoleRepository;
 import org.mbs.budgetplannerserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +24,15 @@ public class UserService {
     private final MunicipalityService municipalityService;
     private final UserRepository userRepository;
     private final Auth0Service auth0Service;
-    private final AuthRoleRepository authRoleRepository;
 
     @Autowired
-    public UserService(MunicipalityService municipalityService, UserRepository userRepository, Auth0Service auth0Service, AuthRoleRepository authRoleRepository) {
+    // AuthRoleRepository is deliberately no longer a dependency: role ids now come from
+    // Auth0 by name (Auth0Service#getRoleIdByName) rather than from the auth_role table,
+    // whose seeded values are tenant-specific and silently wrong on any other tenant.
+    public UserService(MunicipalityService municipalityService, UserRepository userRepository, Auth0Service auth0Service) {
         this.municipalityService = municipalityService;
         this.userRepository = userRepository;
         this.auth0Service = auth0Service;
-        this.authRoleRepository = authRoleRepository;
     }
 
 
@@ -64,6 +63,16 @@ public class UserService {
     }
 
     public User create(UserContract userContract) {
+            // Resolve the role BEFORE creating anything in Auth0. Creating the Auth0 user is
+            // an external, irreversible side effect and this method is not (and cannot
+            // usefully be) transactional — so if the role lookup failed afterwards, the Auth0
+            // account would already exist while no login_user row was ever written. The next
+            // attempt with that same email then gets 409 "user already exists" from Auth0,
+            // which the UI reports as "User already present" for someone who was never
+            // actually created: the address is permanently unusable. Resolving first costs
+            // nothing and leaves no orphan behind.
+            String roleId = auth0Service.getRoleIdByName(roleNameFor(userContract));
+
             ResponseEntity<Object> response = auth0Service.createUser(userContract);
             if (!response.getStatusCode().is2xxSuccessful()) {
                 throw new AuthorizationServiceException("Unable to create user");
@@ -75,14 +84,15 @@ public class UserService {
             user.setName((String) authRes.get("name"));
             user.setAdmin(userContract.getAdmin());
             user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
-            return assignRolesAndSaveUser(userContract, user);
+            return assignRolesAndSaveUser(roleId, user);
     }
 
-    private User assignRolesAndSaveUser(UserContract userContract, User user) {
-        Optional<AuthRole> authRole = authRoleRepository.findByRoleName(userContract.getAdmin() ?
-                ADMIN_USER_ROLE : REGULAR_USER_ROLE);
-        ResponseEntity<String> response = auth0Service.assignRole(user,
-                Arrays.asList(authRole.orElseThrow(EntityNotFoundException::new).getRoleId()));
+    private String roleNameFor(UserContract userContract) {
+        return Boolean.TRUE.equals(userContract.getAdmin()) ? ADMIN_USER_ROLE : REGULAR_USER_ROLE;
+    }
+
+    private User assignRolesAndSaveUser(String roleId, User user) {
+        ResponseEntity<String> response = auth0Service.assignRole(user, Arrays.asList(roleId));
         if(!response.getStatusCode().is2xxSuccessful()) {
             throw new AuthorizationServiceException("Unable to assign roles to user");
         }
