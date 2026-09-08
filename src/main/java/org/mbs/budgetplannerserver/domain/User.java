@@ -20,6 +20,10 @@ public class User extends BaseModel {
     private String name;
     private Boolean isAdmin;
 
+    // The Auth0 role this user was assigned. isAdmin alone cannot tell an accountant from
+    // a read-only user — both are simply not admins — so the role name is recorded too.
+    private String role;
+
     @ManyToOne(targetEntity = Municipality.class)
     @JoinColumn(name = "municipality_id")
     private Municipality municipality;
@@ -55,6 +59,14 @@ public class User extends BaseModel {
 
     public void setAdmin(Boolean admin) {
         isAdmin = admin;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public Municipality getMunicipality() {

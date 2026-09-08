@@ -9,6 +9,13 @@ public class UserContract {
     private Long municipalityId;
     private Boolean isAdmin = false;
 
+    // Optional. When absent the role is derived from isAdmin, which is how the Super
+    // Admin's create-an-admin endpoint and every pre-existing client still behave. When
+    // present it is authoritative, and isAdmin is derived from it instead — so a client
+    // cannot request the Admin role while passing isAdmin=false to dodge the privilege
+    // check. See UserService#roleNameFor.
+    private String role;
+
     public String getEmail() {
         return email;
     }
@@ -55,6 +62,14 @@ public class UserContract {
 
     public void setAdmin(Boolean admin) {
         isAdmin = admin;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
 }

@@ -7,15 +7,18 @@ import org.mbs.budgetplannerserver.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,6 +27,17 @@ public class UserService {
 
     public static final String REGULAR_USER_ROLE = "RegularUser";
     public static final String ADMIN_USER_ROLE = "Admin";
+    public static final String READ_ONLY_ROLE = "Read-only";
+
+    // The roles an administrator may assign through the create-user screen. Admin is
+    // deliberately absent: a Municipality Admin may not create another Admin, and a Super
+    // Admin creates them through /api/municipality/{id}/adminUser instead. SuperAdmin is
+    // absent for the same reason — nothing in the application grants it.
+    public static final List<String> ASSIGNABLE_ROLES = List.of(REGULAR_USER_ROLE, READ_ONLY_ROLE);
+
+    // Every role name the application understands, used to reject unknown values before
+    // they reach Auth0 (where an unknown name would fail late, after the account exists).
+    public static final List<String> KNOWN_ROLES = List.of(ADMIN_USER_ROLE, REGULAR_USER_ROLE, READ_ONLY_ROLE);
 
     private final MunicipalityService municipalityService;
     private final UserRepository userRepository;
@@ -75,7 +89,8 @@ public class UserService {
             // which the UI reports as "User already present" for someone who was never
             // actually created: the address is permanently unusable. Resolving first costs
             // nothing and leaves no orphan behind.
-            String roleId = auth0Service.getRoleIdByName(roleNameFor(userContract));
+            String roleName = roleNameFor(userContract);
+            String roleId = auth0Service.getRoleIdByName(roleName);
 
             ResponseEntity<Object> response = auth0Service.createUser(userContract);
             if (!response.getStatusCode().is2xxSuccessful()) {
@@ -86,7 +101,10 @@ public class UserService {
             user.setUserName((String) authRes.get("user_id"));
             user.setEmail((String) authRes.get("email"));
             user.setName((String) authRes.get("name"));
-            user.setAdmin(userContract.getAdmin());
+            user.setRole(roleName);
+            // Derived from the role actually assigned rather than taken from the request,
+            // so the stored flag can never disagree with the role held in Auth0.
+            user.setAdmin(ADMIN_USER_ROLE.equals(roleName));
             user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
             User savedUser = assignRolesAndSaveUser(roleId, user);
             sendPasswordSetupEmail(savedUser);
@@ -113,8 +131,21 @@ public class UserService {
         }
     }
 
-    private String roleNameFor(UserContract userContract) {
-        return Boolean.TRUE.equals(userContract.getAdmin()) ? ADMIN_USER_ROLE : REGULAR_USER_ROLE;
+    // The role the contract is asking for. An explicit role wins over the isAdmin flag, so
+    // that a caller cannot request Admin while passing isAdmin=false and slip past the
+    // privilege check in UserController — which asks this same method what is being
+    // requested. When no role is given the old flag-derived behaviour is kept, which is
+    // what the Super Admin's create-an-admin endpoint relies on.
+    public static String roleNameFor(UserContract userContract) {
+        String requested = userContract.getRole();
+        if (requested == null || requested.isBlank()) {
+            return Boolean.TRUE.equals(userContract.getAdmin()) ? ADMIN_USER_ROLE : REGULAR_USER_ROLE;
+        }
+        if (!KNOWN_ROLES.contains(requested)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("Unknown role '%s'. Expected one of %s", requested, KNOWN_ROLES));
+        }
+        return requested;
     }
 
     private User assignRolesAndSaveUser(String roleId, User user) {

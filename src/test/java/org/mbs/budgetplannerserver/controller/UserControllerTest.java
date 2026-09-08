@@ -11,6 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -93,6 +94,47 @@ class UserControllerTest {
         controller.updateUser(7L, userContract(false));
 
         verify(userService).update(any(Long.class), any());
+    }
+
+    @Test
+    public void chiefOfficerCanCreateAReadOnlyUser() {
+        signedInWith("read", "write", "admin");
+        when(userService.getMunicipality()).thenReturn(municipality());
+        when(userService.create(any())).thenReturn(existingUser(false));
+
+        controller.createUser(userContractWithRole("Read-only"));
+
+        verify(userService).create(any());
+    }
+
+    // The role field must not become a way around the create rule: asking for the Admin
+    // role while passing admin=false has to be rejected exactly like admin=true is.
+    @Test
+    public void chiefOfficerCannotRequestTheAdminRoleWhileClaimingNotToBeAdmin() {
+        signedInWith("read", "write", "admin");
+        when(userService.getMunicipality()).thenReturn(municipality());
+
+        assertThrows(AccessDeniedException.class,
+                () -> controller.createUser(userContractWithRole("Admin")));
+
+        verify(userService, never()).create(any());
+    }
+
+    @Test
+    public void anUnknownRoleIsRejectedBeforeAnythingIsCreated() {
+        signedInWith("read", "write", "admin");
+        when(userService.getMunicipality()).thenReturn(municipality());
+
+        assertThrows(ResponseStatusException.class,
+                () -> controller.createUser(userContractWithRole("Auditor")));
+
+        verify(userService, never()).create(any());
+    }
+
+    private UserContract userContractWithRole(String role) {
+        UserContract contract = userContract(false);
+        contract.setRole(role);
+        return contract;
     }
 
     // The guard here used to be `id != getUser().getId()`, which is inverted (it rejected

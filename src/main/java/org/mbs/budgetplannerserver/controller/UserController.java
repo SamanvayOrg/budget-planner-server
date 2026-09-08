@@ -63,8 +63,11 @@ public class UserController {
         return new UserContractMapper().fromUser(userService.update(id, userContract));
     }
 
+    // Asks UserService the same question it will answer when it actually assigns the role,
+    // rather than reading the isAdmin flag directly. A request carrying role="Admin" with
+    // isAdmin=false would otherwise pass this check and still be created as an Admin.
     private boolean isRequestingAdminPrivilege(UserContract userContract) {
-        return Boolean.TRUE.equals(userContract.getAdmin());
+        return UserService.ADMIN_USER_ROLE.equals(UserService.roleNameFor(userContract));
     }
 
     // A Super Admin also carries the 'admin' authority, so the @PreAuthorize above cannot
