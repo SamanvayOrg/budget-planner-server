@@ -3,6 +3,7 @@ package org.mbs.budgetplannerserver.controller;
 import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.repository.UserRepository;
 import org.mbs.budgetplannerserver.security.LocalAuthSupport;
+import org.mbs.budgetplannerserver.service.UserService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,13 +59,20 @@ public class LocalAuthController {
         return Map.of("token", LocalAuthSupport.mint(user.getUserName(), permissionsFor(user)));
     }
 
-    // Mirrors the permissions the real Auth0 roles carry: RegularUser gets read+write,
-    // Admin additionally gets admin. superAdmin is deliberately not derivable here — it is
-    // never granted by the create-user flow, so no locally created account should get it.
+    // Mirrors what each Auth0 role actually grants, verified against the tenant. Deriving
+    // this from the isAdmin flag instead would give a Read-only user write access locally,
+    // so the local sign-in would be more permissive than production and hide exactly the
+    // kind of bug it exists to catch. superAdmin is deliberately absent: the create-user
+    // flow never grants it, so no locally created account should be able to obtain it.
     private List<String> permissionsFor(User user) {
-        return Boolean.TRUE.equals(user.getAdmin())
-                ? List.of("read", "write", "admin")
-                : List.of("read", "write");
+        String role = user.getRole();
+        if (UserService.ADMIN_USER_ROLE.equals(role)) {
+            return List.of("read", "write", "admin");
+        }
+        if (UserService.READ_ONLY_ROLE.equals(role)) {
+            return List.of("read");
+        }
+        return List.of("read", "write");
     }
 
     private static final class LocalAccount {
