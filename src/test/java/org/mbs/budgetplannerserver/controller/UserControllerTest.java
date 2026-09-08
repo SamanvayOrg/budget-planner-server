@@ -95,6 +95,41 @@ class UserControllerTest {
         verify(userService).update(any(Long.class), any());
     }
 
+    // The guard here used to be `id != getUser().getId()`, which is inverted (it rejected
+    // deleting anyone other than yourself) and compares boxed Longs by reference. Both
+    // directions need pinning, and the ids are deliberately above 127 so a reference
+    // comparison cannot pass by falling inside the Integer cache.
+    @Test
+    public void adminCannotDeleteHimself() {
+        signedInWith("read", "write", "admin");
+        when(userService.getUser(500L)).thenReturn(existingUser(true));
+        when(userService.getMunicipality()).thenReturn(municipality());
+        when(userService.getUser()).thenReturn(userWithId(500L));
+
+        assertThrows(AccessDeniedException.class, () -> controller.deleteUser(500L));
+
+        verify(userService, never()).delete(any(Long.class));
+    }
+
+    @Test
+    public void adminCanDeleteAnotherUserInHisMunicipality() {
+        signedInWith("read", "write", "admin");
+        when(userService.getUser(501L)).thenReturn(existingUser(false));
+        when(userService.getMunicipality()).thenReturn(municipality());
+        when(userService.getUser()).thenReturn(userWithId(500L));
+        when(userService.delete(501L)).thenReturn(existingUser(false));
+
+        controller.deleteUser(501L);
+
+        verify(userService).delete(501L);
+    }
+
+    private User userWithId(Long id) {
+        User user = existingUser(true);
+        user.setId(id);
+        return user;
+    }
+
     private void signedInWith(String... authorities) {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("local|test", "n/a",

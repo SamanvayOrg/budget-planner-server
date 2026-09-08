@@ -4,6 +4,8 @@ import org.mbs.budgetplannerserver.contract.UserContract;
 import org.mbs.budgetplannerserver.domain.Municipality;
 import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AuthorizationServiceException;
@@ -18,6 +20,8 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     public static final String REGULAR_USER_ROLE = "RegularUser";
     public static final String ADMIN_USER_ROLE = "Admin";
 
@@ -84,7 +88,29 @@ public class UserService {
             user.setName((String) authRes.get("name"));
             user.setAdmin(userContract.getAdmin());
             user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
-            return assignRolesAndSaveUser(roleId, user);
+            User savedUser = assignRolesAndSaveUser(roleId, user);
+            sendPasswordSetupEmail(savedUser);
+            return savedUser;
+    }
+
+    // Auth0#createUser sets a random password that is never shown to anyone — not to the
+    // administrator creating the account, and not to the new user. Without this call the
+    // account exists but nobody can sign in to it, and no message is ever sent, so the new
+    // user has no way to know the account exists. Auth0's change-password mail doubles as
+    // the invitation: it lets them set a password of their own.
+    //
+    // A failure here must not fail the request. The Auth0 account and the local row are
+    // both already created and valid at this point; throwing would report failure for a
+    // user that genuinely exists, and a retry would then hit "user already exists". It is
+    // logged instead so the administrator can re-send from the user list.
+    private void sendPasswordSetupEmail(User user) {
+        try {
+            auth0Service.sendChangePasswordEmail(user);
+        } catch (Exception e) {
+            logger.warn("User {} was created but the password-setup email could not be sent. "
+                    + "They cannot sign in until it is re-sent or they use 'Forgot password'.",
+                    user.getEmail(), e);
+        }
     }
 
     private String roleNameFor(UserContract userContract) {

@@ -83,7 +83,12 @@ public class UserController {
         if(!userService.getUser(id).getMunicipality().getId().equals(userService.getMunicipality().getId())) {
             throw new AccessDeniedException("Admin user can only delete users in his own municipality");
         }
-        if(id != userService.getUser().getId()) {
+        // Two defects fixed here: the condition was inverted (it rejected deleting anyone
+        // *other* than yourself, which is the opposite of the stated rule), and `!=` on a
+        // boxed Long compares references rather than values, so it was true even for equal
+        // ids outside the Integer cache. Together they made this endpoint refuse almost
+        // every deletion.
+        if(id.equals(userService.getUser().getId())) {
             throw new AccessDeniedException("Admin user can not delete himself");
         }
         return new UserContractMapper().fromUser(userService.delete(id));

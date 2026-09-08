@@ -48,7 +48,9 @@ public class MunicipalityController {
         if(!userService.getUser(id).getAdmin()) {
             throw new AccessDeniedException("SuperAdmin user can only delete Admin users of other Municipalities");
         }
-        if(id != userService.getUser().getId()) {
+        // Same pair of defects as UserController#deleteUser: inverted condition, and
+        // reference comparison on a boxed Long. See the comment there.
+        if(id.equals(userService.getUser().getId())) {
             throw new AccessDeniedException("SuperAdmin user can not delete himself");
         }
         return new UserContractMapper().fromUser(userService.delete(id));
