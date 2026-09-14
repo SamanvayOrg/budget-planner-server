@@ -13,7 +13,9 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -164,6 +166,30 @@ public class Auth0Service {
                 user.getUserName(), "roles");
 
         return restTemplate.exchange(url, HttpMethod.DELETE, request, String.class);
+    }
+
+    // The Auth0 account registered against an address, or null if there is none. Used to
+    // make sense of a "user already exists" conflict: the address may belong to a live user,
+    // or to an account this application created and then lost track of, and only Auth0 can
+    // say which.
+    public Map<String, Object> findUserByEmail(String email) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
+
+        // Percent-encoding the address does not work here: this endpoint validates the raw
+        // query value without decoding it first, so an encoded "@" arrives as %40 and is
+        // rejected as a malformed email. The URI is therefore built with the address intact
+        // — "@" and "+" are both legal in a query string — and passed as a URI so that
+        // RestTemplate does not treat it as a template and encode it again.
+        URI uri = UriComponentsBuilder.fromHttpUrl(domain + "/api/v2/users-by-email")
+                .queryParam("email", email)
+                .build()
+                .toUri();
+        ResponseEntity<List> response = restTemplate.exchange(uri, HttpMethod.GET,
+                new HttpEntity<>(headers), List.class);
+
+        List<Map<String, Object>> users = response.getBody() == null ? List.of() : response.getBody();
+        return users.isEmpty() ? null : users.get(0);
     }
 
     // Every role currently held in Auth0, by id. Read before revoking rather than assuming

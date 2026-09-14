@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
@@ -21,6 +22,7 @@ import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -109,7 +111,12 @@ public class UserService {
             String roleName = roleNameFor(userContract);
             String roleId = auth0Service.getRoleIdByName(roleName);
 
-            ResponseEntity<Object> response = auth0Service.createUser(userContract);
+            ResponseEntity<Object> response;
+            try {
+                response = auth0Service.createUser(userContract);
+            } catch (HttpClientErrorException.Conflict alreadyExists) {
+                return adoptExistingAccount(userContract, roleName, roleId, alreadyExists);
+            }
             if (!response.getStatusCode().is2xxSuccessful()) {
                 throw new AuthorizationServiceException("Unable to create user");
             }
@@ -126,6 +133,54 @@ public class UserService {
             User savedUser = assignRolesAndSaveUser(roleName, roleId, user);
             sendPasswordSetupEmail(savedUser);
             return savedUser;
+    }
+
+    // Auth0 says the address is taken. That means one of two quite different things, and
+    // until now both produced the same dead end: "User already present" for an address that
+    // could then never be used again.
+    //
+    //   - Someone is genuinely using it. That is a real conflict and still refused.
+    //   - An Auth0 account exists that this application has no live record of: creation
+    //     failed part way through and left an orphan, or the person was deleted here (which
+    //     strips their roles but leaves the identity). Nothing owns the address, so the
+    //     right answer is to take it over rather than refuse forever.
+    //
+    // Whichever roles the adopted account happens to hold are removed before the requested
+    // one is assigned, so it cannot arrive carrying privileges left over from a previous
+    // life — an orphan of a failed Admin creation must not become an accountant who is
+    // still an administrator in Auth0.
+    private User adoptExistingAccount(UserContract userContract, String roleName, String roleId,
+                                      HttpClientErrorException.Conflict conflict) {
+        Map<String, Object> existingAccount = auth0Service.findUserByEmail(userContract.getEmail());
+        if (existingAccount == null) {
+            // Auth0 refused the address but will not tell us what holds it; nothing can be
+            // reconciled, so report the conflict as it came.
+            throw conflict;
+        }
+        String auth0UserId = (String) existingAccount.get("user_id");
+        User liveUser = userRepository.findByUserName(auth0UserId);
+        if (liveUser != null) {
+            throw conflict;
+        }
+
+        logger.info("Auth0 already holds {} with no active record here — adopting it rather than "
+                + "refusing the address permanently.", userContract.getEmail());
+
+        User user = new User();
+        user.setUserName(auth0UserId);
+        user.setEmail(userContract.getEmail());
+        user.setName(userContract.getName());
+        user.setRole(roleName);
+        user.setAdmin(ADMIN_USER_ROLE.equals(roleName));
+        user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
+
+        List<String> leftoverRoles = auth0Service.roleIdsOf(user);
+        if (!leftoverRoles.isEmpty()) {
+            auth0Service.removeRole(user, leftoverRoles);
+        }
+        User savedUser = assignRolesAndSaveUser(roleName, roleId, user);
+        sendPasswordSetupEmail(savedUser);
+        return savedUser;
     }
 
     // Auth0#createUser sets a random password that is never shown to anyone — not to the

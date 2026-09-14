@@ -8,6 +8,7 @@ import org.mbs.budgetplannerserver.repository.UserRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
@@ -101,6 +102,82 @@ class UserServiceUpdateTest {
         verify(auth0Service).removeRole(eq(existing), eq(java.util.List.of("rol_regular")));
         verify(auth0Service).assignRole(eq(existing), eq(java.util.List.of("rol_readonly")));
         assertEquals(UserService.READ_ONLY_ROLE, updated.getRole());
+    }
+
+    // An address Auth0 already holds means one of two things, and they must not be
+    // conflated. Someone genuinely using it is a real conflict.
+    @Test
+    public void aConflictOnAnAddressSomeoneIsActuallyUsingIsStillRefused() {
+        User liveUser = user(UserService.REGULAR_USER_ROLE, false);
+        liveUser.setUserName("auth0|inuse");
+        when(auth0Service.getRoleIdByName(anyString())).thenReturn("rol_regular");
+        when(auth0Service.createUser(any())).thenThrow(conflict());
+        when(auth0Service.findUserByEmail("taken@example.test"))
+                .thenReturn(java.util.Map.of("user_id", "auth0|inuse"));
+        when(userRepository.findByUserName("auth0|inuse")).thenReturn(liveUser);
+
+        assertThrows(HttpClientErrorException.Conflict.class,
+                () -> userService.create(contractFor("taken@example.test")));
+
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    // An Auth0 account nothing here has a live record of is an orphan — a creation that
+    // failed part way, or someone deleted here. Refusing forever made the address unusable.
+    @Test
+    public void aConflictOnAnOrphanedAccountAdoptsItInsteadOfRefusingForever() {
+        when(auth0Service.getRoleIdByName(UserService.REGULAR_USER_ROLE)).thenReturn("rol_regular");
+        when(auth0Service.createUser(any())).thenThrow(conflict());
+        when(auth0Service.findUserByEmail("orphan@example.test"))
+                .thenReturn(java.util.Map.of("user_id", "auth0|orphan"));
+        when(userRepository.findByUserName("auth0|orphan")).thenReturn(null);
+        when(municipalityService.getMunicipality(1L)).thenReturn(municipalityOf());
+        when(auth0Service.roleIdsOf(any())).thenReturn(java.util.List.of("rol_stale_admin"));
+        when(auth0Service.removeRole(any(), any())).thenReturn(OK);
+        when(auth0Service.assignRole(any(), any())).thenReturn(OK);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User adopted = userService.create(contractFor("orphan@example.test"));
+
+        // Roles left over from its previous life go first: an orphan of a failed Admin
+        // creation must not come back as an accountant who is still an admin in Auth0.
+        verify(auth0Service).removeRole(any(), eq(java.util.List.of("rol_stale_admin")));
+        verify(auth0Service).assignRole(any(), eq(java.util.List.of("rol_regular")));
+        assertEquals("auth0|orphan", adopted.getUserName());
+        assertEquals(UserService.REGULAR_USER_ROLE, adopted.getRole());
+    }
+
+    @Test
+    public void aConflictAuth0WillNotExplainIsReportedAsItCame() {
+        when(auth0Service.getRoleIdByName(anyString())).thenReturn("rol_regular");
+        when(auth0Service.createUser(any())).thenThrow(conflict());
+        when(auth0Service.findUserByEmail(anyString())).thenReturn(null);
+
+        assertThrows(HttpClientErrorException.Conflict.class,
+                () -> userService.create(contractFor("mystery@example.test")));
+
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    private HttpClientErrorException.Conflict conflict() {
+        return (HttpClientErrorException.Conflict) HttpClientErrorException.create(
+                HttpStatus.CONFLICT, "Conflict", org.springframework.http.HttpHeaders.EMPTY,
+                new byte[0], null);
+    }
+
+    private UserContract contractFor(String email) {
+        UserContract contract = new UserContract();
+        contract.setName("Somebody");
+        contract.setEmail(email);
+        contract.setAdmin(false);
+        contract.setMunicipalityId(1L);
+        return contract;
+    }
+
+    private Municipality municipalityOf() {
+        Municipality municipality = new Municipality();
+        municipality.setId(1L);
+        return municipality;
     }
 
     // Deleting only voided the row; Auth0 kept the account and its roles, so the person
