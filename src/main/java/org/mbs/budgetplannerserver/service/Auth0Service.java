@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class Auth0Service {
@@ -140,6 +141,22 @@ public class Auth0Service {
                 user.getUserName(), "roles");
 
         return restTemplate.exchange(url, HttpMethod.DELETE, request, String.class);
+    }
+
+    // Every role currently held in Auth0, by id. Read before revoking rather than assuming
+    // the stored role is the only one: a role assigned by hand in the Auth0 dashboard would
+    // otherwise survive a deletion and keep granting whatever it carries.
+    public List<String> roleIdsOf(User user) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
+
+        String url = String.format("%s/%s/%s/%s", domain, "api/v2/users",
+                user.getUserName(), "roles");
+        ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET,
+                new HttpEntity<>(headers), List.class);
+
+        List<Map<String, Object>> roles = response.getBody() == null ? List.of() : response.getBody();
+        return roles.stream().map(role -> (String) role.get("id")).collect(Collectors.toList());
     }
 
     public ResponseEntity<String> sendChangePasswordEmail(User user) {

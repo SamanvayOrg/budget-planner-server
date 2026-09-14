@@ -59,9 +59,20 @@ public class UserService {
     }
 
 
+    // A token can outlive the account it belongs to: deleting a user voids the row but any
+    // token already issued stays valid until it expires, and an account whose creation
+    // failed part way through never got a row at all. The lookup then returned null and
+    // every caller dereferenced it, so the request died as a 500 with a stack trace.
+    // Refusing it outright is both the correct answer and the one that closes the window
+    // left by a token that is still technically valid.
     public User getUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUserName(userName);
+        User user = userRepository.findByUserName(userName);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "This account is no longer active for this application");
+        }
+        return user;
     }
 
     @Transactional
@@ -74,10 +85,11 @@ public class UserService {
         return userRepository.findByIsAdmin(true);
     }
 
+    // Goes through getUser rather than repeating the lookup, so a caller whose row is gone
+    // gets the same clean refusal instead of a null dereference and a 500.
     @Transactional
     public Iterable<User> getAllUsers() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByMunicipalityId(userRepository.findByUserName(userName).getMunicipality().getId());
+        return userRepository.findByMunicipalityId(getUser().getMunicipality().getId());
     }
 
     @Transactional
@@ -217,7 +229,7 @@ public class UserService {
     // the privileges being taken away. Failing with no role is recoverable by retrying;
     // failing with too much privilege is a silent hole.
     private void applyRoleChange(User user, String currentRole, String newRole) {
-        if (skipRemoteRoleSync()) {
+        if (skipRemoteIdentityChanges()) {
             logger.info("Local profile: not changing {}'s role in Auth0. Local sign-in mints "
                     + "tokens from the stored role, so updating the database is the whole change.",
                     user.getEmail());
@@ -245,16 +257,50 @@ public class UserService {
     // "local|..." marker, not an Auth0 user id — and the local sign-in derives permissions
     // from the stored role rather than from an Auth0 token. Under that profile the database
     // is the whole system of record, so there is nothing remote to keep in step.
-    private boolean skipRemoteRoleSync() {
+    private boolean skipRemoteIdentityChanges() {
         return environment.acceptsProfiles(Profiles.of("local"));
     }
 
 
-    @Transactional
+    // Deleting only marked the row voided. Auth0 kept the account and its roles, so the
+    // person could still sign in and present a token carrying the privileges they had just
+    // had taken away. Revoking in Auth0 is what actually ends their access.
+    //
+    // Not @Transactional, for the same reason as update: the Auth0 call cannot be rolled
+    // back, so there is nothing to gain from holding a transaction across it.
     public User delete(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        revokeRemoteAccess(user);
         userRepository.delete(user);
         return user;
+    }
+
+    // Strips every role the account holds in Auth0. Once it has none, the permissions claim
+    // in any token it is issued is empty and every endpoint refuses it — and getUser below
+    // refuses the request anyway, because the row is voided.
+    //
+    // The identity itself is left in place. Auth0's own "block" would be the tidier match
+    // for a soft delete, but it is a PATCH, and the HTTP client in use cannot issue one
+    // (pinned by RestTemplateHttpMethodsTest). Removing the roles achieves the security
+    // outcome with methods that do work. A consequence worth knowing: the address stays
+    // registered in Auth0, so re-creating the same person still collides until creation is
+    // made idempotent.
+    private void revokeRemoteAccess(User user) {
+        if (skipRemoteIdentityChanges()) {
+            logger.info("Local profile: not revoking {} in Auth0. Local sign-in reads the database, "
+                    + "and the row is about to be voided.", user.getEmail());
+            return;
+        }
+        List<String> heldRoles = auth0Service.roleIdsOf(user);
+        if (heldRoles.isEmpty()) {
+            return;
+        }
+        ResponseEntity<String> response = auth0Service.removeRole(user, heldRoles);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new AuthorizationServiceException(String.format(
+                    "Could not revoke %s's access in Auth0, so they have not been deleted. "
+                            + "Deleting the record alone would leave them able to sign in.", user.getEmail()));
+        }
     }
 
     @Transactional

@@ -103,6 +103,38 @@ class UserServiceUpdateTest {
         assertEquals(UserService.READ_ONLY_ROLE, updated.getRole());
     }
 
+    // Deleting only voided the row; Auth0 kept the account and its roles, so the person
+    // could still sign in holding the privileges just taken from them.
+    @Test
+    public void deletingAUserRevokesEveryRoleTheyHoldInAuth0() {
+        User existing = user(UserService.ADMIN_USER_ROLE, true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(auth0Service.roleIdsOf(existing)).thenReturn(java.util.List.of("rol_admin", "rol_extra"));
+        when(auth0Service.removeRole(any(), any())).thenReturn(OK);
+
+        userService.delete(1L);
+
+        // Both roles, including one this application never assigned — a role added by hand
+        // in the Auth0 dashboard must not survive the deletion.
+        verify(auth0Service).removeRole(eq(existing), eq(java.util.List.of("rol_admin", "rol_extra")));
+        verify(userRepository).delete(existing);
+    }
+
+    @Test
+    public void aFailureToRevokeInAuth0LeavesTheUserInPlace() {
+        User existing = user(UserService.ADMIN_USER_ROLE, true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(auth0Service.roleIdsOf(existing)).thenReturn(java.util.List.of("rol_admin"));
+        when(auth0Service.removeRole(any(), any()))
+                .thenReturn(new ResponseEntity<>("nope", HttpStatus.INTERNAL_SERVER_ERROR));
+
+        assertThrows(RuntimeException.class, () -> userService.delete(1L));
+
+        // Voiding the row while the account keeps its roles would be the worst outcome:
+        // gone from the list, still able to sign in.
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
     private void stubRepository(User existing) {
         when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
