@@ -123,7 +123,7 @@ public class UserService {
             // so the stored flag can never disagree with the role held in Auth0.
             user.setAdmin(ADMIN_USER_ROLE.equals(roleName));
             user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
-            User savedUser = assignRolesAndSaveUser(roleId, user);
+            User savedUser = assignRolesAndSaveUser(roleName, roleId, user);
             sendPasswordSetupEmail(savedUser);
             return savedUser;
     }
@@ -165,9 +165,13 @@ public class UserService {
         return requested;
     }
 
-    private User assignRolesAndSaveUser(String roleId, User user) {
+    private User assignRolesAndSaveUser(String roleName, String roleId, User user) {
         ResponseEntity<String> response = auth0Service.assignRole(user, Arrays.asList(roleId));
         if(!response.getStatusCode().is2xxSuccessful()) {
+            // The id we sent may be a cached one that Auth0 no longer recognises, which is
+            // what happens when a role is deleted and recreated in the dashboard. Drop it so
+            // the next attempt resolves the name afresh rather than repeating a dead id.
+            auth0Service.forgetRole(roleName);
             throw new AuthorizationServiceException("Unable to assign roles to user");
         }
         return save(user);

@@ -11,12 +11,15 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
@@ -45,6 +48,41 @@ class Auth0ServiceTest {
     private void auth0ReturnsRoles(List<Map<String, Object>> roles) {
         when(restTemplate.exchange(any(String.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(List.class)))
                 .thenReturn(new ResponseEntity(roles, HttpStatus.OK));
+    }
+
+    // The incident this whole lookup exists to prevent was a stale role id. Caching the id
+    // for the life of the process reintroduces it by another route: a role deleted and
+    // recreated in the Auth0 dashboard comes back with a new id, and an entry that never
+    // expires keeps the dead one until the next restart.
+    @Test
+    public void shouldResolveTheRoleAgainOnceTheCachedIdHasExpired() {
+        auth0ReturnsRoles(List.of(Map.of("id", "rol_FIRST", "name", "Admin")));
+        assertEquals("rol_FIRST", auth0Service.getRoleIdByName("Admin"));
+
+        // Within its lifetime the cached id is reused and Auth0 is not asked again.
+        assertEquals("rol_FIRST", auth0Service.getRoleIdByName("Admin"));
+        verify(restTemplate, times(1))
+                .exchange(any(String.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(List.class));
+
+        // Move past the lifetime; the role has meanwhile been recreated with a new id.
+        ReflectionTestUtils.setField(auth0Service, "clock",
+                Clock.fixed(Instant.now().plus(Auth0Service.ROLE_CACHE_TTL).plusSeconds(60), ZoneOffset.UTC));
+        auth0ReturnsRoles(List.of(Map.of("id", "rol_SECOND", "name", "Admin")));
+
+        assertEquals("rol_SECOND", auth0Service.getRoleIdByName("Admin"),
+                "an expired entry must be looked up again, not served stale");
+    }
+
+    // A rejected assignment means the id we hold is wrong now, not in thirty minutes.
+    @Test
+    public void shouldDropACachedIdWhenItIsForgotten() {
+        auth0ReturnsRoles(List.of(Map.of("id", "rol_FIRST", "name", "Admin")));
+        assertEquals("rol_FIRST", auth0Service.getRoleIdByName("Admin"));
+
+        auth0Service.forgetRole("Admin");
+        auth0ReturnsRoles(List.of(Map.of("id", "rol_SECOND", "name", "Admin")));
+
+        assertEquals("rol_SECOND", auth0Service.getRoleIdByName("Admin"));
     }
 
     // Auth0's name_filter is a SUBSTRING match, so asking for "Admin" also returns

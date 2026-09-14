@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -46,10 +47,25 @@ public class Auth0Service {
     private Duration clockSkew = Duration.ofSeconds(60);
     private Clock clock = Clock.systemUTC();
     private OAuth2AccessToken tokenCache;
-    // Roles are effectively static for the life of a tenant, so one lookup per name per
-    // process is plenty. Cleared on restart, which is the only time a role change here
-    // would realistically need picking up.
-    private final Map<String, String> roleIdCache = new ConcurrentHashMap<>();
+    // Role ids are cached because they change rarely, but "rarely" is not "never" and the
+    // original incident this code exists to prevent was a stale role id. A role deleted and
+    // recreated in the Auth0 dashboard comes back with a new id; an entry that never expired
+    // would keep the dead one until the next restart and fail every assignment in between —
+    // the same failure as before, arriving by a different route. The entry is therefore
+    // given a lifetime, and is dropped outright when Auth0 rejects it (see forgetRole).
+    static final Duration ROLE_CACHE_TTL = Duration.ofMinutes(30);
+
+    private final Map<String, CachedRoleId> roleIdCache = new ConcurrentHashMap<>();
+
+    private static final class CachedRoleId {
+        final String id;
+        final Instant expiresAt;
+
+        CachedRoleId(String id, Instant expiresAt) {
+            this.id = id;
+            this.expiresAt = expiresAt;
+        }
+    }
 
     public Auth0Service(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -83,9 +99,9 @@ public class Auth0Service {
     // id by name removes the coupling entirely — no seeding, no drift, same behaviour in
     // dev, staging and prod.
     public String getRoleIdByName(String roleName) {
-        String cached = roleIdCache.get(roleName);
-        if (cached != null) {
-            return cached;
+        CachedRoleId cached = roleIdCache.get(roleName);
+        if (cached != null && clock.instant().isBefore(cached.expiresAt)) {
+            return cached.id;
         }
         HttpHeaders headers = new HttpHeaders();
         headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
@@ -105,8 +121,15 @@ public class Auth0Service {
                 .orElseThrow(() -> new AuthorizationServiceException(String.format(
                         "Auth0 tenant %s has no role named '%s' — cannot assign it to a new user",
                         domain, roleName)));
-        roleIdCache.put(roleName, roleId);
+        roleIdCache.put(roleName, new CachedRoleId(roleId, clock.instant().plus(ROLE_CACHE_TTL)));
         return roleId;
+    }
+
+    // Drop a cached id the moment Auth0 tells us it is wrong, rather than waiting out the
+    // rest of its lifetime. A role that was recreated fails with 404 on the id we hold; the
+    // next attempt should look it up again instead of repeating the same dead id.
+    public void forgetRole(String roleName) {
+        roleIdCache.remove(roleName);
     }
 
     public ResponseEntity<String> assignRole(User user, List<String> roles) {
