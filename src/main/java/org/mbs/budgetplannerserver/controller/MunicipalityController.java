@@ -38,6 +38,11 @@ public class MunicipalityController {
     @PreAuthorize("hasAuthority('superAdmin')")
     public UserContract createMunicipalityAdminUser(@PathVariable Long id, @RequestBody UserContract userContract) {
         userContract.setMunicipalityId(id);
+        // Both must be forced, not just the flag. An explicit role in the request body wins
+        // over the flag when the role is resolved (UserService#roleNameFor), so setting only
+        // isAdmin here let a body carrying role="Read-only" create a non-admin through the
+        // endpoint whose entire purpose is creating an administrator.
+        userContract.setRole(UserService.ADMIN_USER_ROLE);
         userContract.setAdmin(true);
         return new UserContractMapper().fromUser(userService.create(userContract));
     }
