@@ -7,6 +7,8 @@ import org.mbs.budgetplannerserver.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AuthorizationServiceException;
@@ -42,15 +44,18 @@ public class UserService {
     private final MunicipalityService municipalityService;
     private final UserRepository userRepository;
     private final Auth0Service auth0Service;
+    private final Environment environment;
 
     @Autowired
     // AuthRoleRepository is deliberately no longer a dependency: role ids now come from
     // Auth0 by name (Auth0Service#getRoleIdByName) rather than from the auth_role table,
     // whose seeded values are tenant-specific and silently wrong on any other tenant.
-    public UserService(MunicipalityService municipalityService, UserRepository userRepository, Auth0Service auth0Service) {
+    public UserService(MunicipalityService municipalityService, UserRepository userRepository,
+                       Auth0Service auth0Service, Environment environment) {
         this.municipalityService = municipalityService;
         this.userRepository = userRepository;
         this.auth0Service = auth0Service;
+        this.environment = environment;
     }
 
 
@@ -161,12 +166,87 @@ public class UserService {
         return user;
     }
 
-    @Transactional
+    // The role a request is asking an EXISTING user to become. This cannot simply reuse
+    // roleNameFor: that derives the role from the isAdmin flag when none is given, and the
+    // existing update screens send only the flag. A Read-only user edited for their name
+    // alone would come back as RegularUser — a silent promotion nobody asked for. So the
+    // current role is kept unless the request either names a role or actually changes the
+    // admin flag.
+    public static String roleNameForUpdate(UserContract userContract, User existingUser) {
+        String requested = userContract.getRole();
+        if (requested != null && !requested.isBlank()) {
+            return roleNameFor(userContract);
+        }
+        boolean wasAdmin = Boolean.TRUE.equals(existingUser.getAdmin());
+        boolean wantsAdmin = Boolean.TRUE.equals(userContract.getAdmin());
+        if (wasAdmin == wantsAdmin) {
+            return existingUser.getRole() == null
+                    ? (wasAdmin ? ADMIN_USER_ROLE : REGULAR_USER_ROLE)
+                    : existingUser.getRole();
+        }
+        return wantsAdmin ? ADMIN_USER_ROLE : REGULAR_USER_ROLE;
+    }
+
+    // Deliberately NOT @Transactional. Changing a role touches Auth0, which no database
+    // rollback can undo — holding a transaction open across that call would only widen the
+    // window in which the two can disagree. The repository methods carry their own
+    // transactions.
     public User update(Long userId, UserContract userContract) {
         User user = getUser(userId);
+        String currentRole = user.getRole();
+        String newRole = roleNameForUpdate(userContract, user);
+
+        if (!newRole.equals(currentRole)) {
+            applyRoleChange(user, currentRole, newRole);
+            user.setRole(newRole);
+            // Kept in step with the role rather than taken from the request, so the flag
+            // the admin list is built from cannot disagree with the role on the same row.
+            user.setAdmin(ADMIN_USER_ROLE.equals(newRole));
+        }
         user.setName(userContract.getName());
-        user.setAdmin(userContract.getAdmin());
         return save(user);
+    }
+
+    // Auth0 holds the role that actually decides what a user may do; the database only
+    // records it. Changing one without the other is how a demoted administrator keeps
+    // administrator access, so the remote change happens first and a failure aborts the
+    // whole update rather than leaving the two out of step.
+    //
+    // The old role is removed before the new one is added. The reverse order would leave a
+    // user holding both if the removal failed — which for a demotion means keeping exactly
+    // the privileges being taken away. Failing with no role is recoverable by retrying;
+    // failing with too much privilege is a silent hole.
+    private void applyRoleChange(User user, String currentRole, String newRole) {
+        if (skipRemoteRoleSync()) {
+            logger.info("Local profile: not changing {}'s role in Auth0. Local sign-in mints "
+                    + "tokens from the stored role, so updating the database is the whole change.",
+                    user.getEmail());
+            return;
+        }
+        if (currentRole != null && !currentRole.isBlank()) {
+            String currentRoleId = auth0Service.getRoleIdByName(currentRole);
+            ResponseEntity<String> removed = auth0Service.removeRole(user, List.of(currentRoleId));
+            if (!removed.getStatusCode().is2xxSuccessful()) {
+                throw new AuthorizationServiceException(
+                        "Unable to remove the existing role in Auth0; the user's privileges are unchanged");
+            }
+        }
+        String newRoleId = auth0Service.getRoleIdByName(newRole);
+        ResponseEntity<String> assigned = auth0Service.assignRole(user, List.of(newRoleId));
+        if (!assigned.getStatusCode().is2xxSuccessful()) {
+            throw new AuthorizationServiceException(String.format(
+                    "Removed %s from %s in Auth0 but could not assign %s. They now have no role and "
+                            + "cannot use the application until this is retried.",
+                    currentRole, user.getEmail(), newRole));
+        }
+    }
+
+    // Seeded local-development accounts exist only in the database — their user name is a
+    // "local|..." marker, not an Auth0 user id — and the local sign-in derives permissions
+    // from the stored role rather than from an Auth0 token. Under that profile the database
+    // is the whole system of record, so there is nothing remote to keep in step.
+    private boolean skipRemoteRoleSync() {
+        return environment.acceptsProfiles(Profiles.of("local"));
     }
 
 

@@ -55,7 +55,13 @@ public class UserController {
         // Without this, the create restriction above is trivially bypassed: make a regular
         // user, then promote them. Demotion and ordinary edits are left alone — only the
         // privilege escalation is blocked.
-        boolean isPromotion = isRequestingAdminPrivilege(userContract) && !Boolean.TRUE.equals(existingUser.getAdmin());
+        //
+        // Resolved the same way the service will resolve it, so the check and the action
+        // cannot disagree about what role is being asked for — in particular, an edit that
+        // names no role leaves the existing one alone rather than implying one.
+        boolean becomesAdmin = UserService.ADMIN_USER_ROLE.equals(
+                UserService.roleNameForUpdate(userContract, existingUser));
+        boolean isPromotion = becomesAdmin && !Boolean.TRUE.equals(existingUser.getAdmin());
         if (isPromotion && !currentUserIsSuperAdmin()) {
             throw new AccessDeniedException(
                     "A Municipality Admin cannot promote a user to Admin. That requires a Super Admin.");

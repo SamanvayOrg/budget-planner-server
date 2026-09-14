@@ -124,6 +124,24 @@ public class Auth0Service {
         return result;
     }
 
+    // Auth0 adds roles rather than replacing them, so changing someone's role means
+    // removing the old one explicitly. Without this a demotion would leave the previous
+    // role in place and the user would keep the privileges it carries.
+    public ResponseEntity<String> removeRole(User user, List<String> roles) {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put(REQ_KEY_ROLES, roles);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(HEADER_AUTHORIZATION, HEADER_BEARER + getRefreshedToken().getTokenValue());
+
+        HttpEntity<String> request = new HttpEntity<String>(requestBody.toString(), headers);
+        String url = String.format("%s/%s/%s/%s", domain, "api/v2/users",
+                user.getUserName(), "roles");
+
+        return restTemplate.exchange(url, HttpMethod.DELETE, request, String.class);
+    }
+
     public ResponseEntity<String> sendChangePasswordEmail(User user) {
         JSONObject requestBody = new JSONObject();
         requestBody.put("client_id", clientId);
