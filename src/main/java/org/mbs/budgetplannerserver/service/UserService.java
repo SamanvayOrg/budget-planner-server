@@ -7,8 +7,6 @@ import org.mbs.budgetplannerserver.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AuthorizationServiceException;
@@ -46,18 +44,16 @@ public class UserService {
     private final MunicipalityService municipalityService;
     private final UserRepository userRepository;
     private final Auth0Service auth0Service;
-    private final Environment environment;
 
     @Autowired
     // AuthRoleRepository is deliberately no longer a dependency: role ids now come from
     // Auth0 by name (Auth0Service#getRoleIdByName) rather than from the auth_role table,
     // whose seeded values are tenant-specific and silently wrong on any other tenant.
     public UserService(MunicipalityService municipalityService, UserRepository userRepository,
-                       Auth0Service auth0Service, Environment environment) {
+                       Auth0Service auth0Service) {
         this.municipalityService = municipalityService;
         this.userRepository = userRepository;
         this.auth0Service = auth0Service;
-        this.environment = environment;
     }
 
 
@@ -288,9 +284,8 @@ public class UserService {
     // the privileges being taken away. Failing with no role is recoverable by retrying;
     // failing with too much privilege is a silent hole.
     private void applyRoleChange(User user, String currentRole, String newRole) {
-        if (skipRemoteIdentityChanges()) {
-            logger.info("Local profile: not changing {}'s role in Auth0. Local sign-in mints "
-                    + "tokens from the stored role, so updating the database is the whole change.",
+        if (existsOnlyLocally(user)) {
+            logger.info("{} exists only in this database, so there is no Auth0 role to change.",
                     user.getEmail());
             return;
         }
@@ -312,12 +307,19 @@ public class UserService {
         }
     }
 
-    // Seeded local-development accounts exist only in the database — their user name is a
-    // "local|..." marker, not an Auth0 user id — and the local sign-in derives permissions
-    // from the stored role rather than from an Auth0 token. Under that profile the database
-    // is the whole system of record, so there is nothing remote to keep in step.
-    private boolean skipRemoteIdentityChanges() {
-        return environment.acceptsProfiles(Profiles.of("local"));
+    // Whether this account exists only here. The seeded local-development users are the
+    // only such case: their user name is a "local|..." marker rather than an Auth0 user id,
+    // so there is no remote role to change.
+    //
+    // This deliberately keys off the account rather than the active profile. Skipping the
+    // whole of Auth0 under the local profile made local behaviour inconsistent with itself,
+    // because creating a user always reaches Auth0 — accounts were created there and then
+    // never updated or revoked. It also meant the remote paths could not be exercised
+    // outside a deployed environment, which is exactly where the bugs in them were hiding.
+    // Keyed this way, any Auth0-backed user keeps Auth0 in step everywhere.
+    private boolean existsOnlyLocally(User user) {
+        String userName = user.getUserName();
+        return userName == null || userName.startsWith("local|");
     }
 
 
@@ -345,9 +347,9 @@ public class UserService {
     // registered in Auth0, so re-creating the same person still collides until creation is
     // made idempotent.
     private void revokeRemoteAccess(User user) {
-        if (skipRemoteIdentityChanges()) {
-            logger.info("Local profile: not revoking {} in Auth0. Local sign-in reads the database, "
-                    + "and the row is about to be voided.", user.getEmail());
+        if (existsOnlyLocally(user)) {
+            logger.info("{} exists only in this database, so there is no Auth0 access to revoke.",
+                    user.getEmail());
             return;
         }
         List<String> heldRoles = auth0Service.roleIdsOf(user);

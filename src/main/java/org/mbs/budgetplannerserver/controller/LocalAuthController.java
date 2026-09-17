@@ -25,7 +25,13 @@ public class LocalAuthController {
     private static final Map<String, LocalAccount> ACCOUNTS = Map.of(
             "chiefofficer", new LocalAccount(LOCAL_PASSWORD, "local|chiefofficer", List.of("read", "write", "admin")),
             "accountant", new LocalAccount(LOCAL_PASSWORD, "local|accountant", List.of("read", "write")),
-            "superadmin", new LocalAccount(LOCAL_PASSWORD, "local|superadmin", List.of("read", "write", "admin", "superAdmin"))
+            // No "admin" here, deliberately. The SuperAdmin role in Auth0 carries read,
+            // write and superAdmin — not admin — so granting it locally made this sign-in
+            // more permissive than the real thing and hid the difference: a Super Admin can
+            // reach the user-administration endpoints here and would be refused them in
+            // production. They administer municipalities and their admins through the
+            // superAdmin-guarded endpoints instead.
+            "superadmin", new LocalAccount(LOCAL_PASSWORD, "local|superadmin", List.of("read", "write", "superAdmin"))
     );
 
     private final UserRepository userRepository;

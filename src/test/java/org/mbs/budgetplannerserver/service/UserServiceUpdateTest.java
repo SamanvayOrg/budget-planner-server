@@ -5,7 +5,6 @@ import org.mbs.budgetplannerserver.contract.UserContract;
 import org.mbs.budgetplannerserver.domain.Municipality;
 import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.repository.UserRepository;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -31,10 +30,9 @@ class UserServiceUpdateTest {
     private final MunicipalityService municipalityService = mock(MunicipalityService.class);
     private final UserRepository userRepository = mock(UserRepository.class);
     private final Auth0Service auth0Service = mock(Auth0Service.class);
-    private final Environment environment = mock(Environment.class);
 
     private final UserService userService =
-            new UserService(municipalityService, userRepository, auth0Service, environment);
+            new UserService(municipalityService, userRepository, auth0Service);
 
     private static final ResponseEntity<String> OK = new ResponseEntity<>("{}", HttpStatus.OK);
 
