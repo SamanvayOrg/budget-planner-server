@@ -23,6 +23,7 @@ public class UserContractMapper {
         userContract.setName(user.getName());
         userContract.setUserName(user.getUserName());
         userContract.setAdmin(user.getAdmin());
+        userContract.setRole(user.getRole());
         userContract.setMunicipalityId(user.getMunicipality().getId());
         return userContract;
     }

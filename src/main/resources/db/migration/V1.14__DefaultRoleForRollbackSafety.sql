@@ -1,0 +1,17 @@
+-- Rollback safety for the `role` column added in V1.13.
+--
+-- V1.13 added login_user.role as NOT NULL with no default. Flyway runs migrations on
+-- startup, so deploying the new build applies it. The hazard is the reverse: if the new
+-- build has to be rolled back, the previous JAR's code inserts users WITHOUT a role — its
+-- entity has no such field — and a NOT NULL column with no default rejects the insert. User
+-- creation would break during the rollback window, and the rollback itself would not fix
+-- it.
+--
+-- A default removes that trap: the previous JAR's inserts succeed and simply take the
+-- default. The current code always sets the role explicitly, so the default never applies
+-- in normal operation — it exists only to keep an older build's inserts valid.
+--
+-- RegularUser is the safe default: it is the least-privileged role that can still use the
+-- application (read + write, no admin), so an insert that falls back to it during a
+-- rollback window can never silently grant administrator rights.
+alter table login_user alter column role set default 'RegularUser';

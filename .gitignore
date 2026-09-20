@@ -2,3 +2,10 @@
 .gradle/
 build/
 .idea/
+
+# Never commit credentials. The Auth0 client secrets and DB password are supplied as
+# BPS_* environment variables; keep any local file holding them out of git.
+.env
+.env.*
+*.local.env
+secrets/

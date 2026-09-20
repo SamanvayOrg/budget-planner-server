@@ -6,6 +6,7 @@ import org.mbs.budgetplannerserver.domain.builder.BudgetBuilder;
 import org.mbs.budgetplannerserver.repository.BudgetRepository;
 import org.mbs.budgetplannerserver.repository.SampleBudgetLineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,9 +37,25 @@ public class BudgetService {
     }
 
     public Budget getOrCreate(int year, int minus, boolean withBudgeLines) {
+        int financialYear = year - minus;
         User user = userService.getUser();
-        Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), year - minus);
-        return budget == null ? createBudgetInternal(year - minus, user, withBudgeLines) : budget;
+        Budget budget = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), financialYear);
+        if (budget != null) {
+            return budget;
+        }
+        try {
+            return createBudgetInternal(financialYear, user, withBudgeLines);
+        } catch (DataIntegrityViolationException raceLost) {
+            // Another concurrent request (e.g. a double-click, or two admins at once)
+            // created the same (municipality, financialYear) budget first — the unique
+            // index caught it. Return that one instead of surfacing an error for what
+            // the user experiences as a successful create.
+            Budget winner = budgetRepository.findByMunicipalityAndFinancialYear(user.getMunicipality(), financialYear);
+            if (winner == null) {
+                throw raceLost;
+            }
+            return winner;
+        }
     }
 
     public Budget create(int year, BigDecimal openingBalance, long population) {

@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +48,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleNoSuchElementFoundException(Exception itemNotFoundException, WebRequest request) {
         logger.error("Failed to find the requested element", itemNotFoundException);
         return buildErrorResponse(itemNotFoundException, HttpStatus.NOT_FOUND, request);
+    }
+
+    // ResponseStatusException already carries the correct status (e.g. BudgetController's
+    // NOT_FOUND() helper throws 404) — without this handler it falls through to the
+    // generic Exception.class case below and every one of those becomes a 500.
+    // Logged at WARN without a stack trace: these are routine, client-driven outcomes
+    // (a 404 for a year with no budget, a 400 for a rejected create), and writing an ERROR
+    // trace for each one buries genuine faults in /var/log/budget-planner.
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException exception, WebRequest request) {
+        HttpStatus status = HttpStatus.resolve(exception.getRawStatusCode());
+        if (status == null) {
+            // A non-standard status would make HttpStatus.valueOf throw, turning a
+            // deliberate 4xx into a 500.
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        String message = exception.getReason() == null ? status.getReasonPhrase() : exception.getReason();
+        // ResponseEntityExceptionHandler's `logger` is Commons Logging, which has no
+        // parameterised overloads — concatenate rather than use {} placeholders.
+        logger.warn("Request rejected with " + status.value() + ": " + message);
+        return buildErrorResponse(exception, message, status, request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException accessDeniedException, WebRequest request) {
+        logger.warn("Access denied: " + accessDeniedException.getMessage());
+        return buildErrorResponse(accessDeniedException, HttpStatus.FORBIDDEN, request);
     }
 
     @ExceptionHandler({RestClientResponseException.class})
