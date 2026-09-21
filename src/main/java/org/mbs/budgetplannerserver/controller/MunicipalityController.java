@@ -38,10 +38,7 @@ public class MunicipalityController {
     @PreAuthorize("hasAuthority('superAdmin')")
     public UserContract createMunicipalityAdminUser(@PathVariable Long id, @RequestBody UserContract userContract) {
         userContract.setMunicipalityId(id);
-        // Both must be forced, not just the flag. An explicit role in the request body wins
-        // over the flag when the role is resolved (UserService#roleNameFor), so setting only
-        // isAdmin here let a body carrying role="Read-only" create a non-admin through the
-        // endpoint whose entire purpose is creating an administrator.
+        // Force both: an explicit role in the body would otherwise override the flag.
         userContract.setRole(UserService.ADMIN_USER_ROLE);
         userContract.setAdmin(true);
         return new UserContractMapper().fromUser(userService.create(userContract));
@@ -53,8 +50,6 @@ public class MunicipalityController {
         if(!userService.getUser(id).getAdmin()) {
             throw new AccessDeniedException("SuperAdmin user can only delete Admin users of other Municipalities");
         }
-        // Same pair of defects as UserController#deleteUser: inverted condition, and
-        // reference comparison on a boxed Long. See the comment there.
         if(id.equals(userService.getUser().getId())) {
             throw new AccessDeniedException("SuperAdmin user can not delete himself");
         }

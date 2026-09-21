@@ -61,12 +61,9 @@ public class BudgetController {
         return financialYear + "-" + String.valueOf(financialYear + 1).substring(2);
     }
 
-    // /budget/actuals and /budget/estimates deliberately get-or-create *prior-year* budgets
-    // (year-2 / year-1) to hold comparison figures, so they cannot reject unknown years the
-    // way create() does. What they must not do is let an arbitrary client-supplied year
-    // conjure a brand-new budget out of nothing — posting budgetYear "2099-00" previously
-    // created a budget for financial year 2097. Requiring that the budget being edited
-    // already exists for this municipality bounds that.
+    // /budget/actuals and /budget/estimates get-or-create prior-year budgets for comparison
+    // figures, so they cannot reject unknown years like create() does. Requiring that the
+    // budget being edited already exists bounds what a client-supplied year can create.
     private int yearOfExistingBudget(BudgetContract budgetContract) {
         String budgetYear = budgetContract == null ? null : budgetContract.getBudgetYear();
         if (budgetYear == null || budgetYear.length() < 4) {

@@ -137,10 +137,7 @@ class UserControllerTest {
         return contract;
     }
 
-    // The guard here used to be `id != getUser().getId()`, which is inverted (it rejected
-    // deleting anyone other than yourself) and compares boxed Longs by reference. Both
-    // directions need pinning, and the ids are deliberately above 127 so a reference
-    // comparison cannot pass by falling inside the Integer cache.
+    // Ids are above 127 so a reference comparison on boxed Longs cannot pass by accident.
     @Test
     public void adminCannotDeleteHimself() {
         signedInWith("read", "write", "admin");

@@ -13,11 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-// The Super Admin's create-an-administrator endpoint forces the privilege rather than
-// trusting the request body. Once an explicit role could be supplied, forcing only the
-// isAdmin flag stopped being enough: the role wins when it is resolved, so a body carrying
-// role="Read-only" produced a non-admin from the endpoint whose whole purpose is creating
-// an administrator. Both must be forced together.
+// The create-an-administrator endpoint must force both the role and the flag, since an explicit role wins.
 class MunicipalityControllerTest {
 
     private final MunicipalityService municipalityService = mock(MunicipalityService.class);

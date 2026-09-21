@@ -31,14 +31,9 @@ public class UserService {
     public static final String ADMIN_USER_ROLE = "Admin";
     public static final String READ_ONLY_ROLE = "Read-only";
 
-    // The roles an administrator may assign through the create-user screen. Admin is
-    // deliberately absent: a Municipality Admin may not create another Admin, and a Super
-    // Admin creates them through /api/municipality/{id}/adminUser instead. SuperAdmin is
-    // absent for the same reason — nothing in the application grants it.
+    // Roles an admin may assign at creation. Admin is granted only via the Super Admin endpoint.
     public static final List<String> ASSIGNABLE_ROLES = List.of(REGULAR_USER_ROLE, READ_ONLY_ROLE);
 
-    // Every role name the application understands, used to reject unknown values before
-    // they reach Auth0 (where an unknown name would fail late, after the account exists).
     public static final List<String> KNOWN_ROLES = List.of(ADMIN_USER_ROLE, REGULAR_USER_ROLE, READ_ONLY_ROLE);
 
     private final MunicipalityService municipalityService;
@@ -46,9 +41,6 @@ public class UserService {
     private final Auth0Service auth0Service;
 
     @Autowired
-    // AuthRoleRepository is deliberately no longer a dependency: role ids now come from
-    // Auth0 by name (Auth0Service#getRoleIdByName) rather than from the auth_role table,
-    // whose seeded values are tenant-specific and silently wrong on any other tenant.
     public UserService(MunicipalityService municipalityService, UserRepository userRepository,
                        Auth0Service auth0Service) {
         this.municipalityService = municipalityService;
@@ -57,12 +49,8 @@ public class UserService {
     }
 
 
-    // A token can outlive the account it belongs to: deleting a user voids the row but any
-    // token already issued stays valid until it expires, and an account whose creation
-    // failed part way through never got a row at all. The lookup then returned null and
-    // every caller dereferenced it, so the request died as a 500 with a stack trace.
-    // Refusing it outright is both the correct answer and the one that closes the window
-    // left by a token that is still technically valid.
+    // A valid token may belong to an account with no row (deleted, or a creation that failed
+    // part-way); refuse it rather than let callers dereference null.
     public User getUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUserName(userName);
@@ -83,8 +71,6 @@ public class UserService {
         return userRepository.findByIsAdmin(true);
     }
 
-    // Goes through getUser rather than repeating the lookup, so a caller whose row is gone
-    // gets the same clean refusal instead of a null dereference and a 500.
     @Transactional
     public Iterable<User> getAllUsers() {
         return userRepository.findByMunicipalityId(getUser().getMunicipality().getId());
@@ -96,14 +82,8 @@ public class UserService {
     }
 
     public User create(UserContract userContract) {
-            // Resolve the role BEFORE creating anything in Auth0. Creating the Auth0 user is
-            // an external, irreversible side effect and this method is not (and cannot
-            // usefully be) transactional — so if the role lookup failed afterwards, the Auth0
-            // account would already exist while no login_user row was ever written. The next
-            // attempt with that same email then gets 409 "user already exists" from Auth0,
-            // which the UI reports as "User already present" for someone who was never
-            // actually created: the address is permanently unusable. Resolving first costs
-            // nothing and leaves no orphan behind.
+            // Resolve the role before creating in Auth0: creation is irreversible, so a role
+            // failure afterwards would leave an orphaned account.
             String roleName = roleNameFor(userContract);
             String roleId = auth0Service.getRoleIdByName(roleName);
 
@@ -122,8 +102,6 @@ public class UserService {
             user.setEmail((String) authRes.get("email"));
             user.setName((String) authRes.get("name"));
             user.setRole(roleName);
-            // Derived from the role actually assigned rather than taken from the request,
-            // so the stored flag can never disagree with the role held in Auth0.
             user.setAdmin(ADMIN_USER_ROLE.equals(roleName));
             user.setMunicipality(municipalityService.getMunicipality(userContract.getMunicipalityId()));
             User savedUser = assignRolesAndSaveUser(roleName, roleId, user);
@@ -131,26 +109,13 @@ public class UserService {
             return savedUser;
     }
 
-    // Auth0 says the address is taken. That means one of two quite different things, and
-    // until now both produced the same dead end: "User already present" for an address that
-    // could then never be used again.
-    //
-    //   - Someone is genuinely using it. That is a real conflict and still refused.
-    //   - An Auth0 account exists that this application has no live record of: creation
-    //     failed part way through and left an orphan, or the person was deleted here (which
-    //     strips their roles but leaves the identity). Nothing owns the address, so the
-    //     right answer is to take it over rather than refuse forever.
-    //
-    // Whichever roles the adopted account happens to hold are removed before the requested
-    // one is assigned, so it cannot arrive carrying privileges left over from a previous
-    // life — an orphan of a failed Admin creation must not become an accountant who is
-    // still an administrator in Auth0.
+    // A 409 means either a live user owns the address (refuse), or an account exists that we
+    // have no active record of — an orphan from a failed creation, or a deleted user (adopt).
+    // Leftover Auth0 roles are stripped first so the account cannot keep old privileges.
     private User adoptExistingAccount(UserContract userContract, String roleName, String roleId,
                                       HttpClientErrorException.Conflict conflict) {
         Map<String, Object> existingAccount = auth0Service.findUserByEmail(userContract.getEmail());
         if (existingAccount == null) {
-            // Auth0 refused the address but will not tell us what holds it; nothing can be
-            // reconciled, so report the conflict as it came.
             throw conflict;
         }
         String auth0UserId = (String) existingAccount.get("user_id");
@@ -179,16 +144,8 @@ public class UserService {
         return savedUser;
     }
 
-    // Auth0#createUser sets a random password that is never shown to anyone — not to the
-    // administrator creating the account, and not to the new user. Without this call the
-    // account exists but nobody can sign in to it, and no message is ever sent, so the new
-    // user has no way to know the account exists. Auth0's change-password mail doubles as
-    // the invitation: it lets them set a password of their own.
-    //
-    // A failure here must not fail the request. The Auth0 account and the local row are
-    // both already created and valid at this point; throwing would report failure for a
-    // user that genuinely exists, and a retry would then hit "user already exists". It is
-    // logged instead so the administrator can re-send from the user list.
+    // Auth0 creates the account with a random password nobody sees; the change-password mail
+    // is the invitation. A send failure is logged, not thrown: the account already exists.
     private void sendPasswordSetupEmail(User user) {
         try {
             auth0Service.sendChangePasswordEmail(user);
@@ -199,11 +156,7 @@ public class UserService {
         }
     }
 
-    // The role the contract is asking for. An explicit role wins over the isAdmin flag, so
-    // that a caller cannot request Admin while passing isAdmin=false and slip past the
-    // privilege check in UserController — which asks this same method what is being
-    // requested. When no role is given the old flag-derived behaviour is kept, which is
-    // what the Super Admin's create-an-admin endpoint relies on.
+    // An explicit role wins over the isAdmin flag; with no role given, derive it from the flag.
     public static String roleNameFor(UserContract userContract) {
         String requested = userContract.getRole();
         if (requested == null || requested.isBlank()) {
@@ -219,9 +172,7 @@ public class UserService {
     private User assignRolesAndSaveUser(String roleName, String roleId, User user) {
         ResponseEntity<String> response = auth0Service.assignRole(user, Arrays.asList(roleId));
         if(!response.getStatusCode().is2xxSuccessful()) {
-            // The id we sent may be a cached one that Auth0 no longer recognises, which is
-            // what happens when a role is deleted and recreated in the dashboard. Drop it so
-            // the next attempt resolves the name afresh rather than repeating a dead id.
+            // The cached id may be stale (role recreated in Auth0); drop it so the next attempt re-resolves.
             auth0Service.forgetRole(roleName);
             throw new AuthorizationServiceException("Unable to assign roles to user");
         }
@@ -233,12 +184,8 @@ public class UserService {
         return user;
     }
 
-    // The role a request is asking an EXISTING user to become. This cannot simply reuse
-    // roleNameFor: that derives the role from the isAdmin flag when none is given, and the
-    // existing update screens send only the flag. A Read-only user edited for their name
-    // alone would come back as RegularUser — a silent promotion nobody asked for. So the
-    // current role is kept unless the request either names a role or actually changes the
-    // admin flag.
+    // Keep the existing role unless the request names one or changes the admin flag: the
+    // update screens send only the flag, and deriving from it would silently alter Read-only users.
     public static String roleNameForUpdate(UserContract userContract, User existingUser) {
         String requested = userContract.getRole();
         if (requested != null && !requested.isBlank()) {
@@ -254,10 +201,7 @@ public class UserService {
         return wantsAdmin ? ADMIN_USER_ROLE : REGULAR_USER_ROLE;
     }
 
-    // Deliberately NOT @Transactional. Changing a role touches Auth0, which no database
-    // rollback can undo — holding a transaction open across that call would only widen the
-    // window in which the two can disagree. The repository methods carry their own
-    // transactions.
+    // Not @Transactional: the Auth0 call cannot be rolled back, so a transaction gains nothing.
     public User update(Long userId, UserContract userContract) {
         User user = getUser(userId);
         String currentRole = user.getRole();
@@ -266,23 +210,14 @@ public class UserService {
         if (!newRole.equals(currentRole)) {
             applyRoleChange(user, currentRole, newRole);
             user.setRole(newRole);
-            // Kept in step with the role rather than taken from the request, so the flag
-            // the admin list is built from cannot disagree with the role on the same row.
             user.setAdmin(ADMIN_USER_ROLE.equals(newRole));
         }
         user.setName(userContract.getName());
         return save(user);
     }
 
-    // Auth0 holds the role that actually decides what a user may do; the database only
-    // records it. Changing one without the other is how a demoted administrator keeps
-    // administrator access, so the remote change happens first and a failure aborts the
-    // whole update rather than leaving the two out of step.
-    //
-    // The old role is removed before the new one is added. The reverse order would leave a
-    // user holding both if the removal failed — which for a demotion means keeping exactly
-    // the privileges being taken away. Failing with no role is recoverable by retrying;
-    // failing with too much privilege is a silent hole.
+    // Change Auth0 first so a remote failure aborts the update. Remove the old role before
+    // adding the new one: failing with no role is recoverable, failing with both is not.
     private void applyRoleChange(User user, String currentRole, String newRole) {
         if (existsOnlyLocally(user)) {
             logger.info("{} exists only in this database, so there is no Auth0 role to change.",
@@ -307,28 +242,14 @@ public class UserService {
         }
     }
 
-    // Whether this account exists only here. The seeded local-development users are the
-    // only such case: their user name is a "local|..." marker rather than an Auth0 user id,
-    // so there is no remote role to change.
-    //
-    // This deliberately keys off the account rather than the active profile. Skipping the
-    // whole of Auth0 under the local profile made local behaviour inconsistent with itself,
-    // because creating a user always reaches Auth0 — accounts were created there and then
-    // never updated or revoked. It also meant the remote paths could not be exercised
-    // outside a deployed environment, which is exactly where the bugs in them were hiding.
-    // Keyed this way, any Auth0-backed user keeps Auth0 in step everywhere.
+    // Seeded local-dev users ("local|...") have no Auth0 identity, so there is nothing remote to sync.
     private boolean existsOnlyLocally(User user) {
         String userName = user.getUserName();
         return userName == null || userName.startsWith("local|");
     }
 
 
-    // Deleting only marked the row voided. Auth0 kept the account and its roles, so the
-    // person could still sign in and present a token carrying the privileges they had just
-    // had taken away. Revoking in Auth0 is what actually ends their access.
-    //
-    // Not @Transactional, for the same reason as update: the Auth0 call cannot be rolled
-    // back, so there is nothing to gain from holding a transaction across it.
+    // Revoke in Auth0 before voiding the row. Not @Transactional, for the same reason as update.
     public User delete(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         revokeRemoteAccess(user);
@@ -336,16 +257,8 @@ public class UserService {
         return user;
     }
 
-    // Strips every role the account holds in Auth0. Once it has none, the permissions claim
-    // in any token it is issued is empty and every endpoint refuses it — and getUser below
-    // refuses the request anyway, because the row is voided.
-    //
-    // The identity itself is left in place. Auth0's own "block" would be the tidier match
-    // for a soft delete, but it is a PATCH, and the HTTP client in use cannot issue one
-    // (pinned by RestTemplateHttpMethodsTest). Removing the roles achieves the security
-    // outcome with methods that do work. A consequence worth knowing: the address stays
-    // registered in Auth0, so re-creating the same person still collides until creation is
-    // made idempotent.
+    // Strip every Auth0 role so any token issued carries no permissions. Auth0's "block" would
+    // be tidier but is a PATCH, which the HTTP client cannot send (see RestTemplateHttpMethodsTest).
     private void revokeRemoteAccess(User user) {
         if (existsOnlyLocally(user)) {
             logger.info("{} exists only in this database, so there is no Auth0 access to revoke.",
