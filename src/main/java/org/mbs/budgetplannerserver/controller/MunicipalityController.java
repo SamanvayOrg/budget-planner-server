@@ -75,6 +75,9 @@ public class MunicipalityController {
     @RequestMapping(value = "/api/municipality/{id}", method = DELETE)
     @PreAuthorize("hasAuthority('superAdmin')")
     public MunicipalityContract deleteMunicipality(@PathVariable Long id) {
+        municipalityService.getMunicipality(id); // 404 before anything is voided
+        // Users first: once the municipality is voided their rows can no longer be loaded.
+        userService.deleteAllInMunicipality(id);
         return new MunicipalityContractMapper().fromMunicipality(municipalityService.delete(id));
     }
 

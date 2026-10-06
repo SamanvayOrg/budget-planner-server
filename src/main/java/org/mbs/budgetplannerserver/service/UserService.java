@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,7 +55,16 @@ public class UserService {
     // part-way); refuse it rather than let callers dereference null.
     public User getUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUserName(userName);
+        User user;
+        try {
+            user = userRepository.findByUserName(userName);
+        } catch (JpaObjectRetrievalFailureException municipalityDeleted) {
+            // The row exists but its municipality is soft-deleted, so the eager join finds
+            // nothing behind the @Where filter. Left alone, every request from the account is a 500.
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "This account belongs to a municipality that has been deleted; "
+                            + "a super admin must move it to a live municipality", municipalityDeleted);
+        }
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "This account is no longer active for this application");
@@ -255,6 +266,25 @@ public class UserService {
         revokeRemoteAccess(user);
         userRepository.delete(user);
         return user;
+    }
+
+    // A municipality takes its users with it: a row pointing at a voided municipality cannot be
+    // loaded at all (see getUser). Auth0 revocation is best-effort here — voiding the row already
+    // shuts the account out of the API, and an account Auth0 no longer knows must not block the deletion.
+    public List<User> deleteAllInMunicipality(Long municipalityId) {
+        List<User> deleted = new ArrayList<>();
+        for (User user : userRepository.findByMunicipalityId(municipalityId)) {
+            try {
+                revokeRemoteAccess(user);
+            } catch (RuntimeException auth0Failure) {
+                logger.warn("Could not revoke {}'s Auth0 roles while deleting municipality {}; the record "
+                        + "is voided regardless, so the API will refuse the account.",
+                        user.getEmail(), municipalityId, auth0Failure);
+            }
+            userRepository.delete(user);
+            deleted.add(user);
+        }
+        return deleted;
     }
 
     // Strip every Auth0 role so any token issued carries no permissions. Auth0's "block" would

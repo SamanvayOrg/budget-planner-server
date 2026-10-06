@@ -2,14 +2,23 @@ package org.mbs.budgetplannerserver.controller;
 
 import org.junit.jupiter.api.Test;
 import org.mbs.budgetplannerserver.contract.UserContract;
+import org.mbs.budgetplannerserver.domain.CityClass;
 import org.mbs.budgetplannerserver.domain.Municipality;
+import org.mbs.budgetplannerserver.domain.State;
 import org.mbs.budgetplannerserver.domain.User;
 import org.mbs.budgetplannerserver.service.MunicipalityService;
 import org.mbs.budgetplannerserver.service.UserService;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+
+import javax.persistence.EntityNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +58,45 @@ class MunicipalityControllerTest {
         ArgumentCaptor<UserContract> sent = ArgumentCaptor.forClass(UserContract.class);
         verify(userService).create(sent.capture());
         assertEquals(7L, sent.getValue().getMunicipalityId());
+    }
+
+    // Users of a deleted municipality cannot be loaded afterwards (their eager join finds
+    // nothing behind Municipality's @Where), so they have to go first — and only once the
+    // municipality is known to exist, or a typo in the id would void users for nothing.
+    @Test
+    public void deletingAMunicipalityVoidsItsUsersFirst() {
+        Municipality khopoli = municipalityNamed(13L, "Khopoli");
+        when(municipalityService.getMunicipality(13L)).thenReturn(khopoli);
+        when(municipalityService.delete(13L)).thenReturn(khopoli);
+
+        controller.deleteMunicipality(13L);
+
+        InOrder inOrder = inOrder(userService, municipalityService);
+        inOrder.verify(userService).deleteAllInMunicipality(13L);
+        inOrder.verify(municipalityService).delete(13L);
+    }
+
+    @Test
+    public void anUnknownMunicipalityVoidsNoUsers() {
+        when(municipalityService.getMunicipality(99L)).thenThrow(new EntityNotFoundException());
+
+        assertThrows(EntityNotFoundException.class, () -> controller.deleteMunicipality(99L));
+
+        verify(userService, never()).deleteAllInMunicipality(any());
+        verify(municipalityService, never()).delete(any());
+    }
+
+    private Municipality municipalityNamed(Long id, String name) {
+        State state = new State();
+        state.setName("Maharashtra");
+        CityClass cityClass = new CityClass();
+        cityClass.setName("Municipal Council");
+        Municipality municipality = new Municipality();
+        municipality.setId(id);
+        municipality.setName(name);
+        municipality.setState(state);
+        municipality.setCityClass(cityClass);
+        return municipality;
     }
 
     private User adminUser() {
